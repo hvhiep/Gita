@@ -1,0 +1,16 @@
+const COLOR = {
+    BACKGROUND: "#F3F5F7",
+    UNSELECTED: "#B6B6B6",
+    WHITE: "#FFFFFF",
+    MAIN_COLOR: '#023047',
+    SECOND_COLOR: '#FB8500',
+    BLACK: "#000000",
+}
+
+const FONT_SIZE = {
+    BIG_TITLE: 26,
+    NORMAL_TITLE: 18,
+
+}
+
+export { COLOR, FONT_SIZE };
