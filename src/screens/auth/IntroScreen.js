@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import Video from "react-native-video";
 import guitar_intro from '../../assets/videos/guitar_intro.mp4';
-import { COLOR, FONT_SIZE, TEXT } from '../../res'
+import { COLOR, FONT_SIZE } from '../../res'
 import { PrimaryBtnBig, SecondaryBtnBig } from '../../components'
 function IntroScreen({ navigation }) {
 
@@ -36,8 +36,8 @@ function IntroScreen({ navigation }) {
             <Text style={styles.title}>Gita</Text>
             <View style={styles.wrapperBottom}>
                 <View style={{width: '90%',  marginBottom: 30}}>
-                <Text style={styles.desc}>{TEXT.IntroScreen.intro1}</Text>
-                <Text style={styles.desc}>{TEXT.IntroScreen.intro2}</Text>
+                <Text style={styles.desc}>Muốn một cây ghi-ta xịn xò ư ?</Text>
+                <Text style={styles.desc}>Đăng ký ngay thôi !</Text>
                 </View>
             <PrimaryBtnBig title='Đăng Ký' onPress={handleRegister}></PrimaryBtnBig>
             <SecondaryBtnBig title='Đăng Nhập' onPress={handleLogin}></SecondaryBtnBig>
@@ -73,35 +73,6 @@ const styles = StyleSheet.create({
         color: COLOR.WHITE,
         fontFamily: 'Montserrat-Medium',
         fontSize: FONT_SIZE.NORMAL_TITLE,
-    },
-    primaryBtn: {
-        backgroundColor: COLOR.SECOND_COLOR,
-        width: '90%',
-        height: 55,
-        borderRadius: 10,
-        justifyContent: 'center',
-        alignItems: 'center'
-    },
-    primaryBtnText: {
-        color: COLOR.WHITE,
-        fontSize: 20,
-        fontFamily: 'Montserrat-Medium'
-    },
-    secondaryBtn: {
-        marginTop: 20,
-        backgroundColor: 'transparent',
-        width: '90%',
-        height: 55,
-        borderRadius: 10,
-        borderWidth: 1,
-        borderColor: COLOR.SECOND_COLOR,
-        justifyContent: 'center',
-        alignItems: 'center'
-    },
-    secondaryBtnText: {
-        color: COLOR.SECOND_COLOR,
-        fontSize: 20,
-        fontFamily: 'Montserrat-Medium'
     },
 })
 

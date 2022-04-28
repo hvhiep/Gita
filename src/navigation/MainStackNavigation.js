@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { SplashScreen, IntroScreen, LoginScreen, RegisterScreen } from "../screens/auth";
 import { HomeScreen } from "../screens/home";
+
 const MainStack = createNativeStackNavigator();
 
 function MainStackNavigation() {
@@ -15,7 +16,7 @@ function MainStackNavigation() {
         //giả sử lấy được userToken trong 6s
         const timerId = setTimeout(() => {
             setIsLoading(false)
-        }, 4000)
+        }, 1000)
 
         return () => clearTimeout(timerId)
     }, [])
@@ -27,17 +28,20 @@ function MainStackNavigation() {
     //2. đã lấy được userToken, kiểm tra xem user đã đăng nhập chưa?
     return (
         <MainStack.Navigator
-            initialRouteName="Intro"
+            initialRouteName="Register"
             screenOptions={{
-                headerTransparent: true,
-                headerTitle: '',
-
+                headerShown: false,
             }}
         >
             {userToken === null ? (
                 <>
                     <MainStack.Screen name='Intro' component={IntroScreen} />
-                    <MainStack.Screen name='Login' component={LoginScreen} />
+                    <MainStack.Screen
+                    name='Login'
+                    component={LoginScreen} 
+                    options={{
+                        headerBackVisible: false
+                    }}/>
                     <MainStack.Screen name='Register' component={RegisterScreen} />
                 </>
             ) : (

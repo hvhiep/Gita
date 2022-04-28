@@ -1,27 +1,168 @@
 import React from "react";
-import { View, Text, StyleSheet } from 'react-native';
-import { COLOR } from '../../../res';
+import { useState } from 'react';
+import {
+    View,
+    Text,
+    StyleSheet,
+    StatusBar,
+    Keyboard,
+    TouchableWithoutFeedback,
+    TouchableOpacity,
+    KeyboardAvoidingView,
+    ScrollView,
+    Image
+} from 'react-native';
+import { COLOR, FONT_SIZE, HEIGHT, WIDTH } from '../../../res';
+import { FormInputBig, PrimaryBtnBig, TextBtn, BackBtn } from '../../../components'
+import { customer, salesman } from '../../../assets'
 
-function RegisterScreen() {
+function RegisterScreen({ navigation }) {
+
+    const userRole = [
+        {
+            id: 0,
+            roleTitle: 'Người mua hàng',
+            img: customer,
+        },
+        {
+            id: 1,
+            roleTitle: 'Người bán hàng',
+            img: salesman,
+        }
+    ]
+
+    const [isRoleSelected, setIsRoleSelected] = useState(null);
+    const [isSubmitted, setIsSubmitted] = useState(false);
+
+    const handleSubmit = () => {
+        if(isRoleSelected != null)
+            setIsSubmitted(true)
+        if(isRoleSelected != null && isSubmitted)
+            navigation.navigate('Login')
+    }
     return (
-        <View style={styles.container}>
-            <Text style={styles.title}>register screen</Text>
-        </View>
+        <KeyboardAvoidingView style={styles.container}>
+            <ScrollView>
+                <TouchableWithoutFeedback
+                    onPress={() => Keyboard.dismiss()}>
+                    <View style={styles.wrapper}>
+                        {isSubmitted && isRoleSelected != null ? 
+                    <BackBtn onPress={() => setIsSubmitted(false)} style={styles.backBtn}/> : null}
+                        <StatusBar
+                            backgroundColor={'transparent'}
+                            translucent
+                            barStyle="dark-content"
+                        ></StatusBar>
+                        <Text style={styles.logoText}>Gita</Text>
+                        <Text style={styles.title}>Đăng Ký</Text>
+                        {isSubmitted && isRoleSelected != null ?
+                            <View style={styles.wrapperForm}>
+                                <FormInputBig title='Tên tài khoản' />
+                                <FormInputBig title='Số điện thoại' />
+                                <FormInputBig title='Mật khẩu' />
+                                <FormInputBig title='Xác nhận mật khẩu' />
+                            </View>
+                            :
+                            <View style={styles.wrapperForm}>
+                                {userRole.map((item) => {
+
+                                    const borderColor = isRoleSelected == item.id ? COLOR.SECOND_COLOR : COLOR.UNSELECTED;
+
+                                    return (
+                                        <TouchableOpacity
+                                        key={item.id}
+                                        style={[styles.roleWrapper, {borderColor: borderColor}]}
+                                        onPress={() => setIsRoleSelected(item.id)}
+                                        >
+                                            <Image style={styles.roleImg} source={item.img} />
+                                            <Text style={styles.roleText}>{item.roleTitle}</Text>
+                                        </TouchableOpacity>
+                                    )
+                                })}
+                            </View>
+                        }
+                        <PrimaryBtnBig title={isSubmitted && isRoleSelected != null  ? 'Đăng Ký' : 'Tiếp Tục'} onPress={handleSubmit} />
+                        <View style={styles.wrapperBottom}>
+                            <Text style={styles.bottomText}>Đã có tài khoản?</Text>
+                            <TextBtn onPress={() => navigation.navigate('Register')} title='Đăng Nhập' />
+                        </View>
+                    </View>
+                </TouchableWithoutFeedback>
+            </ScrollView>
+        </KeyboardAvoidingView>
     )
 }
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        backgroundColor: COLOR.WHITE,
+
+    },
+    wrapper: {
+        flex: 1,
         alignItems: "center",
-        backgroundColor: COLOR.MAIN_COLOR
+    },
+    logoText: {
+        textAlignVertical: "center",
+        textAlign: "center",
+        width: '100%',
+        height: 150,
+        fontSize: 60,
+        color: COLOR.MAIN_COLOR,
+        fontFamily: "Montserrat-Bold",
     },
     title: {
-        fontSize: 80,
-        color: COLOR.SECOND_COLOR,
-        fontFamily: "Montserrat-Bold"
+        marginBottom: 10,
+        fontSize: FONT_SIZE.BIG_TITLE,
+        color: COLOR.MAIN_COLOR,
+        fontFamily: "Montserrat-Bold",
+    },
+    wrapperForm: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: '100%',
+        marginBottom: 10,
+        height: 400,
+    },
+    wrapperBottom: {
+        marginTop: 20,
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    bottomText: {
+        fontFamily: 'Montserrat-Bold',
+        fontSize: FONT_SIZE.BIG_TEXT,
+        color: COLOR.MAIN_COLOR,
+    },
+    backBtn: {
+        position: 'absolute',
+        top: 30,
+        left: 10,
+        zIndex: 100,
+        elevation: 100,
+    },
+    roleWrapper: {
+        width: '90%',
+        height: '40%',
+        borderWidth: 2,
+        borderRadius: 10,
+        borderColor: COLOR.UNSELECTED,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 5,
+        marginVertical: 5,
+    },
+    roleImg: {
+        width: '40%',
+        height: '100%'
+    },
+    roleText: {
+        fontFamily: 'Montserrat-Bold',
+        fontSize: FONT_SIZE.NORMAL_TITLE,
+        color: COLOR.MAIN_COLOR,
     }
-    
 })
 
 export default RegisterScreen;
