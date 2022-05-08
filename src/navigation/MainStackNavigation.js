@@ -3,14 +3,15 @@ import { useState, useEffect } from 'react';
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { SplashScreen, IntroScreen, LoginScreen, RegisterScreen } from "../screens/auth";
 import { HomeScreen } from "../screens/home";
+import MainTabNavigation from './MainTabNavigation';
 
 const MainStack = createNativeStackNavigator();
 
 function MainStackNavigation() {
 
     //lấy user token
-    //biến tạm để giả sử người dùng chưa đăng nhập
-    const userToken = null;
+    //tạm thời coi như người dùng đã đăng nhập để thiết kế những screen bên trong app
+    const userToken = 'abcdef';
     const [isLoading, setIsLoading] = useState(true)
     useEffect(() => {
         //giả sử lấy được userToken trong 6s
@@ -28,24 +29,41 @@ function MainStackNavigation() {
     //2. đã lấy được userToken, kiểm tra xem user đã đăng nhập chưa?
     return (
         <MainStack.Navigator
-            initialRouteName="Register"
-            screenOptions={{
-                headerShown: false,
-            }}
+        // screenOptions={{
+        //     headerTransparent: true,
+        //     headerTitle: '',
+        // }}
         >
             {userToken === null ? (
-                <>
-                    <MainStack.Screen name='Intro' component={IntroScreen} />
+                <MainStack.Group
+                    initialRouteName="Intro"
+                    screenOptions={{
+                        headerShown: false,
+                    }}>
                     <MainStack.Screen
-                    name='Login'
-                    component={LoginScreen} 
-                    options={{
-                        headerBackVisible: false
-                    }}/>
-                    <MainStack.Screen name='Register' component={RegisterScreen} />
-                </>
+                        name='Intro'
+                        component={IntroScreen}
+                    />
+                    <MainStack.Screen
+                        name='Login'
+                        component={LoginScreen}
+                    />
+                    <MainStack.Screen
+                        name='Register'
+                        component={RegisterScreen}
+                    />
+                </MainStack.Group>
             ) : (
-                <MainStack.Screen name='Home' component={HomeScreen} />
+                <MainStack.Group>
+                    <MainStack.Screen
+                        name='MainTab'
+                        component={MainTabNavigation}
+                        options={{
+                            headerShown: false
+                        }}
+                    />
+
+                </MainStack.Group>
             )}
 
 

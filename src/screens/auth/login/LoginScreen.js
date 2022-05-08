@@ -56,6 +56,7 @@ const styles = StyleSheet.create({
         fontSize: 60,
         color: COLOR.MAIN_COLOR,
         fontFamily: "Montserrat-Bold",
+        
     },
     title: {
         marginBottom: 10,

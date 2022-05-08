@@ -7,8 +7,14 @@ import {
 import { COLOR } from '../../res/constant'
 
 function PrimaryBtnBig(props) {
+
+    //nếu có truyền prop disbled vào thì dùng giá trị đó còn không mặc định là false
+    const btnState = props.disabled !== undefined ? props.disabled : false;
+
     return (
-        <TouchableOpacity style={styles.btn} onPress={props.onPress}>
+        <TouchableOpacity 
+        style={[styles.btn, btnState === true && {backgroundColor: COLOR.UNSELECTED}]} onPress={props.onPress}
+        disabled={btnState}>
             <Text style={styles.btnText}>{props.title}</Text>
         </TouchableOpacity>
     )

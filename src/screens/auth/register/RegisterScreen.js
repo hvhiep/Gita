@@ -1,5 +1,5 @@
 import React from "react";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
     View,
     Text,
@@ -18,7 +18,7 @@ import { customer, salesman } from '../../../assets'
 
 function RegisterScreen({ navigation }) {
 
-    const userRole = [
+    const userRoles = [
         {
             id: 0,
             roleTitle: 'Người mua hàng',
@@ -30,24 +30,36 @@ function RegisterScreen({ navigation }) {
             img: salesman,
         }
     ]
-
-    const [isRoleSelected, setIsRoleSelected] = useState(null);
-    const [isSubmitted, setIsSubmitted] = useState(false);
+    
+    const [userRole, setUserRole] = useState(null);
+    const [currentPage, setCurrentPage] = useState(0);
+    const [disabled, setDisabled] = useState(true);
 
     const handleSubmit = () => {
-        if(isRoleSelected != null)
-            setIsSubmitted(true)
-        if(isRoleSelected != null && isSubmitted)
-            navigation.navigate('Login')
+        if (currentPage === 0){
+            setCurrentPage(currentPage + 1);
+        }
+        else if (currentPage === 1)
+            navigation.navigate('Login');
     }
+
+    useEffect(() => {
+        if(userRole === null)
+            setDisabled(true);
+        else
+            setDisabled(false);
+    }, [userRole])
+
     return (
         <KeyboardAvoidingView style={styles.container}>
             <ScrollView>
                 <TouchableWithoutFeedback
                     onPress={() => Keyboard.dismiss()}>
                     <View style={styles.wrapper}>
-                        {isSubmitted && isRoleSelected != null ? 
-                    <BackBtn onPress={() => setIsSubmitted(false)} style={styles.backBtn}/> : null}
+                        {currentPage == 1 && (<BackBtn
+                            onPress={() => setCurrentPage(currentPage - 1)}
+                            style={styles.backBtn}
+                        />)}
                         <StatusBar
                             backgroundColor={'transparent'}
                             translucent
@@ -55,33 +67,35 @@ function RegisterScreen({ navigation }) {
                         ></StatusBar>
                         <Text style={styles.logoText}>Gita</Text>
                         <Text style={styles.title}>Đăng Ký</Text>
-                        {isSubmitted && isRoleSelected != null ?
-                            <View style={styles.wrapperForm}>
-                                <FormInputBig title='Tên tài khoản' />
-                                <FormInputBig title='Số điện thoại' />
-                                <FormInputBig title='Mật khẩu' />
-                                <FormInputBig title='Xác nhận mật khẩu' />
-                            </View>
-                            :
-                            <View style={styles.wrapperForm}>
-                                {userRole.map((item) => {
+                        {currentPage === 0 && (<View style={styles.wrapperForm}>
+                            {userRoles.map((item) => {
 
-                                    const borderColor = isRoleSelected == item.id ? COLOR.SECOND_COLOR : COLOR.UNSELECTED;
+                                const borderColor = userRole === item.id ? COLOR.SECOND_COLOR : COLOR.UNSELECTED;
 
-                                    return (
-                                        <TouchableOpacity
+                                return (
+                                    <TouchableOpacity
                                         key={item.id}
-                                        style={[styles.roleWrapper, {borderColor: borderColor}]}
-                                        onPress={() => setIsRoleSelected(item.id)}
-                                        >
-                                            <Image style={styles.roleImg} source={item.img} />
-                                            <Text style={styles.roleText}>{item.roleTitle}</Text>
-                                        </TouchableOpacity>
-                                    )
-                                })}
-                            </View>
-                        }
-                        <PrimaryBtnBig title={isSubmitted && isRoleSelected != null  ? 'Đăng Ký' : 'Tiếp Tục'} onPress={handleSubmit} />
+                                        style={[styles.roleWrapper, { borderColor: borderColor }]}
+                                        onPress={() => setUserRole(item.id)}
+                                    >
+                                        <Image style={styles.roleImg} source={item.img} />
+                                        <Text style={styles.roleText}>{item.roleTitle}</Text>
+                                    </TouchableOpacity>
+                                )
+                            })}
+                        </View>)}
+                        {currentPage === 1 && (<View style={styles.wrapperForm}>
+                            <FormInputBig title='Tên tài khoản' />
+                            <FormInputBig title='Số điện thoại' />
+                            <FormInputBig title='Mật khẩu' />
+                            <FormInputBig title='Xác nhận mật khẩu' />
+                        </View>)}
+
+                        <PrimaryBtnBig
+                            title={currentPage === 0 ? 'Tiếp Tục' : 'Đăng Ký'}
+                            onPress={handleSubmit}
+                            disabled={disabled}
+                        />
                         <View style={styles.wrapperBottom}>
                             <Text style={styles.bottomText}>Đã có tài khoản?</Text>
                             <TextBtn onPress={() => navigation.navigate('Register')} title='Đăng Nhập' />

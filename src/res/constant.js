@@ -7,6 +7,9 @@ const COLOR = {
     MAIN_COLOR: '#023047',
     SECOND_COLOR: '#FB8500',
     BLACK: "#000000",
+    A: 'red',
+    B: 'green',
+    C: 'blue'
 }
 const FONT_SIZE = {
     BIG_TITLE: 26,
@@ -16,9 +19,15 @@ const FONT_SIZE = {
     NORMAL_TEXT: 12,
     SMALL_TEXT: 10,
     TINY_TEXT: 8
+}
 
+const DIMENSION = {
+    MARGIN_HORIZONTAL: 14,
 }
 const STATUSBAR_HEIGHT = StatusBar.currentHeight;
-const {height, width} = Dimensions.get('screen');
+const {height, width} = Dimensions.get('window');
+const numberWithCommas = (x) => {
+    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  }
 
-export { COLOR, FONT_SIZE, STATUSBAR_HEIGHT, height, width };
+export { COLOR, FONT_SIZE, STATUSBAR_HEIGHT, height, width, DIMENSION, numberWithCommas };
