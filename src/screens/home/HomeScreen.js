@@ -12,7 +12,7 @@ import { COLOR, DIMENSION, WIDTH, FONT_SIZE } from '../../res/';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import { Product } from '../../components';
 import { guitarImg } from '../../assets';
-function HomeScreen() {
+function HomeScreen({ navigation }) {
 
     const bannerData = [
         {
@@ -163,7 +163,8 @@ function HomeScreen() {
 
     return (
         <View style={styles.container}>
-            <TouchableOpacity style={styles.searchWrapper}>
+            {/* Thanh tìm kiếm */}
+            <TouchableOpacity onPress={() => navigation.navigate('Search')} style={styles.searchWrapper}>
                 <Text style={styles.searchText}>Tìm kiếm</Text>
                 <Icon name='search' size={20} color={COLOR.UNSELECTED}></Icon>
             </TouchableOpacity>

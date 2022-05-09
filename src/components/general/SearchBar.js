@@ -19,6 +19,7 @@ function SearchBar() {
 
 const styles = StyleSheet.create({
     container: {
+        width: 200,
         flexDirection: 'row',
         padding: 10,
         backgroundColor: COLOR.WHITE,

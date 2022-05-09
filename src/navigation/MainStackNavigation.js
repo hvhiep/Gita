@@ -2,8 +2,9 @@ import React from "react";
 import { useState, useEffect } from 'react';
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { SplashScreen, IntroScreen, LoginScreen, RegisterScreen } from "../screens/auth";
-import { HomeScreen } from "../screens/home";
+import { HomeScreen, SearchScreen, SearchResultScreen } from "../screens/home";
 import MainTabNavigation from './MainTabNavigation';
+import { COLOR } from "../res";
 
 const MainStack = createNativeStackNavigator();
 
@@ -14,7 +15,7 @@ function MainStackNavigation() {
     const userToken = 'abcdef';
     const [isLoading, setIsLoading] = useState(true)
     useEffect(() => {
-        //giả sử lấy được userToken trong 6s
+        //giả sử lấy được userToken trong 1s
         const timerId = setTimeout(() => {
             setIsLoading(false)
         }, 1000)
@@ -62,7 +63,20 @@ function MainStackNavigation() {
                             headerShown: false
                         }}
                     />
-
+                    <MainStack.Screen
+                        name='Search'
+                        component={SearchScreen}
+                        options={{
+                            headerShown: false,
+                        }}
+                    />
+                    <MainStack.Screen
+                        name='SearchResult'
+                        component={SearchResultScreen}
+                        options={{
+                            headerShown: false,
+                        }}
+                    />
                 </MainStack.Group>
             )}
 
