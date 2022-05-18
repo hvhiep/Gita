@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { SplashScreen, IntroScreen, LoginScreen, RegisterScreen } from "../screens/auth";
 import { HomeScreen, SearchScreen, SearchResultScreen } from "../screens/home";
 import MainTabNavigation from './MainTabNavigation';
+import FilterDrawerNavigation from "./FilterDrawerNavigation";
 import { COLOR } from "../res";
 
 const MainStack = createNativeStackNavigator();
@@ -70,9 +71,17 @@ function MainStackNavigation() {
                             headerShown: false,
                         }}
                     />
-                    <MainStack.Screen
+                    {/* <MainStack.Screen
                         name='SearchResult'
                         component={SearchResultScreen}
+                        options={{
+                            headerShown: false,
+                        }}
+                    /> */}
+                    {/* Giải thích: để màn hình 'SearchResult' ở trên có 1 cái drawer thì nó phải làm screen con của drawer navigator, do đó đưa nó vào trong 'FilterDrawerNavigation' */}
+                    <MainStack.Screen 
+                        name='FilterDrawer'
+                        component={FilterDrawerNavigation}
                         options={{
                             headerShown: false,
                         }}

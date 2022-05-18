@@ -28,7 +28,7 @@ function MainTabNavigation() {
                         fontFamily: "Montserrat-Bold",
                     },
                     headerStyle: {
-                        backgroundColor: COLOR.BACKGROUND,
+                        backgroundColor: COLOR.BACKGROUND_WHITE,
                     },
                     headerTitleAlign: 'center',
                     headerShadowVisible: false,

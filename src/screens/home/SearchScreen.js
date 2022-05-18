@@ -45,7 +45,15 @@ function SearchScreen({ navigation }) {
 
     const renderSearchHistory = ({ item }) => {
         return (
-            <TouchableOpacity onPress={() => navigation.navigate('SearchResult', {searchResult: item.content})} style={styles.searchHistoryItem}>
+            <TouchableOpacity
+                onPress={() => (
+                    //truyền params qua 2 navigator lồng nhau stack -> drawer -> screen
+                    navigation.navigate(
+                        'FilterDrawer',
+                        { screen: 'SearchResult', params: { searchResult: item.content } }
+                    ))
+                }
+                style={styles.searchHistoryItem}>
                 <Text style={styles.searchHistoryText}>{item.content}</Text>
             </TouchableOpacity>
         )
@@ -54,7 +62,7 @@ function SearchScreen({ navigation }) {
     // hàm xử lý filter khi search
     const handleSearchFilter = (text) => {
         //nếu có chữ trong TextInput
-        if(text){
+        if (text) {
             //Dùng hàm filter: trả về một mảng mới với các phần tử đạt điều kiện yêu cầu
             const newData = initialData.filter((item) => {
                 const newItem = item.content ? item.content.toUpperCase() : ''.toUpperCase();
@@ -65,7 +73,7 @@ function SearchScreen({ navigation }) {
             setFilterData(newData);
             setSearch(text);
         }
-        else{
+        else {
             setFilterData(initialData);
             setSearch(text);
         }
@@ -87,7 +95,10 @@ function SearchScreen({ navigation }) {
                     value={search}
                     onChangeText={(text) => handleSearchFilter(text)}
                     onSubmitEditing={({ nativeEvent }) => {
-                        navigation.navigate('SearchResult', {searchResult: nativeEvent.text})
+                        navigation.navigate(
+                            'FilterDrawer',
+                            { screen: 'SearchResult', params: { searchResult: nativeEvent.text } }
+                        )
                     }}
                 ></TextInput>
                 <TouchableOpacity style={styles.filter}>
@@ -107,7 +118,7 @@ function SearchScreen({ navigation }) {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: COLOR.BACKGROUND,
+        backgroundColor: COLOR.BACKGROUND_WHITE,
     },
     headerWrapper: {
         flexDirection: 'row',
@@ -122,7 +133,7 @@ const styles = StyleSheet.create({
         borderRadius: 50
     },
     search: {
-        backgroundColor: COLOR.WHITE,
+        backgroundColor: COLOR.BACKGROUND_GREY,
         height: 40,
         flex: 1,
         marginHorizontal: 14,
@@ -139,6 +150,7 @@ const styles = StyleSheet.create({
     listSearchHistory: {
         width: '100%',
         marginTop: 10,
+        backgroundColor: COLOR.BACKGROUND_GREY
     },
     searchHistoryItem: {
         height: 60,

@@ -1,7 +1,8 @@
 import { StatusBar, Dimensions } from 'react-native';
 
 const COLOR = {
-    BACKGROUND: "#F3F5F7",
+    BACKGROUND_GREY: "#F0F0F0",
+    BACKGROUND_WHITE: "#FFFFFF",
     UNSELECTED: "#B6B6B6",
     WHITE: "#FFFFFF",
     MAIN_COLOR: '#023047',

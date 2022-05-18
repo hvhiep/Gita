@@ -11,7 +11,9 @@ import { useState } from 'react';
 import { COLOR, DIMENSION, WIDTH, FONT_SIZE } from '../../res/';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import { Product } from '../../components';
-import { guitarImg } from '../../assets';
+
+//dummy data
+import productData from "./productData";
 function HomeScreen({ navigation }) {
 
     const bannerData = [
@@ -54,88 +56,7 @@ function HomeScreen({ navigation }) {
             color: COLOR.C,
         },
     ];
-    const productData = [
-        {
-            id: 1,
-            name: 'Greg Bennett GD-100SGE',
-            standardCost: 5000000,
-            salePrice: 5660000,
-            soldQuantity: 1000,
-            stars: 4.5,
-            img: guitarImg,
-            location: 'Tp.HCM',
-        },
-        {
-            id: 2,
-            name: 'Greg Bennett GD-100SGE 2',
-            standardCost: 2000000,
-            salePrice: 2660000,
-            soldQuantity: 2873,
-            rating: 5,
-            img: guitarImg,
-            location: 'Tp.HCM',
-        },
-        {
-            id: 3,
-            name: 'Greg Bennett GD-100SGE 3',
-            standardCost: 5000000,
-            salePrice: 5660000,
-            soldQuantity: 1000,
-            rating: 4.5,
-            img: guitarImg,
-            location: 'Tp.HCM',
-        },
-        {
-            id: 4,
-            name: 'Greg Bennett GD-100SGE 4',
-            standardCost: 5000000,
-            salePrice: 5660000,
-            soldQuantity: 1000,
-            rating: 4.5,
-            img: guitarImg,
-            location: 'Tp.HCM',
-        },
-        {
-            id: 5,
-            name: 'Greg Bennett GD-100SGE 5',
-            standardCost: 5000000,
-            salePrice: 5660000,
-            soldQuantity: 1000,
-            rating: 4.5,
-            img: guitarImg,
-            location: 'Tp.HCM',
-        },
-        {
-            id: 6,
-            name: 'Greg Bennett GD-100SGE 6',
-            standardCost: 5000000,
-            salePrice: 5660000,
-            soldQuantity: 1000,
-            rating: 4.5,
-            img: guitarImg,
-            location: 'Tp.HCM',
-        },
-        {
-            id: 7,
-            name: 'Greg Bennett GD-100SGE 7',
-            standardCost: 5000000,
-            salePrice: 5660000,
-            soldQuantity: 1000,
-            rating: 4.5,
-            img: guitarImg,
-            location: 'Tp.HCM',
-        },
-        {
-            id: 8,
-            name: 'Greg Bennett GD-100SGE 8',
-            standardCost: 5000000,
-            salePrice: 5660000,
-            soldQuantity: 1000,
-            rating: 4.5,
-            img: guitarImg,
-            location: 'Tp.HCM',
-        },
-    ]
+    
 
     const [guitarTypeSelected, setGuitarTypeSelected] = useState(1);
 
@@ -168,7 +89,7 @@ function HomeScreen({ navigation }) {
                 <Text style={styles.searchText}>Tìm kiếm</Text>
                 <Icon name='search' size={20} color={COLOR.UNSELECTED}></Icon>
             </TouchableOpacity>
-            <ScrollView style={{ flex: 1 }}>
+            <ScrollView style={styles.scrollview}>
 
                 {/* 1. Banner quảng cáo */}
                 <FlatList
@@ -182,7 +103,7 @@ function HomeScreen({ navigation }) {
                 />
                 {/* 2. filter chọn loại guitar */}
                 <FlatList
-                    style={styles.list}
+                    style={[styles.list, {marginTop: 10}]}
                     data={guitarTypeData}
                     renderItem={renderGuitarTypeData}
                     keyExtractor={item => item.id}
@@ -217,7 +138,7 @@ function HomeScreen({ navigation }) {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: COLOR.BACKGROUND,
+        backgroundColor: COLOR.BACKGROUND_WHITE,
 
     },
     // nút search bar 
@@ -225,7 +146,7 @@ const styles = StyleSheet.create({
         marginHorizontal: DIMENSION.MARGIN_HORIZONTAL,
         flexDirection: 'row',
         padding: 10,
-        backgroundColor: COLOR.WHITE,
+        backgroundColor: COLOR.BACKGROUND_GREY,
         borderRadius: 10,
 
     },
@@ -234,11 +155,14 @@ const styles = StyleSheet.create({
         fontFamily: 'Montserrat-Medium',
         flex: 1,
     },
-
+    scrollview: { 
+        flex: 1, 
+        marginTop: 10,
+        backgroundColor: COLOR.BACKGROUND_GREY
+    },
     // banner style 
     list: {
         width: '100%',
-        marginTop: 20,
         paddingHorizontal: DIMENSION.MARGIN_HORIZONTAL,
     },
     bannerItem: {
