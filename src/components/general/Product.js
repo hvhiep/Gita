@@ -7,17 +7,17 @@ import {
     Image
 } from 'react-native';
 import { memo } from 'react';
-import { COLOR, WIDTH, DIMENSION, FONT_SIZE, numberWithCommas } from '../../res';
+import { COLOR, WIDTH, DIMENSION, FONT_SIZE, numberWithCommas, numFormatter } from '../../res';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { Rating } from 'react-native-ratings';
 
-
+// chiều rộng của mỗi box sản phẩm
 const cardWidth = Math.round(WIDTH / 2 - DIMENSION.MARGIN_HORIZONTAL * 1.5);
 
-function Product({ item }) {
+function Product({ item, onPress, style }) {
     return (
-        <TouchableOpacity style={styles.container}>
-            <Image style={styles.img} source={item.img}></Image>
+        <TouchableOpacity style={[styles.container, style && style]} onPress={onPress}>
+            <Image style={styles.img} source={item.img[0]}></Image>
             <Text style={styles.productName}>{item.name}</Text>
             <Text style={styles.price}>{numberWithCommas(item.salePrice)}đ</Text>
             <View style={styles.wrapper}>
@@ -28,7 +28,7 @@ function Product({ item }) {
                     startingValue={item.stars}
                     imageSize={12}
                 />
-                <Text style={styles.sold}>Đã bán {item.soldQuantity}</Text>
+                <Text style={styles.sold}>Đã bán {numFormatter(item.soldQuantity)}</Text>
             </View>
             <View style={styles.location}>
                 <Ionicons name='location' size={20} color={COLOR.BLACK}/>
@@ -48,8 +48,8 @@ const styles = StyleSheet.create({
     img: {
         borderTopLeftRadius: 10,
         borderTopRightRadius: 10,
-        width: cardWidth,
-        height: cardWidth,
+        width: cardWidth - 5,
+        height: cardWidth - 5,
         resizeMode: 'contain',
     },
     productName: {

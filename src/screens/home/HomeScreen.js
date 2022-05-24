@@ -112,21 +112,29 @@ function HomeScreen({ navigation }) {
                 />
 
                 {/* 3. Danh sách các sản phẩm */}
-                {/* 3.1 Sale đặc biệt (có mức giảm giá cao) */}
+                    {/* 3.1 Sale đặc biệt (có mức giảm giá cao) */}
                 <Text style={styles.categoryTitle}>Sale đặc biệt</Text>
                 <View style={styles.categoryWrapper}>
                     {productData.map((item) => {
                         return (
-                            <Product key={item.id} item={item}></Product>
+                            <Product
+                                key={item.id}
+                                item={item} 
+                                onPress={() => navigation.navigate('ProductDetail', {productId: item.id})}
+                            />
                         )
                     })}
                 </View>
-                {/* 3.1 Bán chạy (có số lượng bán cao) */}
+                    {/* 3.1 Bán chạy (có số lượng bán cao) */}
                 <Text style={styles.categoryTitle}>Bán chạy</Text>
                 <View style={styles.categoryWrapper}>
                     {productData.map((item) => {
                         return (
-                            <Product key={item.id} item={item}></Product>
+                            <Product
+                                key={item.id}
+                                item={item} 
+                                onPress={() => navigation.navigate('ProductDetail', {productId: item.id})}
+                            />
                         )
                     })}
                 </View>

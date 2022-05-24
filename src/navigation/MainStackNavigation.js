@@ -2,7 +2,7 @@ import React from "react";
 import { useState, useEffect } from 'react';
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { SplashScreen, IntroScreen, LoginScreen, RegisterScreen } from "../screens/auth";
-import { HomeScreen, SearchScreen, SearchResultScreen } from "../screens/home";
+import { SearchScreen, ProductDetailScreen } from "../screens/home";
 import MainTabNavigation from './MainTabNavigation';
 import FilterDrawerNavigation from "./FilterDrawerNavigation";
 import { COLOR } from "../res";
@@ -82,6 +82,13 @@ function MainStackNavigation() {
                     <MainStack.Screen 
                         name='FilterDrawer'
                         component={FilterDrawerNavigation}
+                        options={{
+                            headerShown: false,
+                        }}
+                    />
+                    <MainStack.Screen
+                        name='ProductDetail'
+                        component={ProductDetailScreen}
                         options={{
                             headerShown: false,
                         }}

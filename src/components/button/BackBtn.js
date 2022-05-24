@@ -10,7 +10,7 @@ import { COLOR } from '../../res/constant'
 function BackBtn(props) {
     return (
         <TouchableOpacity style={[styles.btn, props.style]} onPress={props.onPress}>
-            <Icon name='arrow-left' size={20} color={COLOR.BLACK}/>
+            <Icon name='arrow-left' size={20} color={COLOR.MAIN_COLOR}/>
         </TouchableOpacity>
     )
 }

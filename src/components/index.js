@@ -5,4 +5,6 @@ import TextBtn from "./button/TextBtn";
 import BackBtn from "./button/BackBtn";
 import SearchBar from "./general/SearchBar";
 import Product from "./general/Product";
-export { PrimaryBtnBig, SecondaryBtnBig, FormInputBig, TextBtn, BackBtn, SearchBar, Product};
+import PrimaryBtn from "./button/PrimaryBtn";
+import SecondaryBtn from "./button/SecondaryBtn";
+export { PrimaryBtnBig, SecondaryBtnBig, FormInputBig, TextBtn, BackBtn, SearchBar, Product, PrimaryBtn, SecondaryBtn};
