@@ -12,6 +12,8 @@ const COLOR = {
     YELLOW: '#FFB800',
     LIGHT_GREY: "#bdbdbd",
     BACKGROUND_MODAL: '#000000AA',
+    GREEN: '#14FC00',
+    RED: '#FF1E1E'
 }
 const FONT_SIZE = {
     BIG_TITLE: 26,

@@ -11,7 +11,7 @@ import {
     Animated,
     Modal
 } from 'react-native';
-import { BackBtn } from '../../components';
+import { BackBtn, Message } from '../../components';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Icon2 from 'react-native-vector-icons/FontAwesome5';
 import { COLOR, DIMENSION, FONT_SIZE, numberWithCommas, numFormatter, specificationsFormat, WIDTH } from '../../res';
@@ -64,7 +64,7 @@ function ProductDetailScreen({ navigation, route }) {
     ];
     //tính giá sau khi đã giảm(giá giảm = giá bán - phần trăm khuyến mãi, tạm thời cứ tính đơn giản thế này đã)
     const discount = discountData.find((item) => item.id === product.discountId)
-    product.discountPrice = product.salePrice * (1 - discount.percent);
+    product.discountPrice = Math.round(product.salePrice * (1 - discount.percent));
 
     // animation cho header
     const ScrollViewScrollY = useRef(new Animated.Value(0)).current;
@@ -75,8 +75,22 @@ function ProductDetailScreen({ navigation, route }) {
     });
 
     const [currentImg, setCurrentImg] = useState(1);
-    const [isModalShow, setIsModalShow] = useState(false);
+    const [isBottomModalShow, setIsBottomModalShow] = useState(false);
     const [orderQuantity, setOrderQuantity] = useState(1);
+    const [isMessageShowed, setIsMessageShowed] = useState(false);
+    const handleAddToCart = () => {
+        // thêm sản phẩm mới vào cart của user
+
+        // hiển thị modal thông báo thành công
+        setIsMessageShowed(!isMessageShowed);
+    }
+    const handleMessageShowed = () => {
+        setTimeout(() => {
+            setIsMessageShowed(!isMessageShowed);
+            setIsBottomModalShow(!isBottomModalShow);
+            setOrderQuantity(1);
+        }, 1000)
+    }
 
     return (
         <View style={styles.container}>
@@ -230,7 +244,7 @@ function ProductDetailScreen({ navigation, route }) {
                 </TouchableOpacity>
                 <TouchableOpacity
                     style={styles.footerOrderBtn}
-                    onPress={() => setIsModalShow(!isModalShow)}
+                    onPress={() => setIsBottomModalShow(!isBottomModalShow)}
                 >
                     <Icon name='cart-plus' size={30} color={COLOR.WHITE} />
                     <Text style={styles.orderBtnText}>Thêm vào giỏ hàng</Text>
@@ -240,16 +254,16 @@ function ProductDetailScreen({ navigation, route }) {
             {/* D. BOTTOM MODAL */}
             <Modal
                 animationType='fade'
-                visible={isModalShow}
+                visible={isBottomModalShow}
                 transparent
             >
                 <View style={styles.modal}>
                     <Pressable
                         style={styles.modalOutsideBg}
-                        onPress={() => setIsModalShow(!isModalShow)}
+                        onPress={() => setIsBottomModalShow(!isBottomModalShow)}
                     ></Pressable>
                     <View style={styles.sheetWrapper}>
-                        <TouchableOpacity style={styles.sheetClose} onPress={() => setIsModalShow(!isModalShow)}>
+                        <TouchableOpacity style={styles.sheetClose} onPress={() => setIsBottomModalShow(!isBottomModalShow)}>
                             <Icon name='remove' size={20} color={COLOR.GREY}></Icon>
                         </TouchableOpacity>
                         <View style={styles.sheetHeaderWrapper}>
@@ -291,6 +305,7 @@ function ProductDetailScreen({ navigation, route }) {
                         <View style={styles.sheetBtn}>
                         <TouchableOpacity
                             style={styles.footerOrderBtn}
+                            onPress={handleAddToCart}
                         >
                             <Icon name='cart-plus' size={30} color={COLOR.WHITE} />
                             <Text style={styles.orderBtnText}>Thêm vào giỏ hàng</Text>
@@ -299,6 +314,13 @@ function ProductDetailScreen({ navigation, route }) {
                     </View>
                 </View>
             </Modal>
+            {/* Thông báo thêm vào giỏ hàng thành công */}
+            <Message
+                state='error'
+                content='Thêm vào giỏ hàng thành công'
+                visible={isMessageShowed}
+                onShow={handleMessageShowed}
+            />
         </View>
     )
 };
