@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useMemo } from 'react';
 import {
     View,
     Text,
@@ -6,15 +6,15 @@ import {
     ScrollView,
     Image,
     TouchableOpacity,
+    Pressable,
     FlatList,
-    Animated
+    Animated,
+    Modal
 } from 'react-native';
 import { BackBtn } from '../../components';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Icon2 from 'react-native-vector-icons/FontAwesome5';
 import { COLOR, DIMENSION, FONT_SIZE, numberWithCommas, numFormatter, specificationsFormat, WIDTH } from '../../res';
-import guitarImg2 from '../../assets/images/guitarImg2.png';
-import guitarImg from '../../assets/images/guitarImg.jpg';
 import shopLogo from '../../assets/images/shopLogo.png';
 import productData from './productData';
 
@@ -38,7 +38,6 @@ function ProductDetailScreen({ navigation, route }) {
     const { productId } = route?.params;
     // lấy sản phẩm từ id truyền qua navigation
     const product = productData.find((item) => productId === item.id);
-
     //Bảng giảm giá cho các sản phẩm (để join với product lấy cái percent -> tính giá đã giảm)
     const discountData = [
         {
@@ -75,8 +74,10 @@ function ProductDetailScreen({ navigation, route }) {
         extrapolate: 'clamp'
     });
 
-    //phân trang cho hình ảnh sp
     const [currentImg, setCurrentImg] = useState(1);
+    const [isModalShow, setIsModalShow] = useState(false);
+    const [orderQuantity, setOrderQuantity] = useState(1);
+
     return (
         <View style={styles.container}>
             {/* A. HEADER */}
@@ -109,16 +110,12 @@ function ProductDetailScreen({ navigation, route }) {
                         horizontal
                         showsHorizontalScrollIndicator={false}
                         pagingEnabled
-                        onMomentumScrollEnd={( event ) => {
-                            setCurrentImg(Math.round(event.nativeEvent.contentOffset.x/WIDTH) + 1)
+                        onMomentumScrollEnd={(event) => {
+                            setCurrentImg(Math.round(event.nativeEvent.contentOffset.x / WIDTH) + 1)
                         }}
                     />
-                    {/* ????????????? style cho cái phân trang này */}
                     <Text style={styles.pagination}>{currentImg}/{product.img.length}</Text>
                 </View>
-
-
-
                 {/* 2. Thông tin giá, tên sp*/}
                 <View style={styles.sectionFirst}>
                     <View style={styles.priceWrapper}>
@@ -231,11 +228,77 @@ function ProductDetailScreen({ navigation, route }) {
                     <Icon name='commenting' size={22} color={COLOR.SECOND_COLOR} />
                     <Text style={styles.smallBtnText}>Chat</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.footerOrderBtn}>
+                <TouchableOpacity
+                    style={styles.footerOrderBtn}
+                    onPress={() => setIsModalShow(!isModalShow)}
+                >
                     <Icon name='cart-plus' size={30} color={COLOR.WHITE} />
                     <Text style={styles.orderBtnText}>Thêm vào giỏ hàng</Text>
                 </TouchableOpacity>
             </View>
+
+            {/* D. BOTTOM MODAL */}
+            <Modal
+                animationType='fade'
+                visible={isModalShow}
+                transparent
+            >
+                <View style={styles.modal}>
+                    <Pressable
+                        style={styles.modalOutsideBg}
+                        onPress={() => setIsModalShow(!isModalShow)}
+                    ></Pressable>
+                    <View style={styles.sheetWrapper}>
+                        <TouchableOpacity style={styles.sheetClose} onPress={() => setIsModalShow(!isModalShow)}>
+                            <Icon name='remove' size={20} color={COLOR.GREY}></Icon>
+                        </TouchableOpacity>
+                        <View style={styles.sheetHeaderWrapper}>
+                            <View style={styles.sheetImgWrapper}>
+                                <Image style={styles.sheetImg} source={product.img[0]} />
+                            </View>
+                            <View style={styles.sheetInfoWrapper}>
+                                <View style={styles.sheetHeaderInfoWrapper}>
+                                    <Text style={styles.discountPrice}>{numberWithCommas(product.discountPrice)} đ</Text>
+                                    <View style={styles.salePriceWrapper}>
+                                        <Text style={styles.salePrice}>{numberWithCommas(product.salePrice)} đ</Text>
+                                        <Text style={styles.discountPercent}>-{discount.percent * 100}%</Text>
+                                    </View>
+                                </View>
+                                <View style={styles.sheetQuantityWrapper}>
+                                    <Text style={styles.sheetQuantityText}>Số lượng</Text>
+                                    <View style={styles.sheetQuantity}>
+                                        <TouchableOpacity
+                                            style={styles.quantityBtn}
+                                            onPress={() => setOrderQuantity(prev => {
+                                                if (prev <= 1)
+                                                    return prev
+                                                return prev - 1
+                                            })}
+                                        >
+                                            <Icon name='minus' size={20} color={COLOR.BLACK} />
+                                        </TouchableOpacity>
+                                        <Text style={styles.quantityText}>{orderQuantity}</Text>
+                                        <TouchableOpacity
+                                            style={styles.quantityBtn}
+                                            onPress={() => setOrderQuantity(prev => prev + 1)}
+                                        >
+                                            <Icon name='plus' size={20} color={COLOR.BLACK} />
+                                        </TouchableOpacity>
+                                    </View>
+                                </View>
+                            </View>
+                        </View>
+                        <View style={styles.sheetBtn}>
+                        <TouchableOpacity
+                            style={styles.footerOrderBtn}
+                        >
+                            <Icon name='cart-plus' size={30} color={COLOR.WHITE} />
+                            <Text style={styles.orderBtnText}>Thêm vào giỏ hàng</Text>
+                        </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
         </View>
     )
 };
@@ -288,9 +351,13 @@ const styles = StyleSheet.create({
     },
     pagination: {
         position: 'absolute',
-        left: 0,
-        bottom: 0,
-        marginLeft: DIMENSION.MARGIN_HORIZONTAL
+        left: 14,
+        bottom: 10,
+        paddingVertical: 2,
+        paddingHorizontal: 8,
+        borderRadius: 15,
+        backgroundColor: COLOR.GREY,
+        color: COLOR.WHITE
     },
 
     // section 1
@@ -519,7 +586,84 @@ const styles = StyleSheet.create({
         fontSize: FONT_SIZE.SMALL_TEXT,
         marginLeft: 15,
     },
+    modal: {
+        flex: 1,
+        backgroundColor: COLOR.BACKGROUND_MODAL,
+    },
+    modalOutsideBg: {
+        flex: 1,
+    },
+    sheetWrapper: {
+        backgroundColor: COLOR.WHITE,
+        paddingHorizontal: DIMENSION.MARGIN_HORIZONTAL,
+        borderWidth: 1,
+        borderTopLeftRadius: 20,
+        borderTopRightRadius: 20,
+    },
+    sheetClose: {
+        padding: 5,
+        borderRadius: 50,
+        alignSelf: 'flex-end',
+    },
+    sheetHeaderWrapper: {
+        flexDirection: 'row',
 
+    },
+    sheetImgWrapper: {
+        width: 100,
+        height: 100,
+        borderWidth: 1,
+        borderColor: COLOR.LIGHT_GREY,
+        borderRadius: 10,
+        justifyContent: 'center',
+        alignItems: 'center'
+    },
+    sheetImg: {
+        width: '90%',
+        height: '90%',
+        resizeMode: 'contain',
+    },
+    sheetInfoWrapper: {
+        marginLeft: 10,
+        justifyContent: 'space-between',
+        paddingVertical: 2,
+    },
+    sheetHeaderInfoWrapper: {
+
+    },
+    sheetQuantityWrapper: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'baseline'
+    },
+    sheetQuantityText: {
+        fontFamily: 'Montserrat-Medium',
+        fontSize: FONT_SIZE.NORMAL_TEXT,
+        color: COLOR.MAIN_COLOR
+    },
+    sheetQuantity: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginLeft: 40,
+    },
+    quantityBtn: {
+        paddingHorizontal: 4,
+        paddingVertical: 2,
+        borderRadius: 5,
+        backgroundColor: COLOR.LIGHT_GREY,
+        justifyContent: 'center',
+        alignItems: 'center'
+    },
+    quantityText: {
+        marginHorizontal: 15,
+        fontFamily: 'Montserrat-Bold',
+        fontSize: FONT_SIZE.NORMAL_TITLE,
+        color: COLOR.MAIN_COLOR
+    },
+    sheetBtn: {
+        flexDirection: 'row',
+        marginVertical: 20,
+    }
 })
 
 export default ProductDetailScreen;
