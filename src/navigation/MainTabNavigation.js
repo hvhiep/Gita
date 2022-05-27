@@ -54,14 +54,16 @@ function MainTabNavigation() {
                 name='Message'
                 component={MessageScreen}
                 options={{
-                    tabBarIcon: ({ color }) => <Icon name='commenting' size={20} color={color} />
+                    tabBarIcon: ({ color }) => <Icon name='commenting' size={20} color={color} />,
+                    headerShown: false
                 }}
             />
             <Tab.Screen
                 name='Cart'
                 component={CartScreen}
                 options={{
-                    tabBarIcon: ({ color }) => <Icon name='shopping-cart' size={20} color={color} />
+                    tabBarIcon: ({ color }) => <Icon name='shopping-cart' size={20} color={color} />,
+                    headerShown: false
                 }}
             />
             <Tab.Screen

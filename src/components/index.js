@@ -8,4 +8,5 @@ import Product from "./general/Product";
 import PrimaryBtn from "./button/PrimaryBtn";
 import SecondaryBtn from "./button/SecondaryBtn";
 import Message from "./general/Message";
-export { PrimaryBtnBig, SecondaryBtnBig, FormInputBig, TextBtn, BackBtn, SearchBar, Product, PrimaryBtn, SecondaryBtn, Message};
+import Order from "./general/Order";
+export { PrimaryBtnBig, SecondaryBtnBig, FormInputBig, TextBtn, BackBtn, SearchBar, Product, PrimaryBtn, SecondaryBtn, Message, Order};

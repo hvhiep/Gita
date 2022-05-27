@@ -33,7 +33,7 @@ const productData = [
     },
     {
         id: 2,
-        name: 'Greg Bennett GD-100SGE 2',
+        name: 'Greg Bennett 2',
         standardCost: 2000000,
         salePrice: 2660000,
         soldQuantity: 2873,

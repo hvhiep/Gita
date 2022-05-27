@@ -9,11 +9,12 @@ import {
     Pressable,
     FlatList,
     Animated,
-    Modal
+    Modal,
 } from 'react-native';
 import { BackBtn, Message } from '../../components';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Icon2 from 'react-native-vector-icons/FontAwesome5';
+import Icon3 from 'react-native-vector-icons/Feather';
 import { COLOR, DIMENSION, FONT_SIZE, numberWithCommas, numFormatter, specificationsFormat, WIDTH } from '../../res';
 import shopLogo from '../../assets/images/shopLogo.png';
 import productData from './productData';
@@ -73,6 +74,11 @@ function ProductDetailScreen({ navigation, route }) {
         outputRange: ['transparent', COLOR.WHITE],
         extrapolate: 'clamp'
     });
+    const animatedHeaderBorderWidth = ScrollViewScrollY.interpolate({
+        inputRange: [0, 300],
+        outputRange: [0, 0.5],
+        extrapolate: 'clamp'
+    });
 
     const [currentImg, setCurrentImg] = useState(1);
     const [isBottomModalShow, setIsBottomModalShow] = useState(false);
@@ -95,7 +101,7 @@ function ProductDetailScreen({ navigation, route }) {
     return (
         <View style={styles.container}>
             {/* A. HEADER */}
-            <Animated.View style={[styles.header, { backgroundColor: animatedHeaderBackgroundColor }]}>
+            <Animated.View style={[styles.header, { backgroundColor: animatedHeaderBackgroundColor, borderBottomWidth: animatedHeaderBorderWidth }]}>
                 <BackBtn onPress={() => navigation.goBack()} />
                 <TouchableOpacity style={styles.cart}>
                     <Icon name='shopping-cart' size={20} color={COLOR.MAIN_COLOR} />
@@ -289,34 +295,34 @@ function ProductDetailScreen({ navigation, route }) {
                                                 return prev - 1
                                             })}
                                         >
-                                            <Icon name='minus' size={20} color={COLOR.BLACK} />
+                                            <Icon3 name='minus' size={20} color={COLOR.BLACK} />
                                         </TouchableOpacity>
                                         <Text style={styles.quantityText}>{orderQuantity}</Text>
                                         <TouchableOpacity
                                             style={styles.quantityBtn}
                                             onPress={() => setOrderQuantity(prev => prev + 1)}
                                         >
-                                            <Icon name='plus' size={20} color={COLOR.BLACK} />
+                                            <Icon3 name='plus' size={20} color={COLOR.BLACK} />
                                         </TouchableOpacity>
                                     </View>
                                 </View>
                             </View>
                         </View>
                         <View style={styles.sheetBtn}>
-                        <TouchableOpacity
-                            style={styles.footerOrderBtn}
-                            onPress={handleAddToCart}
-                        >
-                            <Icon name='cart-plus' size={30} color={COLOR.WHITE} />
-                            <Text style={styles.orderBtnText}>Thêm vào giỏ hàng</Text>
-                        </TouchableOpacity>
+                            <TouchableOpacity
+                                style={styles.footerOrderBtn}
+                                onPress={handleAddToCart}
+                            >
+                                <Icon name='cart-plus' size={30} color={COLOR.WHITE} />
+                                <Text style={styles.orderBtnText}>Thêm vào giỏ hàng</Text>
+                            </TouchableOpacity>
                         </View>
                     </View>
                 </View>
             </Modal>
             {/* Thông báo thêm vào giỏ hàng thành công */}
             <Message
-                state='error'
+                state='success'
                 content='Thêm vào giỏ hàng thành công'
                 visible={isMessageShowed}
                 onShow={handleMessageShowed}
@@ -346,6 +352,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 10,
         backgroundColor: 'transparent',
         width: '100%',
+        borderBottomColor: COLOR.LIGHT_GREY
     },
     cart: {
         width: 45,
@@ -672,7 +679,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 4,
         paddingVertical: 2,
         borderRadius: 5,
-        backgroundColor: COLOR.LIGHT_GREY,
+        backgroundColor: '#EBEBEB',
         justifyContent: 'center',
         alignItems: 'center'
     },

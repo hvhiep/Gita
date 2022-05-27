@@ -58,7 +58,8 @@ const styles = StyleSheet.create({
         alignSelf: 'center',
         textAlign: 'center',
         color: COLOR.MAIN_COLOR,
-        marginTop: 4
+        marginTop: 4,
+        flex: 1
     },
     price: {
         fontFamily: 'Montserrat-Bold',
