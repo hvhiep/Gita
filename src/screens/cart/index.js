@@ -1,2 +1,3 @@
 import CartScreen from './CartScreen';
-export { CartScreen };
+import OrderVerificationScreen from './OrderVerificationScreen';
+export { CartScreen, OrderVerificationScreen };

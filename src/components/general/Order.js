@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     View,
     Text,
@@ -11,10 +11,14 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import Icon2 from 'react-native-vector-icons/Feather';
 import { COLOR, FONT_SIZE, numberWithCommas } from '../../res';
 
-function Order({ item }) {
+function Order({ navigation, item, isChecked, onCheckBoxTouch }) {
 
     const [toggleCheckBox, setToggleCheckBox] = useState(false);
-    const [orderQuantity, setOrderQuantity] = useState(1);
+    const [productQuantity, setProductQuantity] = useState(1);
+
+    useEffect(() => {
+        isChecked ? setToggleCheckBox(true) : setToggleCheckBox(false);
+    }, [isChecked])
 
     //dump: Tính giá đã giảm
     item.product.discountPrice = Math.round(item.product.salePrice * (1 - 0.21));
@@ -25,7 +29,10 @@ function Order({ item }) {
                 <CheckBox
                     disabled={false}
                     value={toggleCheckBox}
-                    onValueChange={(newValue) => setToggleCheckBox(newValue)}
+                    onValueChange={(newValue) => {
+                        setToggleCheckBox(newValue)
+                        onCheckBoxTouch(newValue, item.id)
+                    }}
                     tintColors={{
                         true: COLOR.SECOND_COLOR,
                         false: COLOR.GREY
@@ -45,19 +52,26 @@ function Order({ item }) {
                 {/* order content */}
                 <View style={styles.orderContentWrapper}>
                     {/* ảnh sp */}
-                    <View style={styles.imgWrapper}>
+                    <TouchableOpacity
+                        style={styles.imgWrapper}
+                        onPress={() => navigation.navigate('ProductDetail', {productId: item.id})}
+                    >
                         <Image style={styles.img} source={item.product.img[0]}></Image>
-                    </View>
+                    </TouchableOpacity>
                     {/* info sp */}
                     <View style={styles.orderInfoWrapper}>
+                        <TouchableOpacity
+                            onPress={() => navigation.navigate('ProductDetail', {productId: item.id})}
+                        >
                         <Text style={styles.productName}>{item.product.name}</Text>
+                        </TouchableOpacity>
                         <View style={styles.priceWrapper}>
                             <Text style={styles.discountPrice}>{numberWithCommas(item.product.discountPrice)} đ</Text>
                             {/* thêm bớt số lượng  */}
                             <View style={styles.sheetQuantity}>
                                 <TouchableOpacity
                                     style={styles.quantityBtn}
-                                    onPress={() => setOrderQuantity(prev => {
+                                    onPress={() => setProductQuantity(prev => {
                                         if (prev <= 1)
                                             return prev
                                         return prev - 1
@@ -65,10 +79,10 @@ function Order({ item }) {
                                 >
                                     <Icon2 name='minus' size={20} color={COLOR.BLACK} />
                                 </TouchableOpacity>
-                                <Text style={styles.quantityText}>{orderQuantity}</Text>
+                                <Text style={styles.quantityText}>{productQuantity}</Text>
                                 <TouchableOpacity
                                     style={styles.quantityBtn}
-                                    onPress={() => setOrderQuantity(prev => prev + 1)}
+                                    onPress={() => setProductQuantity(prev => prev + 1)}
                                 >
                                     <Icon2 name='plus' size={20} color={COLOR.BLACK} />
                                 </TouchableOpacity>

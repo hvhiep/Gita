@@ -3,9 +3,10 @@ import { useState, useEffect } from 'react';
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { SplashScreen, IntroScreen, LoginScreen, RegisterScreen } from "../screens/auth";
 import { SearchScreen, ProductDetailScreen } from "../screens/home";
+import { OrderVerificationScreen } from "../screens/cart";
 import MainTabNavigation from './MainTabNavigation';
 import FilterDrawerNavigation from "./FilterDrawerNavigation";
-import { COLOR } from "../res";
+
 
 const MainStack = createNativeStackNavigator();
 
@@ -89,6 +90,13 @@ function MainStackNavigation() {
                     <MainStack.Screen
                         name='ProductDetail'
                         component={ProductDetailScreen}
+                        options={{
+                            headerShown: false,
+                        }}
+                    />
+                    <MainStack.Screen
+                        name='OrderVerification'
+                        component={OrderVerificationScreen}
                         options={{
                             headerShown: false,
                         }}
