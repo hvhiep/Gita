@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { SplashScreen, IntroScreen, LoginScreen, RegisterScreen } from "../screens/auth";
 import { SearchScreen, ProductDetailScreen } from "../screens/home";
-import { OrderVerificationScreen } from "../screens/cart";
+import { OrderVerificationScreen, AddressScreen, AddressFormScreen } from "../screens/cart";
 import MainTabNavigation from './MainTabNavigation';
 import FilterDrawerNavigation from "./FilterDrawerNavigation";
 
@@ -45,62 +45,33 @@ function MainStackNavigation() {
                     }}>
                     <MainStack.Screen
                         name='Intro'
-                        component={IntroScreen}
-                    />
+                        component={IntroScreen} />
                     <MainStack.Screen
                         name='Login'
-                        component={LoginScreen}
-                    />
+                        component={LoginScreen} />
                     <MainStack.Screen
                         name='Register'
-                        component={RegisterScreen}
-                    />
+                        component={RegisterScreen} />
                 </MainStack.Group>
             ) : (
-                <MainStack.Group>
-                    <MainStack.Screen
-                        name='MainTab'
-                        component={MainTabNavigation}
-                        options={{
-                            headerShown: false
-                        }}
-                    />
-                    <MainStack.Screen
-                        name='Search'
-                        component={SearchScreen}
+                <MainStack.Group
+                    screenOptions={{
+                        headerShown: false
+                    }}
+                >
+                    <MainStack.Screen name='MainTab' component={MainTabNavigation} />
+                    <MainStack.Screen name='Search' component={SearchScreen} />
+                    {/* <MainStack.Screen ='SearchResult' component={SearchResultScreen}
                         options={{
                             headerShown: false,
-                        }}
-                    />
-                    {/* <MainStack.Screen
-                        name='SearchResult'
-                        component={SearchResultScreen}
-                        options={{
-                            headerShown: false,
-                        }}
+                        }} 
                     /> */}
                     {/* Giải thích: để màn hình 'SearchResult' ở trên có 1 cái drawer thì nó phải làm screen con của drawer navigator, do đó đưa nó vào trong 'FilterDrawerNavigation' */}
-                    <MainStack.Screen 
-                        name='FilterDrawer'
-                        component={FilterDrawerNavigation}
-                        options={{
-                            headerShown: false,
-                        }}
-                    />
-                    <MainStack.Screen
-                        name='ProductDetail'
-                        component={ProductDetailScreen}
-                        options={{
-                            headerShown: false,
-                        }}
-                    />
-                    <MainStack.Screen
-                        name='OrderVerification'
-                        component={OrderVerificationScreen}
-                        options={{
-                            headerShown: false,
-                        }}
-                    />
+                    <MainStack.Screen name='FilterDrawer' component={FilterDrawerNavigation} />
+                    <MainStack.Screen name='ProductDetail' component={ProductDetailScreen} />
+                    <MainStack.Screen name='OrderVerification' component={OrderVerificationScreen} />
+                    <MainStack.Screen name='Address' component={AddressScreen} />
+                    <MainStack.Screen name='AddressForm' component={AddressFormScreen} />
                 </MainStack.Group>
             )}
 

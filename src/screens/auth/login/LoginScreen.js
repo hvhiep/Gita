@@ -8,7 +8,7 @@ import {
     TouchableWithoutFeedback,
 } from 'react-native';
 import { COLOR, FONT_SIZE, HEIGHT } from '../../../res';
-import { FormInputBig, PrimaryBtnBig, TextBtn } from '../../../components'
+import { FormInput, PrimaryBtnBig, TextBtn } from '../../../components'
 
 function LoginScreen({ navigation }) {
     return (
@@ -24,8 +24,8 @@ function LoginScreen({ navigation }) {
                 <Text style={styles.logoText}>Gita</Text>
                 <View style={styles.wrapperForm}>
                     <Text style={styles.title}>Đăng Nhập</Text>
-                    <FormInputBig title='Tên tài khoản' />
-                    <FormInputBig title='Mật khẩu' />
+                    <FormInput title='Tên tài khoản' type='big'/>
+                    <FormInput title='Mật khẩu'  type='big'/>
                     <TextBtn title='Quên mật khẩu?' />
                 </View>
                 <PrimaryBtnBig title='Đăng Nhập' />

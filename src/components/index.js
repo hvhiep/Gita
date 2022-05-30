@@ -1,6 +1,6 @@
 import PrimaryBtnBig from "./button/PrimaryBtnBig";
 import SecondaryBtnBig from "./button/SecondaryBtnBig";
-import FormInputBig from "./form/FormInputBig";
+import FormInput from "./form/FormInput";
 import TextBtn from "./button/TextBtn";
 import BackBtn from "./button/BackBtn";
 import SearchBar from "./general/SearchBar";
@@ -9,4 +9,6 @@ import PrimaryBtn from "./button/PrimaryBtn";
 import SecondaryBtn from "./button/SecondaryBtn";
 import Message from "./general/Message";
 import Order from "./general/Order";
-export { PrimaryBtnBig, SecondaryBtnBig, FormInputBig, TextBtn, BackBtn, SearchBar, Product, PrimaryBtn, SecondaryBtn, Message, Order};
+import VerifiedOrder from "./general/VerifiedOrder";
+import Address from "./general/Address";
+export { PrimaryBtnBig, SecondaryBtnBig, FormInput, TextBtn, BackBtn, SearchBar, Product, PrimaryBtn, SecondaryBtn, Message, Order, VerifiedOrder, Address};

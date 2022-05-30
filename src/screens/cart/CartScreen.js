@@ -52,6 +52,7 @@ function CartScreen({ navigation }) {
 
     // xử lý việc thêm bớt sl sp trong danh sách đã chọn
     const handleProductQuantityChange = (orderId, productQuantity) => {
+        // cập nhật state
         setOrderSelected(prev => {
             return prev.map((item) => {
                 if (item.id === orderId)
@@ -60,6 +61,8 @@ function CartScreen({ navigation }) {
                     return item;
             })
         })
+        // update data trên server
+        
     }
 
     // tính tổng tiền phải trả
@@ -120,7 +123,7 @@ function CartScreen({ navigation }) {
                 </View>
                 <TouchableOpacity
                     style={styles.orderBtn}
-                    onPress={() => navigation.navigate('OrderVerification', { listOrder: orderSelected })}
+                    onPress={() => navigation.navigate('OrderVerification', { listOrderSelected: orderSelected })}
                 >
                     <Text style={styles.orderBtnText}>Thanh toán {orderSelected.length !== 0 ? `(${orderSelected.length})` : ''}</Text>
 

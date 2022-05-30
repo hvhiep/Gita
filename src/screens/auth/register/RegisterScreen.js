@@ -13,7 +13,7 @@ import {
     Image
 } from 'react-native';
 import { COLOR, FONT_SIZE, HEIGHT, WIDTH } from '../../../res';
-import { FormInputBig, PrimaryBtnBig, TextBtn, BackBtn } from '../../../components'
+import { FormInput, PrimaryBtnBig, TextBtn, BackBtn } from '../../../components'
 import { customer, salesman } from '../../../assets'
 
 function RegisterScreen({ navigation }) {
@@ -85,10 +85,10 @@ function RegisterScreen({ navigation }) {
                             })}
                         </View>)}
                         {currentPage === 1 && (<View style={styles.wrapperForm}>
-                            <FormInputBig title='Tên tài khoản' />
-                            <FormInputBig title='Số điện thoại' />
-                            <FormInputBig title='Mật khẩu' />
-                            <FormInputBig title='Xác nhận mật khẩu' />
+                            <FormInput title='Tên tài khoản' type='big'/>
+                            <FormInput title='Số điện thoại' type='big'/>
+                            <FormInput title='Mật khẩu' type='big'/>
+                            <FormInput title='Xác nhận mật khẩu' type='big'/>
                         </View>)}
 
                         <PrimaryBtnBig

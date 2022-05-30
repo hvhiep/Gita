@@ -9,6 +9,7 @@ import {
 import CheckBox from '@react-native-community/checkbox';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Icon2 from 'react-native-vector-icons/Feather';
+import Icon3 from 'react-native-vector-icons/FontAwesome5';
 import { COLOR, FONT_SIZE, numberWithCommas } from '../../res';
 
 function Order({ navigation, item, isCheckedBySelectAll, onCheckBoxTouch, onProductQuantityChange }) {
@@ -56,7 +57,7 @@ function Order({ navigation, item, isCheckedBySelectAll, onCheckBoxTouch, onProd
                 {/* shop btn */}
                 <TouchableOpacity style={styles.shopBtn}>
                     <View style={styles.shopBtnWrapper}>
-                        <Icon name='home' size={20} color={COLOR.MAIN_COLOR} />
+                        <Icon3 name='store' size={18} color={COLOR.MAIN_COLOR} />
                         <Text style={styles.shopName}>{item.shop.name}</Text>
                         <Icon name='angle-right' size={20} color={COLOR.MAIN_COLOR} />
                     </View>

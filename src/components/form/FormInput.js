@@ -8,22 +8,38 @@ import {
 } from 'react-native';
 import { COLOR, FONT_SIZE } from '../../res/constant'
 
-function FormInputBig(props) {
+function FormInput(props) {
 
     const [isFocus, setIsFocus] = useState(false);
     const [isError, setIsError] = useState(false);
-    const [text, setText] = useState();
+    const [text, setText] = useState(undefined);
+
+    let styleTitle = null;
+    let styleInput = null;
+    switch (props.type) {
+        case 'big':
+            styleTitle = 'titleBig';
+            styleInput = 'inputBig';
+            break;
+        case 'small':
+            styleTitle = 'titleSmall';
+            styleInput = 'inputSmall';
+            break;
+    }
+
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>{props.title}</Text>
+            <Text style={[styles.title, styleTitle && styles[styleTitle]]}>{props.title}</Text>
             <TextInput
                 style={[
                     styles.textInput,
+                    styleInput && styles[styleInput],
                     isFocus && styles.selected,
                     isError && styles.error
                 ]}
-                onChange={() => setText(text)}
+                onTextChange={(text) => setText(text)}
                 value={text}
+                defaultValue={props.initValue ? props.initValue : ''}
                 onFocus={() => setIsFocus(true)}
                 onBlur={() => setIsFocus(false)}
                 spellCheck={false}
@@ -41,10 +57,16 @@ const styles = StyleSheet.create({
     },
     title: {
         fontFamily: 'Montserrat-Bold',
-        fontSize: FONT_SIZE.NORMAL_TITLE,
         color: COLOR.MAIN_COLOR,
         marginBottom: 4,
     },
+    titleBig: {
+        fontSize: FONT_SIZE.NORMAL_TITLE,
+    },
+    titleSmall: {
+        fontSize: FONT_SIZE.SMALL_TITLE,
+    },
+
     textInput: {
         backgroundColor: COLOR.UNSELECTED,
         height: 55,
@@ -54,6 +76,14 @@ const styles = StyleSheet.create({
         fontSize: FONT_SIZE.NORMAL_TITLE,
         fontFamily: 'Montserrat-Medium',
         paddingHorizontal: 6
+    },
+    inputBig: {
+        height: 55,
+        fontSize: FONT_SIZE.NORMAL_TITLE,
+    },
+    inputSmall: {
+        height: 40,
+        fontSize: FONT_SIZE.SMALL_TITLE,
     },
     selected: {
         backgroundColor: COLOR.WHITE,
@@ -74,4 +104,4 @@ const styles = StyleSheet.create({
     }
 })
 
-export default FormInputBig;
+export default FormInput;
