@@ -10,6 +10,7 @@ const orderData = [
             id: 1,
             name: 'Greg Bennett GD-100SGE',
             salePrice: 5660000,
+            discountPrice: 4471400, 
             img: [
                 guitarImg,
                 guitarImg2,
@@ -33,6 +34,7 @@ const orderData = [
             id: 2,
             name: 'Greg Bennett 2',
             salePrice: 2660000,
+            discountPrice: 2101400, 
             img: [
                 guitarImg,
                 guitarImg2,
@@ -56,6 +58,7 @@ const orderData = [
             id: 2,
             name: 'Greg Bennett 2',
             salePrice: 2660000,
+            discountPrice: 2101400, 
             img: [
                 guitarImg,
                 guitarImg2,
@@ -79,6 +82,7 @@ const orderData = [
             id: 2,
             name: 'Greg Bennett 2',
             salePrice: 2660000,
+            discountPrice: 2101400, 
             img: [
                 guitarImg,
                 guitarImg2,
@@ -102,6 +106,7 @@ const orderData = [
             id: 1,
             name: 'Greg Bennett GD-100SGE',
             salePrice: 5660000,
+            discountPrice: 4471400, 
             img: [
                 guitarImg,
                 guitarImg2,
@@ -125,6 +130,7 @@ const orderData = [
             id: 1,
             name: 'Greg Bennett GD-100SGE',
             salePrice: 5660000,
+            discountPrice: 4471400, 
             img: [
                 guitarImg,
                 guitarImg2,

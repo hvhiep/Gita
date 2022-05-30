@@ -8,7 +8,11 @@ import {
 } from 'react-native';
 import { COLOR, FONT_SIZE, DIMENSION } from '../../res';
 
-const OrderVerificationScreen = () => {
+const OrderVerificationScreen = ({ navigation, route }) => {
+
+    const listOrder = route?.params?.listOrder;
+    // console.log(listOrder);
+
     return (
         <Text>xac minh ne</Text>
     )

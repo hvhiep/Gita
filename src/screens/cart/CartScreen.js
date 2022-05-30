@@ -7,37 +7,71 @@ import {
     TouchableOpacity
 } from 'react-native';
 import { Order } from '../../components';
-import { COLOR, FONT_SIZE, DIMENSION } from '../../res';
+import { COLOR, FONT_SIZE, DIMENSION, numberWithCommas } from '../../res';
 import CheckBox from '@react-native-community/checkbox';
 
 // dump import
 import orderData from './orderData';
 
 function CartScreen({ navigation }) {
- 
+
     const [toggleCheckBox, setToggleCheckBox] = useState(false);
     const [orderCheckBoxState, setOrderCheckBoxState] = useState(false);
     const [orderSelected, setOrderSelected] = useState([]);
 
+    // logic cho nút chọn tất cả order ở footer
     useEffect(() => {
         if (toggleCheckBox) {
             setOrderCheckBoxState(true);
-            setOrderSelected(orderData.map((item) => item.id ))
         } else {
             setOrderCheckBoxState(false)
-            setOrderSelected([])
-
         }
     }, [toggleCheckBox])
 
-    const handleCheckBoxTouch = (checkBoxValue, orderId) => {
-    
-        // logic cho việc chọn hay bỏ chọn một order
-        checkBoxValue ? setOrderSelected(prev => [...prev, orderId]) : setOrderSelected(prev => {
-            return prev.filter((id) => {
-                return id !== orderId;
+    // logic cho việc chọn hay bỏ chọn một order
+    const handleCheckBoxTouch = (checkBoxValue, order) => {
+        if (checkBoxValue) {
+            setOrderSelected(prev => {
+                // kiểm tra order định thêm vào có tồn tại trong mảng orderSelected hay không
+                let isExisted = orderSelected.some((item) => {
+                    return item.id === order.id;
+                });
+                if (isExisted)
+                    return prev;
+                else
+                    return [...prev, { id: order.id, quantity: order.quantity }];
+            })
+        } else {
+            setOrderSelected(prev => {
+                return prev.filter((item) => {
+                    return item.id !== order.id;
+                })
+            })
+        }
+    };
+
+    // xử lý việc thêm bớt sl sp trong danh sách đã chọn
+    const handleProductQuantityChange = (orderId, productQuantity) => {
+        setOrderSelected(prev => {
+            return prev.map((item) => {
+                if (item.id === orderId)
+                    return { id: orderId, quantity: productQuantity };
+                else
+                    return item;
             })
         })
+    }
+
+    // tính tổng tiền phải trả
+    const handleTotalPrice = () => {
+        const total = orderSelected.reduce((total, item) => {
+            const order = orderData.find((orderItem) => {
+                return orderItem.id === item.id;
+            })
+            return total + Math.round(order.product.discountPrice * item.quantity);
+        }, 0);
+
+        return numberWithCommas(total);
     }
 
     return (
@@ -56,8 +90,9 @@ function CartScreen({ navigation }) {
                             key={item.id}
                             item={item}
                             navigation={navigation}
-                            isChecked={orderCheckBoxState}
+                            isCheckedBySelectAll={orderCheckBoxState}
                             onCheckBoxTouch={handleCheckBoxTouch}
+                            onProductQuantityChange={handleProductQuantityChange}
                         />
                     )
                 }}
@@ -81,11 +116,11 @@ function CartScreen({ navigation }) {
                 </View>
                 <View style={styles.totalPriceWrapper}>
                     <Text style={styles.totalPriceText}>Tổng cộng</Text>
-                    <Text style={styles.totalPrice}>14.900.000 đ</Text>
+                    <Text style={styles.totalPrice}>{handleTotalPrice()} đ</Text>
                 </View>
                 <TouchableOpacity
                     style={styles.orderBtn}
-                    onPress={() => navigation.navigate('OrderVerification')}
+                    onPress={() => navigation.navigate('OrderVerification', { listOrder: orderSelected })}
                 >
                     <Text style={styles.orderBtnText}>Thanh toán {orderSelected.length !== 0 ? `(${orderSelected.length})` : ''}</Text>
 
