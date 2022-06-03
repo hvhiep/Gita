@@ -48,7 +48,9 @@ const OrderVerificationScreen = ({ navigation, route }) => {
                 </View>
                 <TouchableOpacity
                     style={styles.orderBtn}
-                    
+                    onPress={() => navigation.navigate('SuccessfulOrder', {
+                        listOrderSelected: listOrderSelected
+                    })}
                 >
                     <Text style={styles.orderBtnText}>Đặt hàng</Text>
                 </TouchableOpacity>

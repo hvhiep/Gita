@@ -13,7 +13,7 @@ function Address({ navigation, address }) {
     return (
         <TouchableOpacity
             style={styles.container}
-            onPress={() => navigation.navigate('AddressForm', {addressId: address.id})}
+            
         >
             <View style={styles.contentWrapper}>
                 <Icon2 name='map-marked-alt' size={20} color={COLOR.MAIN_COLOR} />
@@ -26,7 +26,7 @@ function Address({ navigation, address }) {
                 </View>
                 <TouchableOpacity
                     style={styles.editBtn}
-                    onPress={() => navigation.navigate('AddressForm')}
+                    onPress={() => navigation.navigate('AddressForm', {addressId: address.id})}
                 >
                     <Text style={styles.editBtnText}>Chỉnh sửa</Text>
                 </TouchableOpacity>

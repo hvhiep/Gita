@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { SplashScreen, IntroScreen, LoginScreen, RegisterScreen } from "../screens/auth";
 import { SearchScreen, ProductDetailScreen } from "../screens/home";
-import { OrderVerificationScreen, AddressScreen, AddressFormScreen } from "../screens/cart";
+import { OrderVerificationScreen, AddressScreen, AddressFormScreen, SuccessfulOrderScreen } from "../screens/cart";
 import MainTabNavigation from './MainTabNavigation';
 import FilterDrawerNavigation from "./FilterDrawerNavigation";
 
@@ -72,6 +72,7 @@ function MainStackNavigation() {
                     <MainStack.Screen name='OrderVerification' component={OrderVerificationScreen} />
                     <MainStack.Screen name='Address' component={AddressScreen} />
                     <MainStack.Screen name='AddressForm' component={AddressFormScreen} />
+                    <MainStack.Screen name='SuccessfulOrder' component={SuccessfulOrderScreen} />
                 </MainStack.Group>
             )}
 

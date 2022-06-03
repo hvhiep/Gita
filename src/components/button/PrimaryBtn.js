@@ -21,7 +21,7 @@ function PrimaryBtn(props) {
             break;
         case 'long':
             styleBtn = 'btnLong';
-            styleText = 'textLong';
+            styleText = 'textSmall';
             break;
     }  
 
@@ -49,6 +49,9 @@ const styles = StyleSheet.create({
     btnSmall: {
         paddingVertical: 5,
         paddingHorizontal: 25,
+    },
+    btnLong: {
+        paddingVertical: 10,
         
     },
     text: {

@@ -6,6 +6,8 @@ const orderData = [
     {
         id: 1,
         quantity: 2,
+        orderDate: '01/01/2022',
+        deliveryDate: '04/01/2022',
         product: {
             id: 1,
             name: 'Greg Bennett GD-100SGE',
@@ -30,6 +32,8 @@ const orderData = [
     {
         id: 2,
         quantity: 1,
+        orderDate: '01/01/2022',
+        deliveryDate: '04/01/2022',
         product: {
             id: 2,
             name: 'Greg Bennett 2',
@@ -54,6 +58,8 @@ const orderData = [
     {
         id: 3,
         quantity: 1,
+        orderDate: '01/01/2022',
+        deliveryDate: '04/01/2022',
         product: {
             id: 2,
             name: 'Greg Bennett 2',
@@ -78,6 +84,8 @@ const orderData = [
     {
         id: 4,
         quantity: 1,
+        orderDate: '01/01/2022',
+        deliveryDate: '04/01/2022',
         product: {
             id: 2,
             name: 'Greg Bennett 2',
@@ -102,6 +110,8 @@ const orderData = [
     {
         id: 5,
         quantity: 2,
+        orderDate: '01/01/2022',
+        deliveryDate: '04/01/2022',
         product: {
             id: 1,
             name: 'Greg Bennett GD-100SGE',
@@ -126,6 +136,8 @@ const orderData = [
     {
         id: 6,
         quantity: 2,
+        orderDate: '01/01/2022',
+        deliveryDate: '04/01/2022',
         product: {
             id: 1,
             name: 'Greg Bennett GD-100SGE',

@@ -70,7 +70,8 @@ function MainTabNavigation() {
                 name='Profile'
                 component={ProfileScreen}
                 options={{
-                    tabBarIcon: ({ color }) => <Icon name='user' size={20} color={color} />
+                    tabBarIcon: ({ color }) => <Icon name='user' size={20} color={color} />,
+                    headerShown: false
                 }}
             />
         </Tab.Navigator>
