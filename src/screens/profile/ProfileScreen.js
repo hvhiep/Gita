@@ -9,7 +9,7 @@ import { Customer, Salesman } from '../../components';
 //dump:
 import userData from './userData';
 
-function ProfileScreen() {
+function ProfileScreen({ navigation }) {
 
     const user = userData.find((item) => item.id === 1);
 
@@ -18,7 +18,7 @@ function ProfileScreen() {
             {user.type === 0 ?
                 <Salesman user={user}/>
                 :
-                <Customer user={user}/>}
+                <Customer navigation={navigation} user={user}/>}
         </View>
     )
 }

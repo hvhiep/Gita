@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { SplashScreen, IntroScreen, LoginScreen, RegisterScreen } from "../screens/auth";
 import { SearchScreen, ProductDetailScreen } from "../screens/home";
 import { OrderVerificationScreen, AddressScreen, AddressFormScreen, SuccessfulOrderScreen } from "../screens/cart";
+import { OrderListScreen } from '../screens/profile';
 import MainTabNavigation from './MainTabNavigation';
 import FilterDrawerNavigation from "./FilterDrawerNavigation";
 
@@ -73,6 +74,9 @@ function MainStackNavigation() {
                     <MainStack.Screen name='Address' component={AddressScreen} />
                     <MainStack.Screen name='AddressForm' component={AddressFormScreen} />
                     <MainStack.Screen name='SuccessfulOrder' component={SuccessfulOrderScreen} />
+
+                    <MainStack.Screen name='OrderList' component={OrderListScreen} />
+
                 </MainStack.Group>
             )}
 
