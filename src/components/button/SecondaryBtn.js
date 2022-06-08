@@ -27,7 +27,7 @@ function SecondaryBtn(props) {
 
     return (
         <TouchableOpacity 
-            style={[styles.btn, styleBtn && styles[styleBtn]]}
+            style={[styles.btn, styleBtn && styles[styleBtn], props.style && props.style]}
             onPress={props.onPress}
         >
             <Text style={[styles.text, styleText && styles[styleText]]}>{props.title}</Text>
@@ -54,7 +54,7 @@ const styles = StyleSheet.create({
     },
     text: {
         color: COLOR.SECOND_COLOR,
-        fontFamily: 'Montserrat-Medium'
+        fontFamily: 'Montserrat-Bold'
     },
     textBig: {
         fontSize: FONT_SIZE.NORMAL_TITLE,

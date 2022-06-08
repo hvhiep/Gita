@@ -7,10 +7,9 @@ import {
     TouchableOpacity,
     Image
 } from 'react-native';
-import Icon from 'react-native-vector-icons/FontAwesome5';
 import { COLOR, FONT_SIZE, DIMENSION, numberWithCommas } from '../../res';
 import { BackBtn } from '../../components';
-import { transformOrderStatusText, orderStatusLookup } from '../../res';
+import { orderStatusLookup } from '../../res';
 //dummy:
 import orderData from '../cart/orderData';
 
@@ -41,7 +40,7 @@ const OrderListScreen = ({ navigation }) => {
     const renderSectionTitle = ({ item, index }) => {
         return (
             <TouchableOpacity
-                key={index}
+                key={item.id}
                 style={styles.sectionTitleItem}
                 onPress={() => setSectionTitle(index)}
             >
@@ -57,7 +56,7 @@ const OrderListScreen = ({ navigation }) => {
         return (
             <View key={item.id} style={styles.orderItem}>
                 <View style={styles.orderItemHeader}>
-                    <TouchableOpacity>
+                    <TouchableOpacity onPress={() => navigation.navigate('OrderDetail', {orderId: item.id})}>
                         <Text style={styles.orderId}>Mã đơn hàng: {item.id}</Text>
                         <Text style={styles.orderDate}>Thời gian đặt hàng: {item.orderDate}</Text>
                     </TouchableOpacity>
