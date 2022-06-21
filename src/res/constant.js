@@ -11,7 +11,7 @@ const COLOR = {
     GREY: 'grey',
     YELLOW: '#FFB800',
     LIGHT_GREY: "#bdbdbd",
-    EXTRA_LIGHT_GREY: "#d9d9d9",
+    EXTRA_LIGHT_GREY: "#f5f5f5",
     BACKGROUND_MODAL: '#000000AA',
     GREEN: '#14FC00',
     RED: '#FF1E1E'

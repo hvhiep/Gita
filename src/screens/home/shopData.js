@@ -1,13 +1,12 @@
-
 import shopLogo from '../../assets/images/shopLogo.png';
-
+import guitarBg from '../../assets/images/guitarBg.jpg';
 const shopData = [
     {
         id: 1,
         userId: 1,
         name: 'Ba Đờn',
         avatarImg: shopLogo,
-        backgroundImg: '',
+        backgroundImg: guitarBg,
         city: 'Tp Hồ Chí Minh',
         district: 'Thủ Đức',
         ward: 'Linh Trung',
@@ -18,7 +17,7 @@ const shopData = [
         userId: 2,
         name: 'Việt Thương',
         avatarImg: shopLogo,
-        backgroundImg: '',
+        backgroundImg: guitarBg,
         city: 'Tp Hồ Chí Minh',
         district: 'Thủ Đức',
         ward: 'Linh Tây',

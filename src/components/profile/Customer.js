@@ -3,7 +3,6 @@ import {
     View,
     Text,
     StyleSheet,
-    FlatList,
     TouchableOpacity,
     Image
 } from 'react-native';
@@ -13,6 +12,7 @@ import Icon3 from 'react-native-vector-icons/Feather';
 import Icon4 from 'react-native-vector-icons/FontAwesome';
 import { COLOR, FONT_SIZE, DIMENSION } from '../../res';
 import { Badge } from '@rneui/themed';
+import { OrderDeliveryState, ChangeSettingBtn } from '../../components';
 
 function Customer({ navigation, user }) {
 
@@ -44,17 +44,6 @@ function Customer({ navigation, user }) {
         },
     ];
 
-    const ChangeSettingBtn = ({ title, onPress }) => {
-        return (
-            <TouchableOpacity style={styles.btn}>
-                <View style={styles.btnWrapper}>
-                    <Text style={styles.btnText}>{title}</Text>
-                    <Icon3 name='chevron-right' size={20} color={COLOR.MAIN_COLOR} />
-                </View>
-            </TouchableOpacity>
-        )
-    }
-
     return (
         <>
             {/* 1.HEADER */}
@@ -76,37 +65,16 @@ function Customer({ navigation, user }) {
                 </TouchableOpacity>
             </View>
             {/* 2.ORDER DELIVERY STATE */}
-            <View style={styles.orderTitleWrapper}>
-                <Text style={styles.sectionTitle}>Đơn hàng của tôi</Text>
-                <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <Text style={styles.seeAll} onPress={() => navigation.navigate('OrderList')}>Xem tất cả</Text>
-                    <Icon name='chevron-right' size={10} color={COLOR.GREY} />
-                </TouchableOpacity>
-            </View>
-            <View style={styles.orderStateList}>
-                {orderState.map((item) => {
-                    return (
-                        <TouchableOpacity style={styles.orderState} key={item.id}>
-                            {/* 1,2,3 thì dùng Icon; 4,5 dùng Icon2 vì các icon cần phải solid mà một vài bộ icon k có solid */}
-                            <View style={styles.orderStateItem}>
-                                {(item.id === 1 || item.id === 2 || item.id === 3) && <Icon name={item.icon} size={30} color={COLOR.MAIN_COLOR} />}
-                                {(item.id === 4 || item.id === 5) && <Icon4 name={item.icon} size={30} color={COLOR.MAIN_COLOR} />}
-                                <Badge containerStyle={styles.orderBadge} value={25} badgeStyle={{ backgroundColor: COLOR.SECOND_COLOR }}></Badge>
-                            </View>
-
-                            <Text style={styles.orderStateText}>{item.title}</Text>
-                        </TouchableOpacity>
-                    )
-                })}
-            </View>
+            <OrderDeliveryState
+                title='Đơn hàng của tôi'
+                orderState={orderState}
+                navigation={navigation}
+            />
             {/* BUTTON LIST */}
             <ChangeSettingBtn title='Đổi mật khẩu' />
             <ChangeSettingBtn title='Liên hệ &amp; Góp ý' />
             <ChangeSettingBtn title='Trung tâm trợ giúp' />
             <ChangeSettingBtn title='Đăng xuất' />
-            <View>
-
-            </View>
         </>
     )
 };
@@ -161,67 +129,7 @@ const styles = StyleSheet.create({
         marginTop: 10,
         marginBottom: 10,
     },
-    orderTitleWrapper: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        marginHorizontal: DIMENSION.MARGIN_HORIZONTAL
-    },
-    seeAll: {
-        fontFamily: 'Montserrat-Regular',
-        color: COLOR.GREY,
-        fontSize: FONT_SIZE.SMALL_TEXT,
-        marginRight: 5,
-    },
-    orderStateList: {
-        flexDirection: 'row',
-        marginHorizontal: DIMENSION.MARGIN_HORIZONTAL,
-        justifyContent: 'space-around',
-        backgroundColor: COLOR.WHITE,
-        paddingVertical: 15,
-        borderRadius: 10,
-        marginBottom: 10,
-    },
-    orderState: {
-        alignItems: 'center',
-    },
-    orderStateItem: {
-        width: 45,
-        height: 40,
-        justifyContent: 'center',
-        alignItems: 'center'
-    },
-    orderBadge: {
-        position: 'absolute',
-        right: -8,
-        top: -5,
-    },
-    orderStateText: {
-        marginTop: 5,
-        width: 60,
-        textAlign: 'center',
-        fontFamily: 'Montserrat-Regular',
-        color: COLOR.MAIN_COLOR,
-        fontSize: FONT_SIZE.SMALL_TEXT,
-    },
 
-    btn: {
-        backgroundColor: COLOR.WHITE,
-        marginHorizontal: DIMENSION.MARGIN_HORIZONTAL,
-        marginBottom: 3,
-        borderRadius: 10,
-        paddingHorizontal: 10,
-        paddingVertical: 15,
-    },
-    btnWrapper: {
-        flexDirection: 'row',
-        justifyContent: 'space-between'
-    },
-    btnText: {
-        fontFamily: 'Montserrat-Bold',
-        color: COLOR.MAIN_COLOR,
-        fontSize: FONT_SIZE.NORMAL_TEXT,
-    },
 })
 
 export default Customer;

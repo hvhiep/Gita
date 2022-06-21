@@ -160,7 +160,7 @@ const styles = StyleSheet.create({
         height: 60,
         backgroundColor: COLOR.WHITE,
         borderTopWidth: 0.2,
-        borderTopColor: COLOR.EXTRA_LIGHT_GREY,
+        borderTopColor: "#d9d9d9",
         flexDirection: 'row',
         justifyContent: 'space-around',
         alignItems: 'center'

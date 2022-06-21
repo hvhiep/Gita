@@ -170,12 +170,11 @@ const styles = StyleSheet.create({
     },
     // banner style 
     list: {
-        width: '100%',
-        paddingHorizontal: DIMENSION.MARGIN_HORIZONTAL,
+        marginHorizontal: DIMENSION.MARGIN_HORIZONTAL,
     },
     bannerItem: {
         height: 200,
-        width: WIDTH,
+        width: WIDTH - DIMENSION.MARGIN_HORIZONTAL*2,
         backgroundColor: COLOR.SECOND_COLOR,
         borderRadius: 10,
         marginRight: 20

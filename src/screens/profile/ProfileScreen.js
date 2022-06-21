@@ -11,12 +11,12 @@ import userData from './userData';
 
 function ProfileScreen({ navigation }) {
 
-    const user = userData.find((item) => item.id === 1);
+    const user = userData.find((item) => item.id === 2);
 
     return (
         <View style={styles.container}>
             {user.type === 0 ?
-                <Salesman user={user}/>
+                <Salesman navigation={navigation} user={user}/>
                 :
                 <Customer navigation={navigation} user={user}/>}
         </View>

@@ -2,9 +2,11 @@ import { guitarImg, guitarImg2, guitarImg3 } from '../../assets';
 const productData = [
     {
         id: 1,
+        shopId: 2,
         name: 'Greg Bennett GD-100SGE',
         standardCost: 5000000,
         salePrice: 5660000,
+        quantity: 20000,
         soldQuantity: 15300,
         stars: 4.5,
         img: [
@@ -33,9 +35,11 @@ const productData = [
     },
     {
         id: 2,
+        shopId: 2,
         name: 'Greg Bennett 2',
         standardCost: 2000000,
         salePrice: 2660000,
+        quantity: 20000,
         soldQuantity: 2873,
         rating: 5,
         img: [
@@ -64,9 +68,11 @@ const productData = [
     },
     {
         id: 3,
+        shopId: 2,
         name: 'Greg Bennett GD-100SGE 3',
         standardCost: 5000000,
         salePrice: 5660000,
+        quantity: 20000,
         soldQuantity: 1000,
         rating: 4.5,
         img: [
@@ -95,9 +101,11 @@ const productData = [
     },
     {
         id: 4,
+        shopId: 2,
         name: 'Greg Bennett GD-100SGE 4',
         standardCost: 5000000,
         salePrice: 5660000,
+        quantity: 20000,
         soldQuantity: 1000,
         rating: 4.5,
         img: [
@@ -126,9 +134,11 @@ const productData = [
     },
     {
         id: 5,
+        shopId: 2,
         name: 'Greg Bennett GD-100SGE 5',
         standardCost: 5000000,
         salePrice: 5660000,
+        quantity: 20000,
         soldQuantity: 1000,
         rating: 4.5,
         img: [
@@ -157,9 +167,11 @@ const productData = [
     },
     {
         id: 6,
+        shopId: 2,
         name: 'Greg Bennett GD-100SGE 6',
         standardCost: 5000000,
         salePrice: 5660000,
+        quantity: 20000,
         soldQuantity: 1000,
         rating: 4.5,
         img: [
@@ -188,9 +200,11 @@ const productData = [
     },
     {
         id: 7,
+        shopId: 1,
         name: 'Greg Bennett GD-100SGE 7',
         standardCost: 5000000,
         salePrice: 5660000,
+        quantity: 20000,
         soldQuantity: 1000,
         rating: 4.5,
         img: [
@@ -219,9 +233,143 @@ const productData = [
     },
     {
         id: 8,
+        shopId: 1,
         name: 'Greg Bennett GD-100SGE 8',
         standardCost: 5000000,
         salePrice: 5660000,
+        quantity: 20000,
+        soldQuantity: 1000,
+        rating: 4.5,
+        img: [
+            guitarImg,
+            guitarImg2,
+            guitarImg3
+        ],
+        location: 'Tp.HCM',
+        discountId: 3,
+        specifications: {
+            brand: 'Taylor',
+            origin: 'USA',
+            shape: 'A Khuyết',
+            paintStyle: 'Sơn mờ',
+            top: 'Gỗ Thông Englemann (Laminated Englemann Spruce)',
+            sideAndBack: 'Gỗ Okoume (Laminated Okoume)',
+            headstockAndNeck: 'Gỗ Okoume',
+            saddle: 'Gỗ Cẩm Lai(Rosewood)',
+            string: 'Alice AW436',
+            stringAdjustment: true,
+            warranty: 12,
+            eq: 'Amplifer Epiphone 15C',
+            
+        },
+        information: 'Đàn Guitar Acoustic Mantic GT-1 thuộc dòng đàn entry level dành cho người mới bắt đầu. Với những thiết kế chuẩn mực của một cây đàn acoustic mantic GT-1 sẽ đáp ứng được nhu cầu tập luyện của bạn. Với thiết kế hiện đại của dòng đàn Mantic nổi tiếng GT-1 mang đậm chất tinh tế, nhẹ nhàng, không quá cầu kì, với ba mầu sắc được ưa chuộng nhất hiện nay là Vàng gỗ, Xanh ngọc và Đỏ mặt trời (Sunburst), GT-1 sẽ là điểm nhấn cho bạn trong mỗi cuộc giao lưu hội nhóm. Không chỉ đẹp về ngoại hình, GT-1 còn có âm thanh tốt, tiếng vang sáng, ngoài ra action đàn cực thấp nên những bạn mới chơi cũng có thể tiếp cận một cách dễ dàng.'
+    },
+    {
+        id: 9,
+        shopId: 2,
+        name: 'Taylor FX520 8',
+        standardCost: 5000000,
+        salePrice: 5660000,
+        quantity: 20000,
+        soldQuantity: 1000,
+        rating: 4.5,
+        img: [
+            guitarImg,
+            guitarImg2,
+            guitarImg3
+        ],
+        location: 'Tp.HCM',
+        discountId: 3,
+        specifications: {
+            brand: 'Taylor',
+            origin: 'USA',
+            shape: 'A Khuyết',
+            paintStyle: 'Sơn mờ',
+            top: 'Gỗ Thông Englemann (Laminated Englemann Spruce)',
+            sideAndBack: 'Gỗ Okoume (Laminated Okoume)',
+            headstockAndNeck: 'Gỗ Okoume',
+            saddle: 'Gỗ Cẩm Lai(Rosewood)',
+            string: 'Alice AW436',
+            stringAdjustment: true,
+            warranty: 12,
+            eq: 'Amplifer Epiphone 15C',
+            
+        },
+        information: 'Đàn Guitar Acoustic Mantic GT-1 thuộc dòng đàn entry level dành cho người mới bắt đầu. Với những thiết kế chuẩn mực của một cây đàn acoustic mantic GT-1 sẽ đáp ứng được nhu cầu tập luyện của bạn. Với thiết kế hiện đại của dòng đàn Mantic nổi tiếng GT-1 mang đậm chất tinh tế, nhẹ nhàng, không quá cầu kì, với ba mầu sắc được ưa chuộng nhất hiện nay là Vàng gỗ, Xanh ngọc và Đỏ mặt trời (Sunburst), GT-1 sẽ là điểm nhấn cho bạn trong mỗi cuộc giao lưu hội nhóm. Không chỉ đẹp về ngoại hình, GT-1 còn có âm thanh tốt, tiếng vang sáng, ngoài ra action đàn cực thấp nên những bạn mới chơi cũng có thể tiếp cận một cách dễ dàng.'
+    },
+    {
+        id: 10,
+        shopId: 2,
+        name: 'Greg Bennett GD-100SGE 8',
+        standardCost: 5000000,
+        salePrice: 5660000,
+        quantity: 20000,
+        soldQuantity: 1000,
+        rating: 4.5,
+        img: [
+            guitarImg,
+            guitarImg2,
+            guitarImg3
+        ],
+        location: 'Tp.HCM',
+        discountId: 3,
+        specifications: {
+            brand: 'Taylor',
+            origin: 'USA',
+            shape: 'A Khuyết',
+            paintStyle: 'Sơn mờ',
+            top: 'Gỗ Thông Englemann (Laminated Englemann Spruce)',
+            sideAndBack: 'Gỗ Okoume (Laminated Okoume)',
+            headstockAndNeck: 'Gỗ Okoume',
+            saddle: 'Gỗ Cẩm Lai(Rosewood)',
+            string: 'Alice AW436',
+            stringAdjustment: true,
+            warranty: 12,
+            eq: 'Amplifer Epiphone 15C',
+            
+        },
+        information: 'Đàn Guitar Acoustic Mantic GT-1 thuộc dòng đàn entry level dành cho người mới bắt đầu. Với những thiết kế chuẩn mực của một cây đàn acoustic mantic GT-1 sẽ đáp ứng được nhu cầu tập luyện của bạn. Với thiết kế hiện đại của dòng đàn Mantic nổi tiếng GT-1 mang đậm chất tinh tế, nhẹ nhàng, không quá cầu kì, với ba mầu sắc được ưa chuộng nhất hiện nay là Vàng gỗ, Xanh ngọc và Đỏ mặt trời (Sunburst), GT-1 sẽ là điểm nhấn cho bạn trong mỗi cuộc giao lưu hội nhóm. Không chỉ đẹp về ngoại hình, GT-1 còn có âm thanh tốt, tiếng vang sáng, ngoài ra action đàn cực thấp nên những bạn mới chơi cũng có thể tiếp cận một cách dễ dàng.'
+    },
+    {
+        id: 11,
+        shopId: 2,
+        name: 'Greg Bennett GD-100SGE 8',
+        standardCost: 5000000,
+        salePrice: 5660000,
+        quantity: 20000,
+        soldQuantity: 1000,
+        rating: 4.5,
+        img: [
+            guitarImg,
+            guitarImg2,
+            guitarImg3
+        ],
+        location: 'Tp.HCM',
+        discountId: 3,
+        specifications: {
+            brand: 'Taylor',
+            origin: 'USA',
+            shape: 'A Khuyết',
+            paintStyle: 'Sơn mờ',
+            top: 'Gỗ Thông Englemann (Laminated Englemann Spruce)',
+            sideAndBack: 'Gỗ Okoume (Laminated Okoume)',
+            headstockAndNeck: 'Gỗ Okoume',
+            saddle: 'Gỗ Cẩm Lai(Rosewood)',
+            string: 'Alice AW436',
+            stringAdjustment: true,
+            warranty: 12,
+            eq: 'Amplifer Epiphone 15C',
+            
+        },
+        information: 'Đàn Guitar Acoustic Mantic GT-1 thuộc dòng đàn entry level dành cho người mới bắt đầu. Với những thiết kế chuẩn mực của một cây đàn acoustic mantic GT-1 sẽ đáp ứng được nhu cầu tập luyện của bạn. Với thiết kế hiện đại của dòng đàn Mantic nổi tiếng GT-1 mang đậm chất tinh tế, nhẹ nhàng, không quá cầu kì, với ba mầu sắc được ưa chuộng nhất hiện nay là Vàng gỗ, Xanh ngọc và Đỏ mặt trời (Sunburst), GT-1 sẽ là điểm nhấn cho bạn trong mỗi cuộc giao lưu hội nhóm. Không chỉ đẹp về ngoại hình, GT-1 còn có âm thanh tốt, tiếng vang sáng, ngoài ra action đàn cực thấp nên những bạn mới chơi cũng có thể tiếp cận một cách dễ dàng.'
+    },
+    {
+        id: 12,
+        shopId: 2,
+        name: 'Greg Bennett GD-100SGE 8',
+        standardCost: 5000000,
+        salePrice: 5660000,
+        quantity: 20000,
         soldQuantity: 1000,
         rating: 4.5,
         img: [

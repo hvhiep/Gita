@@ -93,14 +93,14 @@ const OrderListScreen = ({ navigation }) => {
                 data={sectionTitleList}
                 horizontal
                 renderItem={renderSectionTitle}
-                keyExtractor={({ index }) => index}
+                keyExtractor={item => item}
                 showsHorizontalScrollIndicator={false}
             />
             <FlatList
                 style={styles.orderList}
                 data={filterOrderData}
                 renderItem={renderOrderList}
-                keyExtractor={({ item }) => item}
+                keyExtractor={item => item.id}
                 showsVerticalScrollIndicator={false}
             />
         </View>

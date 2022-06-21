@@ -13,4 +13,7 @@ import VerifiedOrder from "./general/VerifiedOrder";
 import Address from "./general/Address";
 import Customer from "./profile/Customer";
 import Salesman from "./profile/Salesman";
-export { PrimaryBtnBig, SecondaryBtnBig, FormInput, TextBtn, BackBtn, SearchBar, Product, PrimaryBtn, SecondaryBtn, Message, Order, VerifiedOrder, Address, Customer, Salesman};
+import OrderDeliveryState from "./profile/OrderDeliveryState";
+import GradientText from "./general/GradientText";
+import ChangeSettingBtn from "./button/ChangeSettingBtn";
+export { PrimaryBtnBig, SecondaryBtnBig, FormInput, TextBtn, BackBtn, SearchBar, Product, PrimaryBtn, SecondaryBtn, Message, Order, VerifiedOrder, Address, Customer, Salesman, OrderDeliveryState, GradientText, ChangeSettingBtn};
