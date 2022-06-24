@@ -28,14 +28,15 @@ function FormInput(props) {
     }
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, props.style && props.style]}>
             <Text style={[styles.title, styleTitle && styles[styleTitle]]}>{props.title}</Text>
             <TextInput
                 style={[
                     styles.textInput,
                     styleInput && styles[styleInput],
                     isFocus && styles.selected,
-                    isError && styles.error
+                    isError && styles.error,
+                    props.multiline && {height: 150, textAlignVertical: 'top'}
                 ]}
                 onTextChange={(text) => setText(text)}
                 value={text}
@@ -44,6 +45,7 @@ function FormInput(props) {
                 onBlur={() => setIsFocus(false)}
                 spellCheck={false}
                 underlineColorAndroid='transparent'
+                multiline={props.multiline}
             ></TextInput>
             {isError && <Text style={styles.errorMessage}>Nhập trùng rồi condi !</Text>}
         </View>
@@ -52,7 +54,6 @@ function FormInput(props) {
 
 const styles = StyleSheet.create({
     container: {
-        width: '90%',
         marginTop: 10,
     },
     title: {

@@ -5,17 +5,15 @@ import {
     StyleSheet,
     TextInput,
     Image,
-    TouchableOpacity
+    TouchableOpacity,
+    FlatList
 } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome5';
-import Icon2 from 'react-native-vector-icons/FontAwesome';
-import Icon3 from 'react-native-vector-icons/Ionicons';
 import { COLOR, FONT_SIZE, DIMENSION, numberWithCommas } from '../../../res';
 import { BackBtn } from '../../../components';
 
 //dummy data
 import productData from '../../home/productData';
-import { FlatList } from 'react-native-gesture-handler';
 
 const TotalProductScreen = ({ navigation, route }) => {
 
@@ -94,7 +92,7 @@ const TotalProductScreen = ({ navigation, route }) => {
                 keyExtractor={item => item.id}
             />
             {/* 4. ADD BTN */}
-            <TouchableOpacity style={styles.btnAdd}>
+            <TouchableOpacity style={styles.btnAdd} onPress={() => navigation.navigate('AddProduct')}>
                 <Icon name='plus' size={30} color={COLOR.WHITE} />
             </TouchableOpacity>
         </View>

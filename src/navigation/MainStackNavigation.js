@@ -4,7 +4,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { SplashScreen, IntroScreen, LoginScreen, RegisterScreen } from "../screens/auth";
 import { SearchScreen, ProductDetailScreen } from "../screens/home";
 import { OrderVerificationScreen, AddressScreen, AddressFormScreen, SuccessfulOrderScreen } from "../screens/cart";
-import { OrderListScreen, OrderDetailScreen, OrderCancellationScreen, TotalProductScreen } from '../screens/profile';
+import { OrderListScreen, OrderDetailScreen, OrderCancellationScreen, TotalProductScreen, AddProductScreen, TurnoverScreen } from '../screens/profile';
 import MainTabNavigation from './MainTabNavigation';
 import FilterDrawerNavigation from "./FilterDrawerNavigation";
 
@@ -79,6 +79,8 @@ function MainStackNavigation() {
                     <MainStack.Screen name='OrderDetail' component={OrderDetailScreen} />
                     <MainStack.Screen name='OrderCancellation' component={OrderCancellationScreen} />
                     <MainStack.Screen name='TotalProduct' component={TotalProductScreen} />
+                    <MainStack.Screen name='AddProduct' component={AddProductScreen} />
+                    <MainStack.Screen name='Turnover' component={TurnoverScreen} />
 
                 </MainStack.Group>
             )}

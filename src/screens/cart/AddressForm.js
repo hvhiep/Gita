@@ -3,8 +3,6 @@ import {
     View,
     Text,
     StyleSheet,
-    FlatList,
-    TouchableOpacity,
     ScrollView,
     KeyboardAvoidingView,
     TouchableWithoutFeedback,
@@ -34,12 +32,12 @@ function AddressFormScreen({ navigation, route }) {
                 <ScrollView>
                     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
                         <View style={styles.contentWrapper}>
-                            <FormInput title='Tên người nhận' type='small' initValue={address?.fullName}/>
-                            <FormInput title='Số điện thoại' type='small'initValue={address?.phoneNumber}/>
-                            <FormInput title='Địa chỉ' type='small'initValue={address?.address}/>
-                            <FormInput title='Phường (Xã)' type='small'initValue={address?.ward}/>
-                            <FormInput title='Quận (Huyện)' type='small'initValue={address?.district}/>
-                            <FormInput title='Thành phố (Tỉnh)' type='small'initValue={address?.city}/>
+                            <FormInput style={styles.form} title='Tên người nhận' type='small' initValue={address?.fullName}/>
+                            <FormInput style={styles.form} title='Số điện thoại' type='small'initValue={address?.phoneNumber}/>
+                            <FormInput style={styles.form} title='Địa chỉ' type='small'initValue={address?.address}/>
+                            <FormInput style={styles.form} title='Phường (Xã)' type='small'initValue={address?.ward}/>
+                            <FormInput style={styles.form} title='Quận (Huyện)' type='small'initValue={address?.district}/>
+                            <FormInput style={styles.form} title='Thành phố (Tỉnh)' type='small'initValue={address?.city}/>
                         </View>
                     </TouchableWithoutFeedback>
                 </ScrollView>
@@ -68,7 +66,9 @@ const styles = StyleSheet.create({
     },
     contentWrapper: {
         flex: 1,
-        alignItems: 'center'
+    },
+    form: {
+        marginHorizontal: DIMENSION.MARGIN_HORIZONTAL
     },
     saveBtn: {
         marginHorizontal: DIMENSION.MARGIN_HORIZONTAL,
