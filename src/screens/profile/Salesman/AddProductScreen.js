@@ -15,7 +15,6 @@ import { COLOR, FONT_SIZE, DIMENSION, WIDTH } from '../../../res';
 import { BackBtn, FormInput, PrimaryBtn, DropDown } from '../../../components';
 import { launchImageLibrary } from 'react-native-image-picker';
 
-
 // Chiều rộng ảnh phải trừ đi margin trái phải của container lớn rồi chia 3 ra để có được 3 ảnh trên 1 hàng, cuối cùng trừ đi margin ngang của chính nó (do dùng hàm làm tròn nên trừ margin cứ cho lệch thêm lên 2 giá trị để cân bằng với số làm tròn)
 const imageMarginHorizontal = 1;
 const imageWidth = Math.round((WIDTH - 2 * DIMENSION.MARGIN_HORIZONTAL) / 3 - (imageMarginHorizontal * 2 + 2));

@@ -5,11 +5,11 @@ import {
     StyleSheet,
     Image,
 } from 'react-native';
-import { COLOR, FONT_SIZE, DIMENSION, numberWithCommas } from '../../res';
-import { BackBtn, PrimaryBtn } from '../../components';
+import { COLOR, FONT_SIZE, DIMENSION, numberWithCommas } from '../../../res';
+import { BackBtn, PrimaryBtn } from '../../../components';
 import CheckBox from '@react-native-community/checkbox';
 
-import orderData from '../cart/orderData';
+import orderData from '../../cart/orderData';
 
 const OrderCancellationScreen = ({ navigation, route }) => {
 

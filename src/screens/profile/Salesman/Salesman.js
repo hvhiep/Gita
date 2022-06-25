@@ -3,21 +3,16 @@ import {
     View,
     Text,
     StyleSheet,
-    FlatList,
     TouchableOpacity,
     Image,
     ImageBackground
 } from 'react-native';
-import Icon from 'react-native-vector-icons/FontAwesome5';
 import Icon2 from 'react-native-vector-icons/Ionicons';
-import LinearGradient from 'react-native-linear-gradient';
-import MaskedView from '@react-native-masked-view/masked-view';
-import GradientText from '../general/GradientText';
-import { COLOR, FONT_SIZE, DIMENSION, numberWithCommas } from '../../res';
-import { OrderDeliveryState, ChangeSettingBtn } from '../../components';
+import { COLOR, FONT_SIZE, DIMENSION, numberWithCommas } from '../../../res';
+import { OrderDeliveryState, ChangeSettingBtn, GradientText } from '../../../components';
 
 //dummy:
-import shopData from '../../screens/home/shopData';
+import shopData from '../../home/shopData';
 
 const Salesman = ({ navigation }) => {
 

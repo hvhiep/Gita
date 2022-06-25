@@ -1,11 +1,11 @@
 import React from 'react';
 import {
     View,
-    Text,
     StyleSheet
 } from 'react-native';
-import { COLOR, FONT_SIZE, DIMENSION} from '../../res';
-import { Customer, Salesman } from '../../components';
+import { COLOR } from '../../res';
+import Customer from './Customer/Customer';
+import Salesman from './Salesman/Salesman';
 //dump:
 import userData from './userData';
 

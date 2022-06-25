@@ -6,13 +6,10 @@ import {
     TouchableOpacity,
     Image
 } from 'react-native';
-import Icon from 'react-native-vector-icons/FontAwesome5';
 import Icon2 from 'react-native-vector-icons/Ionicons';
 import Icon3 from 'react-native-vector-icons/Feather';
-import Icon4 from 'react-native-vector-icons/FontAwesome';
-import { COLOR, FONT_SIZE, DIMENSION } from '../../res';
-import { Badge } from '@rneui/themed';
-import { OrderDeliveryState, ChangeSettingBtn } from '../../components';
+import { COLOR, FONT_SIZE, DIMENSION } from '../../../res';
+import { OrderDeliveryState, ChangeSettingBtn } from '../../../components';
 
 function Customer({ navigation, user }) {
 
