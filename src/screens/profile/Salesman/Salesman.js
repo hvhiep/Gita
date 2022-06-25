@@ -105,7 +105,7 @@ const Salesman = ({ navigation }) => {
             />
             {/* BUTTON LIST */}
             <ChangeSettingBtn title='Quản lý sản phẩm' onPress={() => navigation.navigate('TotalProduct', {shopId: data.id})}/>
-            <ChangeSettingBtn title='Báo cáo doanh thu' />
+            <ChangeSettingBtn title='Báo cáo doanh số' onPress={() => navigation.navigate('Turnover', {shopId: data.id})}/>
             <ChangeSettingBtn title='Trung tâm trợ giúp' />
             <ChangeSettingBtn title='Đăng xuất' />
         </View>

@@ -189,6 +189,7 @@ const styles = StyleSheet.create({
         fontSize: FONT_SIZE.BIG_TEXT,
         color: COLOR.SECOND_COLOR,
     },
+    
     btnAdd: {
         position: 'absolute',
         bottom: 20,

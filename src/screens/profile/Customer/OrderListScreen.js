@@ -7,11 +7,10 @@ import {
     TouchableOpacity,
     Image
 } from 'react-native';
-import { COLOR, FONT_SIZE, DIMENSION, numberWithCommas } from '../../res';
-import { BackBtn } from '../../components';
-import { orderStatusLookup } from '../../res';
+import { COLOR, FONT_SIZE, DIMENSION, numberWithCommas, orderStatusLookup } from '../../../res';
+import { BackBtn } from '../../../components';
 //dummy:
-import orderData from '../cart/orderData';
+import orderData from '../../cart/orderData';
 
 const OrderListScreen = ({ navigation }) => {
 

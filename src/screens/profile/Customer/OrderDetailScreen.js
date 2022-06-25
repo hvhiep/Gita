@@ -5,14 +5,13 @@ import {
     StyleSheet,
     Image,
 } from 'react-native';
-import { COLOR, FONT_SIZE, DIMENSION, numberWithCommas } from '../../res';
-import { BackBtn, SecondaryBtn } from '../../components';
+import { COLOR, FONT_SIZE, DIMENSION, numberWithCommas, orderStatusLookup } from '../../../res';
+import { BackBtn, SecondaryBtn } from '../../../components';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Icon2 from 'react-native-vector-icons/FontAwesome5';
-import { orderStatusLookup } from '../../res';
 
 //dummy:
-import orderData from '../cart/orderData';
+import orderData from '../../cart/orderData';
 
 const OrderDetailScreen = ({ navigation, route }) => {
 
