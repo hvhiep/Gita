@@ -7,11 +7,18 @@ import {
     KeyboardAvoidingView,
     TouchableWithoutFeedback,
     Keyboard,
-    TouchableOpacity
+    TouchableOpacity,
+    Image
 } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome5';
-import { COLOR, FONT_SIZE, DIMENSION } from '../../../res';
+import { COLOR, FONT_SIZE, DIMENSION, WIDTH } from '../../../res';
 import { BackBtn, FormInput, PrimaryBtn, DropDown } from '../../../components';
+import { launchImageLibrary } from 'react-native-image-picker';
+
+
+// Chiều rộng ảnh phải trừ đi margin trái phải của container lớn rồi chia 3 ra để có được 3 ảnh trên 1 hàng, cuối cùng trừ đi margin ngang của chính nó (do dùng hàm làm tròn nên trừ margin cứ cho lệch thêm lên 2 giá trị để cân bằng với số làm tròn)
+const imageMarginHorizontal = 1;
+const imageWidth = Math.round((WIDTH - 2 * DIMENSION.MARGIN_HORIZONTAL) / 3 - (imageMarginHorizontal * 2 + 2));
 
 
 const AddProductScreen = ({ navigation }) => {
@@ -49,15 +56,31 @@ const AddProductScreen = ({ navigation }) => {
     ]
     //dummy: Biến đối dữ liệu(chưa biết nên đổi ngay từ database hay trên giao diện? để xem sau...)
     //phải biến đổi dữ liệu về dạng {label: ,value: } trước khi cho vào DropDown
-    const newDiscountData = discountData.map((item) => ({ label: `${item.name} (${item.percent} %)`, value: item.id }))
-
+    const newDiscountData = discountData.map((item) => ({ label: `${item.name} (${item.percent * 100}%)`, value: item.id }))
     //discount dropdown
     const [discountOpen, setDiscountOpen] = useState(false);
     const [selectedDiscountValue, setSelectedDiscountValue] = useState(null);
-
     //ty chỉnh cần dropdown
     const [stringAdjOpen, setStringAdjOpen] = useState(false);
     const [selectedStringAdjValue, setSelectedStringAdjValue] = useState(null);
+
+
+    //lấy ảnh
+    const [images, setImages] = useState([]);
+    // đặt biến để tối ưu tránh gọi .length nhiều lần, giảm performance
+    const IMAGES_LIST_LENGTH = images.length;
+    const handlePickImage = async () => {
+        try {
+            // gọi thư viện lấy ảnh
+            const results = await launchImageLibrary({ selectionLimit: 0 });
+            // cho các ảnh vào mảng state
+            setImages(results?.assets)
+        } catch (error) {
+            console.log(error);
+        }
+    };
+    useEffect(() => console.log(images))
+
 
     return (
         <View style={styles.container}>
@@ -70,10 +93,36 @@ const AddProductScreen = ({ navigation }) => {
                 <ScrollView>
                     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
                         <View style={styles.contentWrapper}>
-                            <TouchableOpacity style={styles.addImageBtn}>
-                                <Icon name='camera' size={30} color={COLOR.SECOND_COLOR} />
-                                <Text style={styles.addImageText}>Thêm ảnh minh họa</Text>
-                            </TouchableOpacity>
+                            {/* IMAGES PICKER */}
+                            {/* khi chưa có ảnh nào thì style nút bấm to */}
+                            {IMAGES_LIST_LENGTH <= 0 &&
+                                <TouchableOpacity style={styles.addImageBtn} onPress={handlePickImage}>
+                                    <Icon name='camera' size={30} color={COLOR.SECOND_COLOR} />
+                                    <Text style={styles.addImageText}>Thêm ảnh minh họa</Text>
+                                </TouchableOpacity>
+                            }
+                            {/* IMAGES GALLERY */}
+                            <View style={styles.imgList}>
+                                {/* khi có ảnh thì style nút bấm nhỏ vừa với ảnh cho đẹp */}
+                                {IMAGES_LIST_LENGTH > 0 &&
+                                    <TouchableOpacity style={styles.addImageBtnSmall} onPress={handlePickImage}>
+                                        <Icon name='camera' size={30} color={COLOR.SECOND_COLOR} />
+                                    </TouchableOpacity>
+                                }
+                                {IMAGES_LIST_LENGTH > 0 && images.map((item, index) => {
+                                    return (
+                                        <Image
+                                            key={index}
+                                            style={styles.imgItem}
+                                            source={item}
+                                            resizeMode='cover'
+                                        />
+                                    )
+                                })}
+
+                            </View>
+
+                            {/* INPUT FORM */}
                             <FormInput style={styles.form} title='Tên sản phẩm' type='small' />
                             <DropDown
                                 containerStyle={styles.dropDown}
@@ -148,11 +197,34 @@ const styles = StyleSheet.create({
         height: 150,
         justifyContent: 'center',
     },
+    addImageBtnSmall: {
+        borderWidth: 2,
+        borderRadius: 10,
+        borderColor: COLOR.SECOND_COLOR,
+        marginHorizontal: imageMarginHorizontal,
+        height: imageWidth,
+        width: imageWidth,
+        justifyContent: 'center',
+        alignItems: 'center'
+    },
     addImageText: {
         fontFamily: 'Montserrat-Bold',
         color: COLOR.SECOND_COLOR,
         fontSize: FONT_SIZE.SMALL_TITLE,
         marginLeft: 10,
+    },
+    imgList: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        marginTop: 10,
+        marginHorizontal: DIMENSION.MARGIN_HORIZONTAL,
+    },
+    imgItem: {
+        width: imageWidth,
+        height: imageWidth,
+        marginHorizontal: imageMarginHorizontal,
+        marginBottom: 2,
+
     },
     form: {
         marginHorizontal: DIMENSION.MARGIN_HORIZONTAL,
