@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "713480024619",
+    "project_id": "gita-backend",
+    "storage_bucket": "gita-backend.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:713480024619:android:58e6d8648a3c618bd9b06e",
+        "android_client_info": {
+          "package_name": "com.gita"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "713480024619-kl0fopbpqkbll0dfjfghjmninpq94pmv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyADCm91VLBxvn-6cPpmuKRfLnfrk17gupY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "713480024619-kl0fopbpqkbll0dfjfghjmninpq94pmv.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
