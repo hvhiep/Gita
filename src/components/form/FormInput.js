@@ -4,19 +4,17 @@ import {
     Text,
     StyleSheet,
     TextInput,
-    Keyboard
 } from 'react-native';
-import { COLOR, FONT_SIZE } from '../../res/constant'
+import { COLOR, FONT_SIZE, DIMENSION } from '../../res/constant'
 
-function FormInput(props) {
+function FormInput({ style, title, type, inputState, onInputStateChange, multiline, secure  }) {
 
     const [isFocus, setIsFocus] = useState(false);
     const [isError, setIsError] = useState(false);
-    const [text, setText] = useState(undefined);
 
     let styleTitle = null;
     let styleInput = null;
-    switch (props.type) {
+    switch (type) {
         case 'big':
             styleTitle = 'titleBig';
             styleInput = 'inputBig';
@@ -28,24 +26,24 @@ function FormInput(props) {
     }
 
     return (
-        <View style={[styles.container, props.style && props.style]}>
-            <Text style={[styles.title, styleTitle && styles[styleTitle]]}>{props.title}</Text>
+        <View style={[styles.container, style && style]}>
+            <Text style={[styles.title, styleTitle && styles[styleTitle]]}>{title}</Text>
             <TextInput
                 style={[
                     styles.textInput,
                     styleInput && styles[styleInput],
                     isFocus && styles.selected,
                     isError && styles.error,
-                    props.multiline && {height: 150, textAlignVertical: 'top'}
+                    multiline && {height: 150, textAlignVertical: 'top'}
                 ]}
-                onTextChange={(text) => setText(text)}
-                value={text}
-                defaultValue={props.initValue ? props.initValue : ''}
+                onChangeText={onInputStateChange}
+                value={inputState}
                 onFocus={() => setIsFocus(true)}
                 onBlur={() => setIsFocus(false)}
                 spellCheck={false}
                 underlineColorAndroid='transparent'
-                multiline={props.multiline}
+                multiline={multiline}
+                secureTextEntry={secure}
             ></TextInput>
             {isError && <Text style={styles.errorMessage}>Nhập trùng rồi condi !</Text>}
         </View>

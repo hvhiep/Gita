@@ -11,6 +11,10 @@ import Icon2 from 'react-native-vector-icons/Ionicons';
 import { COLOR, FONT_SIZE, DIMENSION, numberWithCommas } from '../../../res';
 import { OrderDeliveryState, ChangeSettingBtn, GradientText } from '../../../components';
 
+//firebase
+import { auth } from '../../../../firebase';
+import { signOut } from 'firebase/auth';
+
 //dummy:
 import shopData from '../../home/shopData';
 
@@ -45,6 +49,19 @@ const Salesman = ({ navigation }) => {
     ];
 
     const data = shopData.find((item) => item.id === 2);
+
+    const handleSignOut = () => {
+        if(auth){
+            signOut(auth)
+                .then(() => {
+                    //đăng xuất thành công, thông báo trước khi đăng xuất
+                })
+                .catch((error) => {
+                    //có lỗi khi đăng xuất
+                    console.log('[SIGN_OUT] error: ', error.message);
+                })
+        }
+    }
 
     return (
         <View style={styles.container}>
@@ -107,7 +124,7 @@ const Salesman = ({ navigation }) => {
             <ChangeSettingBtn title='Quản lý sản phẩm' onPress={() => navigation.navigate('TotalProduct', {shopId: data.id})}/>
             <ChangeSettingBtn title='Báo cáo doanh số' onPress={() => navigation.navigate('Turnover', {shopId: data.id})}/>
             <ChangeSettingBtn title='Trung tâm trợ giúp' />
-            <ChangeSettingBtn title='Đăng xuất' />
+            <ChangeSettingBtn title='Đăng xuất' onPress={handleSignOut}/>
         </View>
     )
 };

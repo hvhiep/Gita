@@ -12,9 +12,12 @@ import {
     ScrollView,
     Image
 } from 'react-native';
-import { COLOR, FONT_SIZE, HEIGHT, WIDTH } from '../../../res';
-import { FormInput, PrimaryBtnBig, TextBtn, BackBtn } from '../../../components'
-import { customer, salesman } from '../../../assets'
+import { COLOR, DIMENSION, FONT_SIZE } from '../../../res';
+import { FormInput, PrimaryBtnBig, TextBtn, BackBtn } from '../../../components';
+import { customer, salesman } from '../../../assets';
+//firebase
+import { auth } from '../../../../firebase';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
 
 function RegisterScreen({ navigation }) {
 
@@ -30,21 +33,47 @@ function RegisterScreen({ navigation }) {
             img: salesman,
         }
     ]
-    
+
     const [userRole, setUserRole] = useState(null);
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [passVerification, setPassVerification] = useState('');
+
     const [currentPage, setCurrentPage] = useState(0);
     const [disabled, setDisabled] = useState(true);
 
     const handleSubmit = () => {
-        if (currentPage === 0){
+        if (currentPage === 0) {
             setCurrentPage(currentPage + 1);
         }
-        else if (currentPage === 1)
-            navigation.navigate('Login');
+        else if (currentPage === 1) {
+            // LOGIC ĐĂNG KÝ
+
+            //verify mật khẩu: (phần validate để làm sau, sử dụng Formik + Yup)
+            // if (password !== passVerification) {
+            //     console.log('Xác nhận mật khẩu không đúng!');
+            //     return;
+            // }
+            createUserWithEmailAndPassword(auth, email, password)
+                .then((userCredential) => {
+                    console.log('[SIGN_UP] user: ', userCredential);
+
+                    // tạo 1 instance trong bảng user trong realtime-db với id === uid từ userCredential (để chứa các thông tin thêm cho user)
+
+                    //Lưu luôn instance này vào redux
+
+                    //=> navigation sẽ tự động kiểm tra auth và điều hướng vào Home
+                })
+                .catch((error) => {
+                    // Nếu có lỗi thì đưa ra thông báo (phải làm 1 component thông báo lỗi riêng)
+                    const errorMessage = error.message;
+                    console.log('[RegisterScreen] error: ', errorMessage);
+                });
+        }
     }
 
     useEffect(() => {
-        if(userRole === null)
+        if (userRole === null)
             setDisabled(true);
         else
             setDisabled(false);
@@ -85,10 +114,29 @@ function RegisterScreen({ navigation }) {
                             })}
                         </View>)}
                         {currentPage === 1 && (<View style={styles.wrapperForm}>
-                            <FormInput title='Tên tài khoản' type='big'/>
-                            <FormInput title='Số điện thoại' type='big'/>
-                            <FormInput title='Mật khẩu' type='big'/>
-                            <FormInput title='Xác nhận mật khẩu' type='big'/>
+                            <FormInput
+                                style={styles.formInput}
+                                title='Email'
+                                type='big'
+                                inputState={email}
+                                onInputStateChange={(text) => setEmail(text)}
+                            />
+                            <FormInput
+                                style={styles.formInput}
+                                title='Mật khẩu'
+                                type='big'
+                                inputState={password}
+                                onInputStateChange={(text) => setPassword(text)}
+                                secure={true}
+                            />
+                            <FormInput
+                                style={styles.formInput}
+                                title='Xác nhận mật khẩu'
+                                type='big'
+                                inputState={passVerification}
+                                onInputStateChange={(text) => setPassVerification(text)}
+                                secure={true}
+                            />
                         </View>)}
 
                         <PrimaryBtnBig
@@ -98,7 +146,7 @@ function RegisterScreen({ navigation }) {
                         />
                         <View style={styles.wrapperBottom}>
                             <Text style={styles.bottomText}>Đã có tài khoản?</Text>
-                            <TextBtn onPress={() => navigation.navigate('Register')} title='Đăng Nhập' />
+                            <TextBtn onPress={() => navigation.navigate('Login')} title='Đăng Nhập' />
                         </View>
                     </View>
                 </TouchableWithoutFeedback>
@@ -133,7 +181,6 @@ const styles = StyleSheet.create({
         fontFamily: "Montserrat-Bold",
     },
     wrapperForm: {
-        alignItems: 'center',
         justifyContent: 'center',
         width: '100%',
         marginBottom: 10,
@@ -143,6 +190,9 @@ const styles = StyleSheet.create({
         marginTop: 20,
         flexDirection: 'row',
         alignItems: 'center',
+    },
+    formInput: {
+        marginHorizontal: DIMENSION.MARGIN_HORIZONTAL
     },
     bottomText: {
         fontFamily: 'Montserrat-Bold',
@@ -157,7 +207,7 @@ const styles = StyleSheet.create({
         elevation: 100,
     },
     roleWrapper: {
-        width: '90%',
+        marginHorizontal: DIMENSION.MARGIN_HORIZONTAL,
         height: '40%',
         borderWidth: 2,
         borderRadius: 10,

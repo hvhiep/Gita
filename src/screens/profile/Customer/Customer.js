@@ -10,6 +10,8 @@ import Icon2 from 'react-native-vector-icons/Ionicons';
 import Icon3 from 'react-native-vector-icons/Feather';
 import { COLOR, FONT_SIZE, DIMENSION } from '../../../res';
 import { OrderDeliveryState, ChangeSettingBtn } from '../../../components';
+import { auth } from '../../../../firebase';
+import { signOut } from 'firebase/auth';
 
 function Customer({ navigation, user }) {
 
@@ -41,6 +43,19 @@ function Customer({ navigation, user }) {
         },
     ];
 
+    const handleSignOut = () => {
+        if(auth){
+            signOut(auth)
+                .then(() => {
+                    //đăng xuất thành công, thông báo trước khi đăng xuất
+                })
+                .catch((error) => {
+                    //có lỗi khi đăng xuất
+                    console.log('[SIGN_OUT] error: ', error.message);
+                })
+        }
+    }
+
     return (
         <>
             {/* 1.HEADER */}
@@ -71,7 +86,7 @@ function Customer({ navigation, user }) {
             <ChangeSettingBtn title='Đổi mật khẩu' />
             <ChangeSettingBtn title='Liên hệ &amp; Góp ý' />
             <ChangeSettingBtn title='Trung tâm trợ giúp' />
-            <ChangeSettingBtn title='Đăng xuất' />
+            <ChangeSettingBtn title='Đăng xuất' onPress={handleSignOut}/>
         </>
     )
 };

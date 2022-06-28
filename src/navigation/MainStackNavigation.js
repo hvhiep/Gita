@@ -8,37 +8,42 @@ import { OrderListScreen, OrderDetailScreen, OrderCancellationScreen, TotalProdu
 import MainTabNavigation from './MainTabNavigation';
 import FilterDrawerNavigation from "./FilterDrawerNavigation";
 
+//firebase
+import { auth } from '../../firebase';
+import { onAuthStateChanged } from "firebase/auth";
+
 
 const MainStack = createNativeStackNavigator();
 
 function MainStackNavigation() {
 
-    //lấy user token
-    //tạm thời coi như người dùng đã đăng nhập để thiết kế những screen bên trong app
-    const userToken = 'abcdef';
-    const [isLoading, setIsLoading] = useState(true)
-    useEffect(() => {
-        //giả sử lấy được userToken trong 1s
-        const timerId = setTimeout(() => {
-            setIsLoading(false)
-        }, 1000)
+    
+    const [isSignIn, setIsSignIn] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
 
-        return () => clearTimeout(timerId)
+    // kiểm tra xem user đã đăng nhập chưa để thay đổi state
+    useEffect(() => {
+        const unregisterAuthObserver = onAuthStateChanged(auth, (user) => {
+            if(user) {
+                setIsSignIn(true);
+                setIsLoading(false);
+            } else {
+                setIsSignIn(false);
+                setIsLoading(false);
+            }
+        });
+
+        // phải clear khi unmount component nếu không sẽ bị memory leak
+        return () => unregisterAuthObserver();
     }, [])
 
-    //1. lấy thông tin userToken, nếu vấn chưa lấy được thì chờ ở SplashScreen
+    //1. loading chờ kiểm tra user có đăng nhập chưa
     if (isLoading) {
         return (<SplashScreen />)
     }
-    //2. đã lấy được userToken, kiểm tra xem user đã đăng nhập chưa?
     return (
-        <MainStack.Navigator
-        // screenOptions={{
-        //     headerTransparent: true,
-        //     headerTitle: '',
-        // }}
-        >
-            {userToken === null ? (
+        <MainStack.Navigator>
+            {isSignIn === false ? (
                 <MainStack.Group
                     initialRouteName="Intro"
                     screenOptions={{
@@ -84,8 +89,6 @@ function MainStackNavigation() {
 
                 </MainStack.Group>
             )}
-
-
         </MainStack.Navigator>
     )
 }
