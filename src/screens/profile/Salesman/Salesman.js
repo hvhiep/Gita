@@ -51,7 +51,7 @@ const Salesman = ({ navigation }) => {
     const data = shopData.find((item) => item.id === 2);
 
     const handleSignOut = () => {
-        if(auth){
+        if (auth) {
             signOut(auth)
                 .then(() => {
                     //đăng xuất thành công, thông báo trước khi đăng xuất
@@ -116,15 +116,15 @@ const Salesman = ({ navigation }) => {
                 </View>
             </View>
             <OrderDeliveryState
-                title='Quản lý đơn hàng' 
-                orderState={orderState} 
+                title='Quản lý đơn hàng'
+                orderState={orderState}
                 navigation={navigation}
             />
             {/* BUTTON LIST */}
-            <ChangeSettingBtn title='Quản lý sản phẩm' onPress={() => navigation.navigate('TotalProduct', {shopId: data.id})}/>
-            <ChangeSettingBtn title='Báo cáo doanh số' onPress={() => navigation.navigate('Turnover', {shopId: data.id})}/>
+            <ChangeSettingBtn title='Quản lý sản phẩm' onPress={() => navigation.navigate('TotalProduct', { shopId: data.id })} />
+            <ChangeSettingBtn title='Báo cáo doanh số' onPress={() => navigation.navigate('Turnover', { shopId: data.id })} />
             <ChangeSettingBtn title='Trung tâm trợ giúp' />
-            <ChangeSettingBtn title='Đăng xuất' onPress={handleSignOut}/>
+            <ChangeSettingBtn title='Đăng xuất' onPress={handleSignOut} />
         </View>
     )
 };

@@ -10,6 +10,7 @@ import Icon2 from 'react-native-vector-icons/Ionicons';
 import Icon3 from 'react-native-vector-icons/Feather';
 import { COLOR, FONT_SIZE, DIMENSION } from '../../../res';
 import { OrderDeliveryState, ChangeSettingBtn } from '../../../components';
+//firebase
 import { auth } from '../../../../firebase';
 import { signOut } from 'firebase/auth';
 

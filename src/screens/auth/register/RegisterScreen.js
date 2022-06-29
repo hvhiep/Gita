@@ -1,5 +1,5 @@
 import React from "react";
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
     View,
     Text,
@@ -12,72 +12,73 @@ import {
     ScrollView,
     Image
 } from 'react-native';
-import { COLOR, DIMENSION, FONT_SIZE } from '../../../res';
+import { COLOR, DIMENSION, FONT_SIZE, HEIGHT, WIDTH } from '../../../res';
 import { FormInput, PrimaryBtnBig, TextBtn, BackBtn } from '../../../components';
 import { customer, salesman } from '../../../assets';
 //firebase
 import { auth } from '../../../../firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { useDispatch } from "react-redux";
+import { storeUser } from '../../../features/users/userSlice';
+//db api
+import { createUserAPI } from '../../../api';
+//form handler
+import { Formik } from 'formik';
+import { SignupSchema } from '../validation';
 
 function RegisterScreen({ navigation }) {
+    const dispatch = useDispatch();
 
     const userRoles = [
         {
             id: 0,
-            roleTitle: 'Người mua hàng',
-            img: customer,
+            roleTitle: 'Người bán hàng',
+            img: salesman,
         },
         {
             id: 1,
-            roleTitle: 'Người bán hàng',
-            img: salesman,
+            roleTitle: 'Người mua hàng',
+            img: customer,
         }
     ]
 
     const [userRole, setUserRole] = useState(null);
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [passVerification, setPassVerification] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
 
-    const [currentPage, setCurrentPage] = useState(0);
-    const [disabled, setDisabled] = useState(true);
+    // slider state
+    const [currentXOffset, setCurrentXOffset] = useState(0);
+    const scrollXRef = useRef();
 
-    const handleSubmit = () => {
-        if (currentPage === 0) {
-            setCurrentPage(currentPage + 1);
-        }
-        else if (currentPage === 1) {
-            // LOGIC ĐĂNG KÝ
+    //TẠM THỜI COMMENT LẠI ĐỂ LÀM SCROLLVIEW ĐÃ
 
-            //verify mật khẩu: (phần validate để làm sau, sử dụng Formik + Yup)
-            // if (password !== passVerification) {
-            //     console.log('Xác nhận mật khẩu không đúng!');
-            //     return;
-            // }
-            createUserWithEmailAndPassword(auth, email, password)
-                .then((userCredential) => {
-                    console.log('[SIGN_UP] user: ', userCredential);
+    const handleSignupSubmit = (values) => {
+        // loading
+        setIsLoading(true);
+        // LOGIC ĐĂNG KÝ
+        createUserWithEmailAndPassword(auth, values.email, values.password)
+            .then((userCredential) => {
+                const user = userCredential.user;
+                console.log('[SIGN_UP] user.uid: ', user.uid);
+                // dữ liệu để lưu lên db
+                const userData = {
+                    id: user.uid,
+                    type: userRole,
+                };
+                //đẩy lên db
+                createUserAPI(userData);
+                //Lưu luôn instance này vào redux
+                dispatch(storeUser(userData));
+                //đưa ra message đăng ký thành công
 
-                    // tạo 1 instance trong bảng user trong realtime-db với id === uid từ userCredential (để chứa các thông tin thêm cho user)
-
-                    //Lưu luôn instance này vào redux
-
-                    //=> navigation sẽ tự động kiểm tra auth và điều hướng vào Home
-                })
-                .catch((error) => {
-                    // Nếu có lỗi thì đưa ra thông báo (phải làm 1 component thông báo lỗi riêng)
-                    const errorMessage = error.message;
-                    console.log('[RegisterScreen] error: ', errorMessage);
-                });
-        }
-    }
-
-    useEffect(() => {
-        if (userRole === null)
-            setDisabled(true);
-        else
-            setDisabled(false);
-    }, [userRole])
+                //=> navigation sẽ tự động kiểm tra auth và điều hướng vào Home
+            })
+            .catch((error) => {
+                // Nếu có lỗi thì đưa ra thông báo (phải làm 1 component thông báo lỗi riêng)
+                setIsLoading(false);
+                const errorMessage = error.message;
+                console.log('[RegisterScreen] error: ', errorMessage);
+            });
+    };
 
     return (
         <KeyboardAvoidingView style={styles.container}>
@@ -85,73 +86,134 @@ function RegisterScreen({ navigation }) {
                 <TouchableWithoutFeedback
                     onPress={() => Keyboard.dismiss()}>
                     <View style={styles.wrapper}>
-                        {currentPage == 1 && (<BackBtn
-                            onPress={() => setCurrentPage(currentPage - 1)}
-                            style={styles.backBtn}
-                        />)}
                         <StatusBar
                             backgroundColor={'transparent'}
                             translucent
                             barStyle="dark-content"
                         ></StatusBar>
+
+                        {currentXOffset === WIDTH ?
+                            <BackBtn
+                                onPress={() => {
+                                    // nếu đang ở trang 2
+                                    if (currentXOffset === WIDTH) {
+                                        setCurrentXOffset(0);
+                                        scrollXRef.current?.scrollTo({ x: 0, y: 0, animated: true })
+                                    }
+                                }}
+                                style={styles.backBtn}
+                            /> : null
+                        }
                         <Text style={styles.logoText}>Gita</Text>
                         <Text style={styles.title}>Đăng Ký</Text>
-                        {currentPage === 0 && (<View style={styles.wrapperForm}>
-                            {userRoles.map((item) => {
 
-                                const borderColor = userRole === item.id ? COLOR.SECOND_COLOR : COLOR.UNSELECTED;
-
-                                return (
-                                    <TouchableOpacity
-                                        key={item.id}
-                                        style={[styles.roleWrapper, { borderColor: borderColor }]}
-                                        onPress={() => setUserRole(item.id)}
+                        {/* formik bao slider(scrollView) */}
+                        <Formik
+                            validationSchema={SignupSchema}
+                            initialValues={{ email: '', password: '', passwordVerification: '' }}
+                            onSubmit={(values) => handleSignupSubmit(values)}
+                        >
+                            {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
+                                <>
+                                    <ScrollView
+                                        ref={scrollXRef}
+                                        style={styles.slider}
+                                        horizontal
+                                        pagingEnabled={true}
+                                        showsHorizontalScrollIndicator={false}
                                     >
-                                        <Image style={styles.roleImg} source={item.img} />
-                                        <Text style={styles.roleText}>{item.roleTitle}</Text>
-                                    </TouchableOpacity>
-                                )
-                            })}
-                        </View>)}
-                        {currentPage === 1 && (<View style={styles.wrapperForm}>
-                            <FormInput
-                                style={styles.formInput}
-                                title='Email'
-                                type='big'
-                                inputState={email}
-                                onInputStateChange={(text) => setEmail(text)}
-                            />
-                            <FormInput
-                                style={styles.formInput}
-                                title='Mật khẩu'
-                                type='big'
-                                inputState={password}
-                                onInputStateChange={(text) => setPassword(text)}
-                                secure={true}
-                            />
-                            <FormInput
-                                style={styles.formInput}
-                                title='Xác nhận mật khẩu'
-                                type='big'
-                                inputState={passVerification}
-                                onInputStateChange={(text) => setPassVerification(text)}
-                                secure={true}
-                            />
-                        </View>)}
-
-                        <PrimaryBtnBig
-                            title={currentPage === 0 ? 'Tiếp Tục' : 'Đăng Ký'}
-                            onPress={handleSubmit}
-                            disabled={disabled}
-                        />
+                                        {/* page chọn type cho user */}
+                                        < View style={styles.wrapperForm}>
+                                            {userRoles.map((item) => {
+                                                const borderColor = userRole === item.id ? COLOR.SECOND_COLOR : COLOR.UNSELECTED;
+                                                return (
+                                                    <TouchableOpacity
+                                                        key={item.id}
+                                                        style={[styles.roleWrapper, { borderColor: borderColor }]}
+                                                        onPress={() => setUserRole(item.id)}
+                                                    >
+                                                        <Image style={styles.roleImg} source={item.img} />
+                                                        <Text style={styles.roleText}>{item.roleTitle}</Text>
+                                                    </TouchableOpacity>
+                                                )
+                                            })}
+                                        </View>
+                                        {/* page nhập thông tin đăng ký  */}
+                                        <View style={styles.wrapperForm}>
+                                            <FormInput
+                                                style={styles.formInput}
+                                                title='Email'
+                                                type='big'
+                                                inputState={values.email}
+                                                onInputStateChange={handleChange('email')}
+                                                onBlur={handleBlur('email')}
+                                            />
+                                            {/* show validation error */}
+                                            {
+                                                errors.email && touched.email ? (
+                                                    <Text style={styles.errorText}>
+                                                        {errors.email}
+                                                    </Text>
+                                                ) : null
+                                            }
+                                            <FormInput
+                                                style={styles.formInput}
+                                                title='Mật khẩu'
+                                                type='big'
+                                                inputState={values.password}
+                                                onInputStateChange={handleChange('password')}
+                                                onBlur={handleBlur('password')}
+                                                secure={true}
+                                            />
+                                            {/* show validation error */}
+                                            {errors.password && touched.password ? (
+                                                <Text style={styles.errorText}>
+                                                    {errors.password}
+                                                </Text>
+                                            ) : null}
+                                            <FormInput
+                                                style={styles.formInput}
+                                                title='Xác nhận mật khẩu'
+                                                type='big'
+                                                inputState={values.passwordVerification}
+                                                onInputStateChange={handleChange('passwordVerification')}
+                                                onBlur={handleBlur('passwordVerification')}
+                                                secure={true}
+                                            />
+                                            {/* show validation error */}
+                                            {errors.passwordVerification && touched.passwordVerification ? (
+                                                <Text style={styles.errorText}>
+                                                    {errors.passwordVerification}
+                                                </Text>
+                                            ) : null}
+                                        </View>
+                                    </ScrollView>
+                                    <PrimaryBtnBig
+                                        title={currentXOffset === 0 ? 'Tiếp theo' : 'Đăng ký'}
+                                        isLoading={isLoading}
+                                        onPress={() => {
+                                            // nếu đang ở page 1 thì scroll đến page2
+                                            if (userRole !== null) {
+                                                if (currentXOffset === 0) {
+                                                    setCurrentXOffset(WIDTH);
+                                                    scrollXRef.current?.scrollTo({ x: WIDTH, y: 0, animated: true })
+                                                }
+                                                // còn ở page 2 thì submit form
+                                                else  handleSubmit()
+                                            }
+                                        }}
+                                    />
+                                </>
+                            )}
+                        </Formik >
                         <View style={styles.wrapperBottom}>
                             <Text style={styles.bottomText}>Đã có tài khoản?</Text>
                             <TextBtn onPress={() => navigation.navigate('Login')} title='Đăng Nhập' />
                         </View>
                     </View>
                 </TouchableWithoutFeedback>
-            </ScrollView>
-        </KeyboardAvoidingView>
+            </ScrollView >
+        </KeyboardAvoidingView >
     )
 }
 
@@ -175,14 +237,16 @@ const styles = StyleSheet.create({
         fontFamily: "Montserrat-Bold",
     },
     title: {
-        marginBottom: 10,
         fontSize: FONT_SIZE.BIG_TITLE,
         color: COLOR.MAIN_COLOR,
         fontFamily: "Montserrat-Bold",
     },
+    slider: {
+
+    },
     wrapperForm: {
         justifyContent: 'center',
-        width: '100%',
+        width: WIDTH,
         marginBottom: 10,
         height: 400,
     },
@@ -193,6 +257,13 @@ const styles = StyleSheet.create({
     },
     formInput: {
         marginHorizontal: DIMENSION.MARGIN_HORIZONTAL
+    },
+    errorText: {
+        color: 'red',
+        marginHorizontal: DIMENSION.MARGIN_HORIZONTAL,
+        fontFamily: 'Montserrat-Bold',
+        fontSize: FONT_SIZE.SMALL_TEXT,
+        marginTop: 5,
     },
     bottomText: {
         fontFamily: 'Montserrat-Bold',

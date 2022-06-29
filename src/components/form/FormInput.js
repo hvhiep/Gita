@@ -7,7 +7,7 @@ import {
 } from 'react-native';
 import { COLOR, FONT_SIZE, DIMENSION } from '../../res/constant'
 
-function FormInput({ style, title, type, inputState, onInputStateChange, multiline, secure  }) {
+function FormInput({ style, title, type, inputState, onInputStateChange, onBlur, multiline, secure  }) {
 
     const [isFocus, setIsFocus] = useState(false);
     const [isError, setIsError] = useState(false);
@@ -39,7 +39,10 @@ function FormInput({ style, title, type, inputState, onInputStateChange, multili
                 onChangeText={onInputStateChange}
                 value={inputState}
                 onFocus={() => setIsFocus(true)}
-                onBlur={() => setIsFocus(false)}
+                onBlur={() => {
+                    setIsFocus(false)
+                    onBlur
+                }}
                 spellCheck={false}
                 underlineColorAndroid='transparent'
                 multiline={multiline}

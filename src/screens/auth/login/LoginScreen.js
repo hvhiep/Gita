@@ -23,8 +23,6 @@ function LoginScreen({ navigation }) {
             .then((userCredential) => {
                 console.log('[SIGN_IN] user: ', userCredential);
 
-                //- gọi api getMe() lấy thông tin trong bảng users
-
                 //- lưu thông tin vào redux để dùng
 
                 //- tự động vào màn hình Home

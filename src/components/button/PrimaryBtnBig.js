@@ -2,20 +2,21 @@ import React from "react";
 import {
     Text,
     StyleSheet,
-    TouchableOpacity
+    TouchableOpacity,
+    ActivityIndicator
 } from 'react-native';
 import { COLOR } from '../../res/constant'
 
 function PrimaryBtnBig(props) {
-
-    //nếu có truyền prop disbled vào thì dùng giá trị đó còn không mặc định là false
-    const btnState = props.disabled !== undefined ? props.disabled : false;
-
+    let loading = false;
+    if(props.isLoading !== undefined) 
+        loading = props.isLoading;
     return (
         <TouchableOpacity 
-        style={[styles.btn, btnState === true && {backgroundColor: COLOR.UNSELECTED}]} onPress={props.onPress}
-        disabled={btnState}>
-            <Text style={styles.btnText}>{props.title}</Text>
+        style={styles.btn} onPress={props.onPress}>
+            {loading ? <ActivityIndicator size='small' color={COLOR.WHITE} /> 
+            :
+            <Text style={styles.btnText}>{props.title}</Text>}
         </TouchableOpacity>
     )
 }
