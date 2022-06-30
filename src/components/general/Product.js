@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     View,
     Text,
@@ -11,28 +11,48 @@ import { COLOR, WIDTH, DIMENSION, FONT_SIZE, numberWithCommas, numFormatter } fr
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { Rating } from 'react-native-ratings';
 
+//firebase
+import { getStorage, ref, getDownloadURL } from "firebase/storage";
+
 // chiều rộng của mỗi box sản phẩm
 const cardWidth = Math.round(WIDTH / 2 - DIMENSION.MARGIN_HORIZONTAL * 1.5);
 
-function Product({ item, onPress, style }) {
+function Product({ productId, productInfo, onPress, style }) {
+
+    const [firstImg, setFirstImg] = useState();
+    useEffect(() => {
+        getFirstProductImg();
+    }, [])
+
+    const getFirstProductImg = async () => {
+        try {
+            const storage = getStorage();
+            const url = await getDownloadURL(ref(storage, productInfo.img[0]))
+            if (url !== null)
+                setFirstImg(url);
+        } catch (error) {
+            console.log('[Product] error: ', error.message);
+        }
+    }
+
     return (
         <TouchableOpacity style={[styles.container, style && style]} onPress={onPress}>
-            <Image style={styles.img} source={item.img[0]}></Image>
-            <Text style={styles.productName}>{item.name}</Text>
-            <Text style={styles.price}>{numberWithCommas(item.salePrice)}đ</Text>
+            <Image style={styles.img} source={{uri: firstImg}}></Image>
+            <Text style={styles.productName}>{productInfo.name}</Text>
+            <Text style={styles.price}>{numberWithCommas(productInfo.salePrice)}đ</Text>
             <View style={styles.wrapper}>
                 <Rating
                     type='star'
                     ratingCount={5}
                     readonly
-                    startingValue={item.stars}
+                    startingValue={productInfo.rating}
                     imageSize={12}
                 />
-                <Text style={styles.sold}>Đã bán {numFormatter(item.soldQuantity)}</Text>
+                <Text style={styles.sold}>Đã bán {numFormatter(productInfo.soldQuantity)}</Text>
             </View>
             <View style={styles.location}>
-                <Ionicons name='location' size={20} color={COLOR.BLACK}/>
-                <Text style={styles.locationText}>{item.location}</Text>
+                <Ionicons name='location' size={20} color={COLOR.BLACK} />
+                <Text style={styles.locationText}>chưa làm :v</Text>
             </View>
         </TouchableOpacity>
     )
@@ -70,8 +90,8 @@ const styles = StyleSheet.create({
     },
     wrapper: {
         flexDirection: 'row',
-        justifyContent:'space-around',
-        alignItems:'center'
+        justifyContent: 'space-around',
+        alignItems: 'center'
     },
     stars: {
 

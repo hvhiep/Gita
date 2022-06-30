@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
     View,
     Text,
@@ -7,14 +7,31 @@ import {
     TouchableOpacity,
     ScrollView,
 } from 'react-native';
-import { useState } from 'react';
 import { COLOR, DIMENSION, WIDTH, FONT_SIZE } from '../../res/';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import { Product } from '../../components';
 
+//api
+import { getAllProductAPI } from "../../api";
+// firebase
+import { getDatabase, ref, onValue } from 'firebase/database';
 //dummy data
 import productData from "./productData";
 function HomeScreen({ navigation }) {
+
+    const [products, setProducts] = useState([]);
+    //DỌN DẸP LẠI, BỪA BỘN QUÁ !!!!
+    useEffect(() => {
+        const db = getDatabase();
+        onValue(ref(db, 'product'), (snapshot) => {
+            const data = snapshot.val();
+            if(data !== null){
+                const dataArr = Object.entries(data);
+                setProducts(dataArr);
+            }
+                
+        })
+    }, [])
 
     const bannerData = [
         {
@@ -56,7 +73,7 @@ function HomeScreen({ navigation }) {
             color: COLOR.C,
         },
     ];
-    
+
 
     const [guitarTypeSelected, setGuitarTypeSelected] = useState(1);
 
@@ -103,7 +120,7 @@ function HomeScreen({ navigation }) {
                 />
                 {/* 2. filter chọn loại guitar */}
                 <FlatList
-                    style={[styles.list, {marginTop: 10}]}
+                    style={[styles.list, { marginTop: 10 }]}
                     data={guitarTypeData}
                     renderItem={renderGuitarTypeData}
                     keyExtractor={item => item.id}
@@ -112,21 +129,24 @@ function HomeScreen({ navigation }) {
                 />
 
                 {/* 3. Danh sách các sản phẩm */}
-                    {/* 3.1 Sale đặc biệt (có mức giảm giá cao) */}
+                {/* 3.1 Sale đặc biệt (có mức giảm giá cao) */}
                 <Text style={styles.categoryTitle}>Sale đặc biệt</Text>
                 <View style={styles.categoryWrapper}>
-                    {productData.map((item) => {
+                    {products.map(([id, value]) => {
                         return (
                             <Product
-                                key={item.id}
-                                item={item} 
-                                onPress={() => navigation.navigate('ProductDetail', {productId: item.id})}
+                                key={id}
+                                productId={id}
+                                productInfo={value}
+                                // tạm thời để id = 1 tránh bị lỗi
+                                onPress={() => navigation.navigate('ProductDetail', { productId: 1 })}
                             />
                         )
                     })}
                 </View>
-                    {/* 3.1 Bán chạy (có số lượng bán cao) */}
-                <Text style={styles.categoryTitle}>Bán chạy</Text>
+                {/* 3.1 Bán chạy (có số lượng bán cao) */}
+                {/* ------------TẠM THỜI COMMENT LẠI */}
+                {/* <Text style={styles.categoryTitle}>Bán chạy</Text>
                 <View style={styles.categoryWrapper}>
                     {productData.map((item) => {
                         return (
@@ -137,7 +157,7 @@ function HomeScreen({ navigation }) {
                             />
                         )
                     })}
-                </View>
+                </View> */}
             </ScrollView>
         </View>
     )
@@ -163,8 +183,8 @@ const styles = StyleSheet.create({
         fontFamily: 'Montserrat-Medium',
         flex: 1,
     },
-    scrollview: { 
-        flex: 1, 
+    scrollview: {
+        flex: 1,
         marginTop: 10,
         backgroundColor: COLOR.BACKGROUND_GREY
     },
@@ -174,7 +194,7 @@ const styles = StyleSheet.create({
     },
     bannerItem: {
         height: 200,
-        width: WIDTH - DIMENSION.MARGIN_HORIZONTAL*2,
+        width: WIDTH - DIMENSION.MARGIN_HORIZONTAL * 2,
         backgroundColor: COLOR.SECOND_COLOR,
         borderRadius: 10,
         marginRight: 20

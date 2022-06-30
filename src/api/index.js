@@ -1,3 +1,3 @@
 import createUserAPI from "./user/createUserAPI";
-
-export { createUserAPI };
+import getAllProductAPI from "./product/getAllProductAPI";
+export { createUserAPI, getAllProductAPI };

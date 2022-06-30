@@ -67,7 +67,7 @@ const AddProductScreen = ({ navigation }) => {
     //lấy ảnh
     const [images, setImages] = useState([]);
     // đặt biến để tối ưu tránh gọi .length nhiều lần, giảm performance
-    const IMAGES_LIST_LENGTH = images.length;
+    const IMAGES_LIST_LENGTH = images === undefined ? -1 : images.length;
     const handlePickImage = async () => {
         try {
             // gọi thư viện lấy ảnh
