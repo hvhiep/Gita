@@ -12,14 +12,20 @@ import { FormInput, PrimaryBtnBig, TextBtn } from '../../../components';
 //firebase
 import { auth } from '../../../../firebase';
 import { signInWithEmailAndPassword } from 'firebase/auth';
+import { transformErrorCode } from '../../../res';
+//form handler
+import { Formik } from 'formik';
+import { SignInSchema } from '../validation';
+//message
+import { showMessage, hideMessage } from "react-native-flash-message";
 
 function LoginScreen({ navigation }) {
 
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
 
-    const handleSignIn = () => {
-        signInWithEmailAndPassword(auth, email, password)
+    const handleSignInSubmit = (values) => {
+        setIsLoading(true);
+        signInWithEmailAndPassword(auth, values.email, values.password)
             .then((userCredential) => {
                 console.log('[SIGN_IN] user: ', userCredential);
 
@@ -28,9 +34,15 @@ function LoginScreen({ navigation }) {
                 //- tự động vào màn hình Home
             })
             .catch((error) => {
-                // Nếu có lỗi thì đưa ra thông báo (phải làm 1 component thông báo lỗi riêng)
-                const errorMessage = error.message;
-                console.log('[LoginScreen] error: ', errorMessage);
+                console.log('[LoginScreen] error: ', error.code);
+                const message = transformErrorCode(error.code);
+                setIsLoading(false);
+                showMessage({
+                    message: message,
+                    type: "danger",
+                    icon: 'auto',
+                    duration: 2500,
+                });
             });
     }
 
@@ -45,26 +57,54 @@ function LoginScreen({ navigation }) {
                     barStyle="dark-content"
                 ></StatusBar>
                 <Text style={styles.logoText}>Gita</Text>
-                <View style={styles.wrapperForm}>
-                    <Text style={styles.title}>Đăng Nhập</Text>
-                    <FormInput
-                        style={styles.formInput}
-                        title='Email'
-                        type='big'
-                        inputState={email}
-                        onInputStateChange={(text) => setEmail(text)}
-                    />
-                    <FormInput
-                        style={styles.formInput}
-                        title='Mật khẩu'
-                        type='big'
-                        inputState={password}
-                        onInputStateChange={(text) => setPassword(text)}
-                        secure={true}
-                    />
-                    <TextBtn style={styles.forgetPass} title='Quên mật khẩu?' />
-                </View>
-                <PrimaryBtnBig title='Đăng Nhập' onPress={handleSignIn} />
+                <Formik
+                    validationSchema={SignInSchema}
+                    initialValues={{ email: '', password: '' }}
+                    onSubmit={(values) => handleSignInSubmit(values)}
+                >
+                    {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
+                        <>
+                            <View style={styles.wrapperForm}>
+                                <Text style={styles.title}>Đăng Nhập</Text>
+                                <FormInput
+                                    style={styles.formInput}
+                                    title='Email'
+                                    type='big'
+                                    inputState={values.email}
+                                    onInputStateChange={handleChange('email')}
+                                    onBlur={handleBlur('email')}
+                                />
+                                {/* show validation error */}
+                                {errors.email && touched.email ? (
+                                    <Text style={styles.errorText}>
+                                        {errors.email}
+                                    </Text>
+                                ) : null}
+                                <FormInput
+                                    style={styles.formInput}
+                                    title='Mật khẩu'
+                                    type='big'
+                                    inputState={values.password}
+                                    onInputStateChange={handleChange('password')}
+                                    onBlur={handleBlur('password')}
+                                    secure={true}
+                                />
+                                {/* show validation error */}
+                                {errors.password && touched.password ? (
+                                    <Text style={styles.errorText}>
+                                        {errors.password}
+                                    </Text>
+                                ) : null}
+                                <TextBtn style={styles.forgetPass} title='Quên mật khẩu?' />
+                            </View>
+                            <PrimaryBtnBig
+                                title='Đăng Nhập'
+                                onPress={handleSubmit}
+                                isLoading={isLoading}
+                            />
+                        </>
+                    )}
+                </Formik>
                 <View style={styles.wrapperBottom}>
                     <Text style={styles.bottomText}>Chưa có tài khoản?</Text>
                     <TextBtn onPress={() => navigation.navigate('Register')} title='Đăng Ký' />
@@ -104,6 +144,13 @@ const styles = StyleSheet.create({
     wrapperForm: {
         width: '100%',
         marginBottom: 30,
+    },
+    errorText: {
+        color: 'red',
+        marginHorizontal: DIMENSION.MARGIN_HORIZONTAL,
+        fontFamily: 'Montserrat-Bold',
+        fontSize: FONT_SIZE.SMALL_TEXT,
+        marginTop: 5,
     },
     formInput: {
         marginHorizontal: DIMENSION.MARGIN_HORIZONTAL

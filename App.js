@@ -6,6 +6,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { LogBox } from 'react-native';
 import { Provider } from 'react-redux';
 import store from './src/app/store';
+import FlashMessage from 'react-native-flash-message';
 
 function App() {
   LogBox.ignoreLogs([
@@ -19,6 +20,8 @@ function App() {
         <NavigationContainer>
           <MainStackNavigation></MainStackNavigation>
         </NavigationContainer>
+        {/* global message: dùng ở đâu cũng được */}
+        <FlashMessage position="top" />
       </GestureHandlerRootView>
     </Provider>
   )

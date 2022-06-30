@@ -56,4 +56,49 @@ const specificationsFormat = (itemIndex) => {
     return productDetail.find((value, index) => itemIndex === index)
 };
 
-export { specificationsFormat, orderStatusLookup };
+const errorCodeFirebaseAuth = [
+    // sign in
+    {
+        code: 'auth/invalid-email',
+        value: 'Email không hợp lệ!'
+    },
+    {
+        code: 'auth/user-not-found',
+        value: 'Tài khoản không hợp lệ!'
+    },
+    {
+        code: 'auth/wrong-password',
+        value: 'Sai mật khẩu!'
+    },
+    {
+        code: 'auth/user-disabled',
+        value: 'Tài khoản đã bị khóa!'
+    },
+    // sign up
+    {
+        code: 'auth/email-already-in-use',
+        value: 'Email bị trùng!'
+    },
+    {
+        code: 'auth/invalid-email',
+        value: 'Email không hợp lệ!'
+    },
+    {
+        code: 'auth/operation-not-allowed',
+        value: 'Tài khoản đã bị khóa!'
+    },
+    {
+        code: 'auth/weak-password',
+        value: 'Mật khẩu quá yếu!'
+    },
+];
+
+const transformErrorCode = (code) => {
+    const message = errorCodeFirebaseAuth.find((item) => item.code === code);
+    if(message !== undefined)
+        return message.value;
+}
+
+
+
+export { specificationsFormat, orderStatusLookup, transformErrorCode };

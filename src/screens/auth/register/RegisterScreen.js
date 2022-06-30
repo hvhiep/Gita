@@ -20,11 +20,14 @@ import { auth } from '../../../../firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { useDispatch } from "react-redux";
 import { storeUser } from '../../../features/users/userSlice';
+import { transformErrorCode } from '../../../res';
 //db api
 import { createUserAPI } from '../../../api';
 //form handler
 import { Formik } from 'formik';
-import { SignupSchema } from '../validation';
+import { SignUpSchema } from '../validation';
+//message
+import { showMessage, hideMessage } from "react-native-flash-message";
 
 function RegisterScreen({ navigation }) {
     const dispatch = useDispatch();
@@ -49,8 +52,6 @@ function RegisterScreen({ navigation }) {
     const [currentXOffset, setCurrentXOffset] = useState(0);
     const scrollXRef = useRef();
 
-    //TẠM THỜI COMMENT LẠI ĐỂ LÀM SCROLLVIEW ĐÃ
-
     const handleSignupSubmit = (values) => {
         // loading
         setIsLoading(true);
@@ -68,15 +69,20 @@ function RegisterScreen({ navigation }) {
                 createUserAPI(userData);
                 //Lưu luôn instance này vào redux
                 dispatch(storeUser(userData));
-                //đưa ra message đăng ký thành công
+                //------------------------đưa ra message đăng ký thành công
 
                 //=> navigation sẽ tự động kiểm tra auth và điều hướng vào Home
             })
             .catch((error) => {
                 // Nếu có lỗi thì đưa ra thông báo (phải làm 1 component thông báo lỗi riêng)
                 setIsLoading(false);
-                const errorMessage = error.message;
-                console.log('[RegisterScreen] error: ', errorMessage);
+                const message = transformErrorCode(error.code);
+                showMessage({
+                    message: message,
+                    type: "danger",
+                    icon: 'auto',
+                    duration: 2500,
+                  });
             });
     };
 
@@ -109,7 +115,7 @@ function RegisterScreen({ navigation }) {
 
                         {/* formik bao slider(scrollView) */}
                         <Formik
-                            validationSchema={SignupSchema}
+                            validationSchema={SignUpSchema}
                             initialValues={{ email: '', password: '', passwordVerification: '' }}
                             onSubmit={(values) => handleSignupSubmit(values)}
                         >
@@ -122,7 +128,7 @@ function RegisterScreen({ navigation }) {
                                         pagingEnabled={true}
                                         showsHorizontalScrollIndicator={false}
                                     >
-                                        {/* page chọn type cho user */}
+                                        {/* page để chọn type cho user */}
                                         < View style={styles.wrapperForm}>
                                             {userRoles.map((item) => {
                                                 const borderColor = userRole === item.id ? COLOR.SECOND_COLOR : COLOR.UNSELECTED;
@@ -138,7 +144,7 @@ function RegisterScreen({ navigation }) {
                                                 )
                                             })}
                                         </View>
-                                        {/* page nhập thông tin đăng ký  */}
+                                        {/* page để nhập thông tin đăng ký  */}
                                         <View style={styles.wrapperForm}>
                                             <FormInput
                                                 style={styles.formInput}
@@ -149,13 +155,11 @@ function RegisterScreen({ navigation }) {
                                                 onBlur={handleBlur('email')}
                                             />
                                             {/* show validation error */}
-                                            {
-                                                errors.email && touched.email ? (
+                                            {errors.email && touched.email ? (
                                                     <Text style={styles.errorText}>
                                                         {errors.email}
                                                     </Text>
-                                                ) : null
-                                            }
+                                                ) : null}
                                             <FormInput
                                                 style={styles.formInput}
                                                 title='Mật khẩu'
@@ -200,6 +204,12 @@ function RegisterScreen({ navigation }) {
                                                 }
                                                 // còn ở page 2 thì submit form
                                                 else  handleSubmit()
+                                            } else {
+                                                showMessage({
+                                                    message: "Vui lòng chọn lựa chọn!",
+                                                    type: "warning",
+                                                    icon: 'auto'
+                                                  })
                                             }
                                         }}
                                     />

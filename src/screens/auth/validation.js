@@ -1,6 +1,6 @@
 import * as Yup from 'yup';
 
-const SignupSchema = Yup.object().shape({
+const SignUpSchema = Yup.object().shape({
     email: Yup.string()
         .email('Email không hợp lệ!')
         .min(6, 'Tối Thiểu 6 Ký Tự!')
@@ -15,4 +15,9 @@ const SignupSchema = Yup.object().shape({
         .required('Bắt Buộc Nhập!'),
 });
 
-export { SignupSchema };
+const SignInSchema = Yup.object().shape({
+    email: Yup.string().required('Bắt Buộc Nhập!'),
+    password: Yup.string().required('Bắt Buộc Nhập!'),
+});
+
+export { SignUpSchema, SignInSchema };
