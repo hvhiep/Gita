@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
     View,
     Text,
@@ -6,99 +6,134 @@ import {
     FlatList,
     TouchableOpacity,
     ScrollView,
+    Image,
+    Animated,
+    ActivityIndicator
 } from 'react-native';
 import { COLOR, DIMENSION, WIDTH, FONT_SIZE } from '../../res/';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import { Product } from '../../components';
 
-//api
-import { getAllProductAPI } from "../../api";
 // firebase
-import { getDatabase, ref, onValue } from 'firebase/database';
+// import { getDatabase, ref, onValue, get, child } from 'firebase/database';
 //dummy data
-import productData from "./productData";
+// dummy banner: 
+const bannerData = [
+    'https://firebasestorage.googleapis.com/v0/b/gita-backend.appspot.com/o/server%2Fbanner1.jpg?alt=media&token=27760a05-95f2-4f79-b5a4-8e57ba0a4fba',
+    'https://firebasestorage.googleapis.com/v0/b/gita-backend.appspot.com/o/server%2Fbanner2.jpg?alt=media&token=2e8f40a4-c717-4a12-b792-17b5a9dc45e6',
+    'https://firebasestorage.googleapis.com/v0/b/gita-backend.appspot.com/o/server%2Fbanner3.jpg?alt=media&token=41cf3f2f-386b-4c5b-bd05-6796ead9f116',
+    'https://firebasestorage.googleapis.com/v0/b/gita-backend.appspot.com/o/server%2Fbanner4.jpg?alt=media&token=b0ad3c8d-758c-458e-b36e-022cbc47a46e'
+];
+
 function HomeScreen({ navigation }) {
 
+    const [productListLoading, setProductListLoading] = useState(false);
+
     const [products, setProducts] = useState([]);
-    //DỌN DẸP LẠI, BỪA BỘN QUÁ !!!!
+    const bannerRef = useRef();
+    const [bannerCurrentIndex, setBannerCurrentIndex] = useState(0);
+    const bannerScrollX = useRef(new Animated.Value(0));
+
+    // gọi api
     useEffect(() => {
-        const db = getDatabase();
-        onValue(ref(db, 'product'), (snapshot) => {
-            const data = snapshot.val();
-            if(data !== null){
-                const dataArr = Object.entries(data);
-                setProducts(dataArr);
-            }
-                
-        })
-    }, [])
+        // const allProductObserver = getAllProduct();
 
-    const bannerData = [
-        {
-            id: 1,
-            imgUrl: 'url banner sau này 1'
-        },
-        {
-            id: 2,
-            imgUrl: 'url banner sau này 2'
-        },
-        {
-            id: 3,
-            imgUrl: 'url banner sau này 3'
-        },
-        {
-            id: 4,
-            imgUrl: 'url banner sau này 4'
-        }
-    ];
-    const guitarTypeData = [
-        {
-            id: 1,
-            title: 'Tất cả',
-            color: COLOR.SECOND_COLOR,
-        },
-        {
-            id: 2,
-            title: 'Đàn Acoustic',
-            color: COLOR.A,
-        },
-        {
-            id: 3,
-            title: 'Đàn Classic',
-            color: COLOR.B,
-        },
-        {
-            id: 4,
-            title: 'Đàn Điện',
-            color: COLOR.C,
-        },
-    ];
+        //unsubscribe
+        // return () => {
+        //     allProductObserver
+        // }
+    }, []);
 
+    // const getAllProduct = () => {
+    //     setProductListLoading(true);
 
-    const [guitarTypeSelected, setGuitarTypeSelected] = useState(1);
+    //     const db = getDatabase();
+    //     const instance = onValue(ref(db, 'product'), (snapshot) => {
+    //         const data = snapshot.val();
+    //         if (data !== null) {
+    //             // dữ liệu của firebase lấy về luôn là Object nên phải dùng entries để
+    //             //chuyển sang Array: {id, {value1, value2,...}} --> [id, {value1, value2,...}]
+    //             const dataArr = Object.entries(data);
+    //             const db = getDatabase();
+    //             // đối với mỗi product, lấy percent giảm giá từ id rồi gán lại vào product
+    //             const promises = dataArr.map(async ([id, value]) => {
+    //                 try {
+    //                     const snapshot = await get(child(ref(db), `discount/${value.discountId}`))
+    //                     if (snapshot.exists()) {
+    //                         const discount = snapshot.val();
+    //                         // *Lưu ý: mặc dù ở đây return về một mảng mới nhưng trong hàm async
+    //                         // thì nó sẽ trả về promise, do đó sau khi map() xong thì sẽ 
+    //                         //trả về một mảng các promise
+    //                         return [id, { ...value, discount }];
+    //                     }
+    //                     else {
+    //                         console.log('[Home] Không có dữ liệu discount!');
+    //                         return;
+    //                     }
+    //                 } catch (error) {
+    //                     console.log('[Home] error:', error);
+    //                     return;
+    //                 }
+    //             })
+    //             // Dùng Promise.all để resolve tất cả promise trong mảng promises
+    //             Promise.all(promises).then((productArr) => {
+    //                 setProductListLoading(false);
+    //                 setProducts(productArr)
+    //             })
+    //         }
+    //     })
+
+    //     return instance;
+    // }
+
+    // logic tự động scroll banner
+    // useEffect(() => {
+    //     const interval = setInterval(() => {
+    //         setBannerCurrentIndex(prev => {
+    //             if (prev < bannerData.length - 1)
+    //                 return prev + 1;
+    //             return 0;
+    //         })
+    //     }, 3000)
+
+    //     return () => clearInterval(interval);
+    // }, []);
+    // useEffect(() => {
+    //     bannerRef.current.scrollToOffset({ offset: bannerCurrentIndex * (WIDTH - DIMENSION.MARGIN_HORIZONTAL * 2), animated: true })
+    // }, [bannerCurrentIndex])
+
 
     const renderBanner = ({ item }) => {
         return (
-            <TouchableOpacity style={styles.bannerItem}>
-                <Text>{item.imgUrl}</Text>
+            <TouchableOpacity key={item} style={styles.bannerItem}>
+                <Image style={styles.bannerImg} source={{ uri: item }} resizeMode='contain' />
             </TouchableOpacity>
         )
     }
-    const renderGuitarTypeData = ({ item }) => {
-        let iconName = item.id === 1 ? 'border-all' : 'guitar';
-        let selectedColor = guitarTypeSelected === item.id ? COLOR.SECOND_COLOR : COLOR.UNSELECTED;
+
+    const renderBigDiscountProducts = () => {
         return (
-            <TouchableOpacity
-                style={styles.guitarTypeItem}
-                onPress={() => setGuitarTypeSelected(item.id)}
-            >
-                <Icon name={iconName} size={20} color={selectedColor} />
-                <Text style={[styles.guitarTypeText, { color: selectedColor }]}>{item.title}</Text>
-            </TouchableOpacity>
+            <View style={styles.categoryWrapper}>
+                {products.map(([id, value], index) => {
+                    // box product nào có index là số chẵn thì marginRight để responsive
+                    let even = index % 2 === 0 ? true : false;
+                    return (
+                        <Product
+                            isEven={even}
+                            key={id}
+                            productId={id}
+                            productInfo={value}
+                            // tạm thời để id = 1 tránh bị lỗi
+                            onPress={() => navigation.navigate('ProductDetail', { productId: id })}
+                        />
+                    )
+                })}
+            </View>
+
         )
     }
 
-
+    // MAIN RENDER
     return (
         <View style={styles.container}>
             {/* Thanh tìm kiếm */}
@@ -109,55 +144,64 @@ function HomeScreen({ navigation }) {
             <ScrollView style={styles.scrollview}>
 
                 {/* 1. Banner quảng cáo */}
-                <FlatList
-                    style={styles.list}
-                    data={bannerData}
-                    renderItem={renderBanner}
-                    keyExtractor={item => item.id}
-                    horizontal={true}
-                    showsHorizontalScrollIndicator={false}
-                    pagingEnabled={true}
-                />
-                {/* 2. filter chọn loại guitar */}
-                <FlatList
-                    style={[styles.list, { marginTop: 10 }]}
-                    data={guitarTypeData}
-                    renderItem={renderGuitarTypeData}
-                    keyExtractor={item => item.id}
-                    horizontal={true}
-                    showsHorizontalScrollIndicator={false}
-                />
+                {/* Tạm thời cứ hiển thị ảnh đã, vì nhấn vào mỗi banner sẽ navigate đến trang sự kiện(chưa làm) */}
+                <View>
+                    <FlatList
+                        ref={bannerRef}
+                        style={styles.list}
+                        data={bannerData}
+                        renderItem={renderBanner}
+                        keyExtractor={item => item}
+                        horizontal={true}
+                        showsHorizontalScrollIndicator={false}
+                        pagingEnabled={true}
+                        bounces={false}
+                        onScroll={Animated.event([{ nativeEvent: { contentOffset: { x: bannerScrollX.current } } }], { useNativeDriver: false })}
+                        scrollEventThrottle={32}
+                    />
+                    {/* indicator cho banner */}
+                    <View style={styles.indicatorWrapper}>
+                        {bannerData.map((item, index) => {
+
+                            const inputRange = [(index - 1) * WIDTH, index * WIDTH, (index + 1) * WIDTH];
+                            const dotWidth = bannerScrollX.current.interpolate({
+                                inputRange,
+                                outputRange: [6, 15, 6],
+                                extrapolate: 'clamp'
+                            });
+                            const opacity = bannerScrollX.current.interpolate({
+                                inputRange,
+                                outputRange: [0.5, 1, 0.5],
+                                extrapolate: 'clamp'
+                            })
+
+                            return (
+                                <Animated.View key={item} style={[styles.indicator, { width: dotWidth, opacity }]} />
+                            )
+                        })}
+                    </View>
+                </View>
 
                 {/* 3. Danh sách các sản phẩm */}
                 {/* 3.1 Sale đặc biệt (có mức giảm giá cao) */}
-                <Text style={styles.categoryTitle}>Sale đặc biệt</Text>
-                <View style={styles.categoryWrapper}>
-                    {products.map(([id, value]) => {
-                        return (
-                            <Product
-                                key={id}
-                                productId={id}
-                                productInfo={value}
-                                // tạm thời để id = 1 tránh bị lỗi
-                                onPress={() => navigation.navigate('ProductDetail', { productId: 1 })}
-                            />
-                        )
-                    })}
-                </View>
+                {/* <Text style={styles.categoryTitle}>Sale đặc biệt</Text>
+                {productListLoading ?
+                    <View style={styles.loadingWrapper}>
+                        <ActivityIndicator size='large' color={COLOR.MAIN_COLOR} />
+                    </View>
+                    :
+                    renderBigDiscountProducts()
+                } */}
                 {/* 3.1 Bán chạy (có số lượng bán cao) */}
-                {/* ------------TẠM THỜI COMMENT LẠI */}
                 {/* <Text style={styles.categoryTitle}>Bán chạy</Text>
-                <View style={styles.categoryWrapper}>
-                    {productData.map((item) => {
-                        return (
-                            <Product
-                                key={item.id}
-                                item={item} 
-                                onPress={() => navigation.navigate('ProductDetail', {productId: item.id})}
-                            />
-                        )
-                    })}
-                </View> */}
+                {productListLoading ?
+                    //loading 
+                    <View style={styles.loadingWrapper}>
+                        <ActivityIndicator size='large' color={COLOR.MAIN_COLOR} />
+                    </View>
+                    :
+                    renderBigDiscountProducts()
+                } */}
             </ScrollView>
         </View>
     )
@@ -188,6 +232,7 @@ const styles = StyleSheet.create({
         marginTop: 10,
         backgroundColor: COLOR.BACKGROUND_GREY
     },
+
     // banner style 
     list: {
         marginHorizontal: DIMENSION.MARGIN_HORIZONTAL,
@@ -197,22 +242,30 @@ const styles = StyleSheet.create({
         width: WIDTH - DIMENSION.MARGIN_HORIZONTAL * 2,
         backgroundColor: COLOR.SECOND_COLOR,
         borderRadius: 10,
-        marginRight: 20
+    },
+    bannerImg: {
+        height: 200,
+        width: WIDTH - DIMENSION.MARGIN_HORIZONTAL * 2,
+        borderRadius: 10,
+    },
+    indicatorWrapper: {
+        position: 'absolute',
+        bottom: 10,
+        left: 0,
+        right: 0,
+        flexDirection: 'row',
+        justifyContent: 'center',
+    },
+    indicator: {
+        borderRadius: 50,
+        width: 6,
+        height: 6,
+        backgroundColor: COLOR.MAIN_COLOR,
+        marginRight: 10,
     },
 
-    // guitar type style 
-    guitarTypeItem: {
-        flexDirection: 'row',
+    loadingWrapper: {
         alignItems: 'center',
-        justifyContent: 'center',
-        padding: 10,
-        backgroundColor: COLOR.WHITE,
-        borderRadius: 10,
-        marginRight: DIMENSION.MARGIN_HORIZONTAL,
-    },
-    guitarTypeText: {
-        marginLeft: 5,
-        fontFamily: 'Montserrat-Medium'
     },
 
     // flatlist các sản phẩm
@@ -228,7 +281,8 @@ const styles = StyleSheet.create({
         width: '100%',
         flexDirection: 'row',
         flexWrap: 'wrap',
-        justifyContent: 'space-evenly'
+        marginHorizontal: DIMENSION.MARGIN_HORIZONTAL
+        // justifyContent: 'space-evenly'
 
     },
 })

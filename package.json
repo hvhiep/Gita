@@ -20,7 +20,7 @@
     "@reduxjs/toolkit": "^1.8.2",
     "@rneui/base": "^4.0.0-rc.4",
     "@rneui/themed": "^4.0.0-rc.4",
-    "firebase": "^9.6.11",
+    "firebase": "^9.8.4",
     "formik": "^2.2.9",
     "react": "17.0.2",
     "react-native": "0.68.1",

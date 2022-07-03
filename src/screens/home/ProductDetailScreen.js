@@ -21,47 +21,55 @@ import productData from './productData';
 import { Rating } from 'react-native-ratings';
 import { Product } from '../../components';
 import { Badge } from '@rneui/themed';
-function ProductDetailScreen({ navigation, route }) {
 
-    const shopData = {
+//dummy: 
+const shopData = {
+    id: 1,
+    userId: 1,
+    name: 'Ba Đờn',
+    avatarImg: shopLogo,
+    backgroundImg: '',
+    city: 'Tp Hồ Chí Minh',
+    district: 'Thủ Đức',
+    ward: 'Linh Trung',
+    address: '41A đường Trần Hưng Đạo',
+};
+
+const discountData = [
+    {
         id: 1,
-        userId: 1,
-        name: 'Ba Đờn',
-        avatarImg: shopLogo,
-        backgroundImg: '',
-        city: 'Tp Hồ Chí Minh',
-        district: 'Thủ Đức',
-        ward: 'Linh Trung',
-        address: '41A đường Trần Hưng Đạo',
-    };
+        name: 'Giảm giá hè',
+        percent: 0.21,
+        startDate: '',
+        endDate: '',
+    },
+    {
+        id: 2,
+        name: 'Giảm giá ngày độc thân 11/11',
+        percent: 0.32,
+        startDate: '',
+        endDate: '',
+    },
+    {
+        id: 3,
+        name: 'Giảm giá giữa tháng',
+        percent: 0.32,
+        startDate: '',
+        endDate: '',
+    },
+];
 
-    const { productId } = route?.params;
+function ProductDetailScreen({ navigation, route }) {
+    const productId = route?.params?.productId;
+
+    const [currentImg, setCurrentImg] = useState(1);
+    const [isBottomModalShow, setIsBottomModalShow] = useState(false);
+    const [orderQuantity, setOrderQuantity] = useState(1);
+    const [isMessageShowed, setIsMessageShowed] = useState(false);
+
     // lấy sản phẩm từ id truyền qua navigation
-    const product = productData.find((item) => productId === item.id);
-    //Bảng giảm giá cho các sản phẩm (để join với product lấy cái percent -> tính giá đã giảm)
-    const discountData = [
-        {
-            id: 1,
-            name: 'Giảm giá hè',
-            percent: 0.21,
-            startDate: '',
-            endDate: '',
-        },
-        {
-            id: 2,
-            name: 'Giảm giá ngày độc thân 11/11',
-            percent: 0.32,
-            startDate: '',
-            endDate: '',
-        },
-        {
-            id: 3,
-            name: 'Giảm giá giữa tháng',
-            percent: 0.32,
-            startDate: '',
-            endDate: '',
-        },
-    ];
+    const product = productData.find((item) => 1 === item.id);
+
     //tính giá sau khi đã giảm(giá giảm = giá bán - phần trăm khuyến mãi, tạm thời cứ tính đơn giản thế này đã)
     const discount = discountData.find((item) => item.id === product.discountId)
     product.discountPrice = Math.round(product.salePrice * (1 - discount.percent));
@@ -78,11 +86,7 @@ function ProductDetailScreen({ navigation, route }) {
         outputRange: [0, 0.5],
         extrapolate: 'clamp'
     });
-
-    const [currentImg, setCurrentImg] = useState(1);
-    const [isBottomModalShow, setIsBottomModalShow] = useState(false);
-    const [orderQuantity, setOrderQuantity] = useState(1);
-    const [isMessageShowed, setIsMessageShowed] = useState(false);
+    
     const handleAddToCart = () => {
         // thêm sản phẩm mới vào cart của user
 
@@ -194,7 +198,7 @@ function ProductDetailScreen({ navigation, route }) {
                 {/* 4. Carousel các sp khác của shop */}
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Các sản phẩm khác của Shop</Text>
-                    <FlatList
+                    {/* <FlatList
                         style={styles.listShopProduct}
                         data={productData}
                         renderItem={({ item }) => {
@@ -210,7 +214,7 @@ function ProductDetailScreen({ navigation, route }) {
                         keyExtractor={(item) => item.id}
                         horizontal
                         showsHorizontalScrollIndicator={false}
-                    />
+                    /> */}
                 </View>
                 {/* 5. Thông số kĩ thuật / specifications */}
                 <View style={styles.section}>

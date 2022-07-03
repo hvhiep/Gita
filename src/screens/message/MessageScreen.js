@@ -8,146 +8,74 @@ import {
 } from 'react-native';
 
 //firebase
-import { db, storage } from '../../../firebase';
-import { ref as storageRef, getDownloadURL } from 'firebase/storage';
-import { ref, push, set } from 'firebase/database';
+import { getFirestore, collection, doc, getDoc, addDoc, getDocs } from "firebase/firestore";
 //message
 import { showMessage } from 'react-native-flash-message';
-
 import products from './products';
+
+const db = getFirestore();
 
 function MessageScreen() {
 
-    const [img, setImg] = useState();
+    //màn hình thêm sản phẩm
+    //1. lấy danh sách discount bằng shopId để hiển thị lên dropbox
+    const discounts = [
+        {
+            id: 'TghBgAqBdYpgXvPE2ojQ',
+            name: "Giảm giá hè(shop0) 1",
+            percent: 0.2
+        },
+        {
+            id: 'Qh2L5LUi1rvTnPxgf8zq',
+            name: "Giảm giá hè(shop0) 2",
+            percent: 0.25
+        },
+        {
+            id: 'SdhevWrbp16h8vBJO5Lh',
+            name: "Giảm giá tháng 7(shop0)",
+            percent: 0.5
+        },
+    ]
 
-    const addProduct = () => {
-        const productData = {
-            name: 'hiepga',
-            img: ['hehe', 'haha', 'cc']
+
+    //2. lấy thông tin của shop, để chuẩn bị gán cho product
+    const addProduct = async (shopId) => {
+        //3.product mới sau khi người dùng nhập vào các trường (bây giờ lấy tạm bên products.js)
+
+        //4.gọi api addDoc
+        //shop0: 0 1 2 3 4,  shop1: 5, 6, 7, 8
+        try {
+            const result = await addDoc(collection(db, 'product'), products[0])
+            console.log('message: ', result)
+            showMessage({
+                message: 'thêm thành công',
+                type: "success",
+                icon: 'auto',
+                duration: 2500,
+            });
+        } catch (error) {
+            console.log('message: ', error)
+            showMessage({
+                message: 'thêm thất bại',
+                type: "danger",
+                icon: 'auto',
+                duration: 2500,
+            });
         }
-        const productRef = ref(db, 'product');
-        const newProductRef = push(productRef);
-        set(newProductRef, productData)
-            .then(() => {
-                showMessage({
-                    message: 'thanh cong',
-                    type: "success",
-                    icon: 'auto',
-                    duration: 2000,
-                })
-            })
-            .catch((error) => {
-                showMessage({
-                    message: error.message,
-                    type: "danger",
-                    icon: 'auto',
-                    duration: 2000,
-                });
-            })
+        //5.trả về message -> hiển thị message lên màn hình
+
     }
 
-    //{solved}CASE: có một mảng các imgRef, làm sao để chuyển từ ref -> url để hiển thị lên
-    const [imgURL, setImgURL] = useState([]);
-    const imgRefArr = [
-        'server/sample1.jpg',
-        'server/sample2.png'
-    ];
-    const getImg = async () => {
-        let promises = imgRefArr.map(async (imgRef) => {
-            // lấy url
-            try {
-                return await getDownloadURL(storageRef(storage, imgRef));
-            } catch (error) {
-                console.log(error)
-            }
-        })
-        const results = await Promise.all(promises);
-        setImgURL(results);
-    }
 
-    // thêm SHOP
-    const sale0 = {
-        userId: 'jb5n1dhF7geNMX8TVHnjCFwOvdo2',
-        name: 'Shop 0',
-        avatarImg: 'server/shopAvatar0.png',
-        backgroundImg: 'server/shopBg0.jpg',
-        city: 'Kon Tum',
-        district: 'Sa Thầy',
-        ward: 'Thị trấn Sa Thầy',
-        address: '999 Quang Trung'
-    };
-    const discount01 = {
-        shopId: '-N5orBlfPXJ49qk6nOh_',
-        name: 'Giảm giá hè(shop0) 1',
-        percent: 0.5
-    };
-    const discount02 = {
-        shopId: '-N5orBlfPXJ49qk6nOh_',
-        name: 'Giảm giá hè(shop0) 2',
-        percent: 0.2
-    };
-    const discount03 = {
-        shopId: '-N5orBlfPXJ49qk6nOh_',
-        name: 'Giảm giá hè(shop0) 3',
-        percent: 0.4
-    };
-    const sale1 = {
-        userId: 'OlOnxRH71chi07tvZQKdmQOAbNi2',
-        name: 'Shop 1',
-        avatarImg: 'server/shopAvatar1.png',
-        backgroundImg: 'server/shopBg1.jpg',
-        city: 'Hồ Chí Minh',
-        district: 'Thủ Đức',
-        ward: 'Linh Trung',
-        address: '81A Võ Văn Kiệt'
-    };
-    const discount11 = {
-        shopId: '-N5orDJPkLtAxKuIjgOv',
-        name: 'Giảm giá 1/7(shop1) 1',
-        percent: 0.4
-    };
-    const discount12 = {
-        shopId: '-N5orDJPkLtAxKuIjgOv',
-        name: 'Giảm giá cho vui(shop1) 2',
-        percent: 0.7
-    };
-    const createRecord = (path, data) => {
-
-        const tableRef = ref(db, path);
-        const newRecordRef = push(tableRef);
-        set(newRecordRef, data)
-            .then(() => {
-                showMessage({
-                    message: 'thanh cong',
-                    type: "success",
-                    icon: 'auto',
-                    duration: 2000,
-                })
-            })
-            .catch((error) => {
-                showMessage({
-                    message: error.message,
-                    type: "danger",
-                    icon: 'auto',
-                    duration: 2000,
-                });
-            })
-    }
-
-    // thêm DISCOUNT
     return (
         <View style={styles.container}>
-            {imgURL.map((item, index) => {
-                return (
-                    <Image key={index} source={{ uri: item }} style={{ width: 100, height: 100, resizeMode: 'contain' }} />
-                )
-            })}
             <Text style={styles.text}>Tính năng đang được phát triển! Quay lại sau nhé 😊</Text>
-            <Button title='thêm product vào data' onPress={addProduct} />
-            <Button title='thêm shop vào data' onPress={addProduct} />
-            <Button title='lấy ảnh' onPress={getImg} />
-            {/* 0 1 */}
-            <Button title='tạo record' onPress={() => createRecord('product', products[1])} />
+            {/* */}
+            <Button title='thêm product' onPress={() => {
+                const shopId0 = 'suUQzTNtQG1iG0B7P4fl';
+                const shopId1 = 'gNPWDkhyC6i3nK2rISqe';
+                addProduct(shopId0);
+            }} />
         </View>
     )
 }

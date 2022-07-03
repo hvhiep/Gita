@@ -1,7 +1,16 @@
 const products = [
     // shop0
     {
-        shopId: '-N5orBlfPXJ49qk6nOh_',
+        shop: {
+            address: "999 Quang Trung",
+            avatarImg: "https://firebasestorage.googleapis.com/v0/b/gita-backend.appspot.com/o/server%2FshopAvatar0.png?alt=media&token=8e14ae91-5f16-4ac5-a84e-f4e95cfb6b84",
+            backgroundImg: "https://firebasestorage.googleapis.com/v0/b/gita-backend.appspot.com/o/server%2FshopBg0.jpg?alt=media&token=e3f44012-26ce-4ab6-a92a-ac5583f8e003",
+            city: "Kon Tum",
+            district: "Sa Thầy",
+            name: "Shop 0",
+            userId: "jb5n1dhF7geNMX8TVHnjCFwOvdo2",
+            ward: "Thị trấn Sa Thầy",
+        },
         name: 'Acoustic Epiphone DR-100 Natural',
         standardCost: 2500000,
         salePrice: 3500000,
@@ -9,9 +18,19 @@ const products = [
         soldQuantity: 350,
         rating: 4.8,
         type: 1,
-        img: ['server/guitar1_1.jpg', 'server/guitar1_2.jpg', 'server/guitar1_3.jpg', 'server/guitar1_4.jpg','server/guitar1_5.jpg'],
+        img: [
+            'https://firebasestorage.googleapis.com/v0/b/gita-backend.appspot.com/o/server%2Fguitar1_1.jpg?alt=media&token=1f7209dc-d6f2-46f5-a896-a1d0436b8dd8',
+            'https://firebasestorage.googleapis.com/v0/b/gita-backend.appspot.com/o/server%2Fguitar1_2.jpg?alt=media&token=aa9a1b01-5125-46c2-9a66-bfff3c244d82',
+            'shttps://firebasestorage.googleapis.com/v0/b/gita-backend.appspot.com/o/server%2Fguitar1_3.jpg?alt=media&token=b7587773-5cfa-4696-89b4-89aa380d013a',
+            'https://firebasestorage.googleapis.com/v0/b/gita-backend.appspot.com/o/server%2Fguitar1_4.jpg?alt=media&token=912cafc0-cb14-4861-9606-bfdce4efcf54',
+            'https://firebasestorage.googleapis.com/v0/b/gita-backend.appspot.com/o/server%2Fguitar1_5.jpg?alt=media&token=9bab5d0f-1b50-48b0-af06-ee03b0e8e903'
+        ],
         // discountId1
-        discountId: '-N5oraR5kzENkMFWUBy0',
+        discount: {
+            id: 'TghBgAqBdYpgXvPE2ojQ',
+            name: "Giảm giá hè(shop0) 1",
+            percent: 0.2
+        },
         specifications: {
             brand: 'Epiphone',
             origin: 'USA',
@@ -21,7 +40,7 @@ const products = [
             sideAndBack: 'Gỗ Gụ (Select Mahogany)',
             headstockAndNeck: 'Gỗ Okoume',
             saddle: 'Gỗ Cẩm Lai (Rosewood)',
-            string: 'D’Addario',
+            string: 'DAddario',
             stringAdjustment: true,
             warranty: 12,
             eq: 'Không có',
@@ -37,7 +56,7 @@ const products = [
         soldQuantity: 1234,
         rating: 4.5,
         type: 1,
-        img: ['server/guitar1_1.jpg', 'server/guitar1_2.jpg', 'server/guitar1_3.jpg', 'server/guitar1_4.jpg','server/guitar1_5.jpg'],
+        img: ['server/guitar1_1.jpg', 'server/guitar1_2.jpg', 'server/guitar1_3.jpg', 'server/guitar1_4.jpg', 'server/guitar1_5.jpg'],
         // discountId2
         discountId: '-N5ordCFE49c0IgaAIuI',
         specifications: {
@@ -49,7 +68,7 @@ const products = [
             sideAndBack: 'Gỗ Gụ (Select Mahogany)',
             headstockAndNeck: 'Gỗ Okoume',
             saddle: 'Gỗ Cẩm Lai (Rosewood)',
-            string: 'D’Addario',
+            string: 'DAddario',
             stringAdjustment: true,
             warranty: 12,
             eq: 'Không có',
@@ -65,7 +84,7 @@ const products = [
         soldQuantity: 222,
         rating: 4.1,
         type: 1,
-        img: ['server/guitar1_1.jpg', 'server/guitar1_2.jpg', 'server/guitar1_3.jpg', 'server/guitar1_4.jpg','server/guitar1_5.jpg'],
+        img: ['server/guitar1_1.jpg', 'server/guitar1_2.jpg', 'server/guitar1_3.jpg', 'server/guitar1_4.jpg', 'server/guitar1_5.jpg'],
         // discountId1
         discountId: '-N5oraR5kzENkMFWUBy0',
         specifications: {
@@ -77,7 +96,7 @@ const products = [
             sideAndBack: 'Gỗ Gụ (Select Mahogany)',
             headstockAndNeck: 'Gỗ Okoume',
             saddle: 'Gỗ Cẩm Lai (Rosewood)',
-            string: 'D’Addario',
+            string: 'DAddario',
             stringAdjustment: true,
             warranty: 12,
             eq: 'Không có',
@@ -253,10 +272,10 @@ const products = [
             stringAdjustment: true,
             warranty: 12,
             eq: 'Amplifer Epiphone 15C',
-            
+
         },
         information: 'Đàn Guitar Acoustic Mantic GT-1 thuộc dòng đàn entry level dành cho người mới bắt đầu. Với những thiết kế chuẩn mực của một cây đàn acoustic mantic GT-1 sẽ đáp ứng được nhu cầu tập luyện của bạn. Với thiết kế hiện đại của dòng đàn Mantic nổi tiếng GT-1 mang đậm chất tinh tế, nhẹ nhàng, không quá cầu kì, với ba mầu sắc được ưa chuộng nhất hiện nay là Vàng gỗ, Xanh ngọc và Đỏ mặt trời (Sunburst), GT-1 sẽ là điểm nhấn cho bạn trong mỗi cuộc giao lưu hội nhóm. Không chỉ đẹp về ngoại hình, GT-1 còn có âm thanh tốt, tiếng vang sáng, ngoài ra action đàn cực thấp nên những bạn mới chơi cũng có thể tiếp cận một cách dễ dàng.'
     },
-    
+
 ];
 export default products;

@@ -15,33 +15,24 @@ import { Rating } from 'react-native-ratings';
 import { getStorage, ref, getDownloadURL } from "firebase/storage";
 
 // chiều rộng của mỗi box sản phẩm
-const cardWidth = Math.round(WIDTH / 2 - DIMENSION.MARGIN_HORIZONTAL * 1.5);
+const cardWidth = (WIDTH - DIMENSION.MARGIN_HORIZONTAL * 3) / 2;
 
-function Product({ productId, productInfo, onPress, style }) {
+function Product({ productId, productInfo, onPress, style, isEven }) {
 
-    const [firstImg, setFirstImg] = useState();
-    useEffect(() => {
-        getFirstProductImg();
-    }, [])
-
-    const getFirstProductImg = async () => {
-        try {
-            const storage = getStorage();
-            const url = await getDownloadURL(ref(storage, productInfo.img[0]))
-            if (url !== null)
-                setFirstImg(url);
-        } catch (error) {
-            console.log('[Product] error: ', error.message);
-        }
-    }
+    productInfo.discountPrice = Math.round(productInfo.salePrice * (1 - productInfo.discount.percent));
 
     return (
-        <TouchableOpacity style={[styles.container, style && style]} onPress={onPress}>
-            <Image style={styles.img} source={{uri: firstImg}}></Image>
+        <TouchableOpacity style={[styles.container, style && style, isEven && { marginRight: DIMENSION.MARGIN_HORIZONTAL }]} onPress={onPress}>
+            <Image style={styles.img} source={{ uri: productInfo.img[0] }}></Image>
             <Text style={styles.productName}>{productInfo.name}</Text>
-            <Text style={styles.price}>{numberWithCommas(productInfo.salePrice)}đ</Text>
+            {/* Giá sau khi đã giảm  */}
+            <View style={styles.priceWrapper}>
+                <Text style={styles.discountPrice}>{numberWithCommas(productInfo.discountPrice)}đ</Text>
+                <Text style={styles.discountPercent}>-{productInfo.discount.percent * 100}%</Text>
+            </View>
             <View style={styles.wrapper}>
                 <Rating
+                    style={styles.rating}
                     type='star'
                     ratingCount={5}
                     readonly
@@ -68,33 +59,46 @@ const styles = StyleSheet.create({
     img: {
         borderTopLeftRadius: 10,
         borderTopRightRadius: 10,
-        width: cardWidth - 5,
-        height: cardWidth - 5,
+        width: cardWidth,
+        height: cardWidth,
         resizeMode: 'contain',
     },
     productName: {
         fontFamily: 'Montserrat-Bold',
         fontSize: FONT_SIZE.BIG_TEXT,
-        alignSelf: 'center',
-        textAlign: 'center',
+        marginHorizontal: 5,
         color: COLOR.MAIN_COLOR,
         marginTop: 4,
         flex: 1
     },
-    price: {
+    priceWrapper: {
+        marginHorizontal: 5,
+        marginVertical: 4,
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    discountPrice: {
         fontFamily: 'Montserrat-Bold',
         color: COLOR.SECOND_COLOR,
         fontSize: FONT_SIZE.NORMAL_TITLE,
-        alignSelf: 'center',
-        marginVertical: 4,
+    },
+    discountPercent: {
+        marginLeft: 5,
+        borderRadius: 5,
+        paddingHorizontal: 2,
+        fontFamily: 'Montserrat-Bold',
+        color: COLOR.WHITE,
+        fontSize: FONT_SIZE.SMALL_TEXT,
+        backgroundColor: 'red'
+        
     },
     wrapper: {
         flexDirection: 'row',
-        justifyContent: 'space-around',
-        alignItems: 'center'
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingHorizontal: 5,
     },
-    stars: {
-
+    rating: {
     },
     sold: {
         fontFamily: 'Montserrat-Light',
