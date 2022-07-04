@@ -17,18 +17,18 @@ import { getStorage, ref, getDownloadURL } from "firebase/storage";
 // chiều rộng của mỗi box sản phẩm
 const cardWidth = (WIDTH - DIMENSION.MARGIN_HORIZONTAL * 3) / 2;
 
-function Product({ productId, productInfo, onPress, style, isEven }) {
+function Product({ product, onPress, style, isEven }) {
 
-    productInfo.discountPrice = Math.round(productInfo.salePrice * (1 - productInfo.discount.percent));
+    product.discountPrice = Math.round(product.salePrice * (1 - product.discount.percent));
 
     return (
         <TouchableOpacity style={[styles.container, style && style, isEven && { marginRight: DIMENSION.MARGIN_HORIZONTAL }]} onPress={onPress}>
-            <Image style={styles.img} source={{ uri: productInfo.img[0] }}></Image>
-            <Text style={styles.productName}>{productInfo.name}</Text>
+            <Image style={styles.img} source={{ uri: product.img[0] }}></Image>
+            <Text style={styles.productName}>{product.name}</Text>
             {/* Giá sau khi đã giảm  */}
             <View style={styles.priceWrapper}>
-                <Text style={styles.discountPrice}>{numberWithCommas(productInfo.discountPrice)}đ</Text>
-                <Text style={styles.discountPercent}>-{productInfo.discount.percent * 100}%</Text>
+                <Text style={styles.discountPrice}>{numberWithCommas(product.discountPrice)}đ</Text>
+                <Text style={styles.discountPercent}>-{product.discount.percent * 100}%</Text>
             </View>
             <View style={styles.wrapper}>
                 <Rating
@@ -36,14 +36,14 @@ function Product({ productId, productInfo, onPress, style, isEven }) {
                     type='star'
                     ratingCount={5}
                     readonly
-                    startingValue={productInfo.rating}
+                    startingValue={product.rating}
                     imageSize={12}
                 />
-                <Text style={styles.sold}>Đã bán {numFormatter(productInfo.soldQuantity)}</Text>
+                <Text style={styles.sold}>Đã bán {numFormatter(product.soldQuantity)}</Text>
             </View>
             <View style={styles.location}>
                 <Ionicons name='location' size={20} color={COLOR.BLACK} />
-                <Text style={styles.locationText}>chưa làm :v</Text>
+                <Text style={styles.locationText}>{product.shop.city}</Text>
             </View>
         </TouchableOpacity>
     )

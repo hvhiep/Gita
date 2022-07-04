@@ -43,10 +43,12 @@ function MessageScreen() {
         //3.product mới sau khi người dùng nhập vào các trường (bây giờ lấy tạm bên products.js)
 
         //4.gọi api addDoc
-        //shop0: 0 1 2 3 4,  shop1: 5, 6, 7, 8
+        //shop0: 0 1 2 3 4,  shop1: 5, 6, 7, 8 done
         try {
-            const result = await addDoc(collection(db, 'product'), products[0])
-            console.log('message: ', result)
+            const result = await addDoc(collection(db, 'product'), products[8])
+            console.log('message: ', result.path)
+
+        //5.trả về message -> hiển thị message lên màn hình
             showMessage({
                 message: 'thêm thành công',
                 type: "success",
@@ -62,19 +64,23 @@ function MessageScreen() {
                 duration: 2500,
             });
         }
-        //5.trả về message -> hiển thị message lên màn hình
+    };
 
+    const getProduct = () => {
+        
     }
+
 
 
     return (
         <View style={styles.container}>
             <Text style={styles.text}>Tính năng đang được phát triển! Quay lại sau nhé 😊</Text>
-            {/* */}
+        {/* //shop0: 0 1 2 3 4,  shop1: 5, 6, 7, 8 */}
+            {/*      0                             */}
             <Button title='thêm product' onPress={() => {
                 const shopId0 = 'suUQzTNtQG1iG0B7P4fl';
                 const shopId1 = 'gNPWDkhyC6i3nK2rISqe';
-                addProduct(shopId0);
+                addProduct(shopId1);
             }} />
         </View>
     )

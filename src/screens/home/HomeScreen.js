@@ -15,7 +15,7 @@ import Icon from 'react-native-vector-icons/FontAwesome5';
 import { Product } from '../../components';
 
 // firebase
-// import { getDatabase, ref, onValue, get, child } from 'firebase/database';
+import { getFirestore, collection, getDocs } from 'firebase/firestore';
 //dummy data
 // dummy banner: 
 const bannerData = [
@@ -26,7 +26,7 @@ const bannerData = [
 ];
 
 function HomeScreen({ navigation }) {
-
+    const db = getFirestore();
     const [productListLoading, setProductListLoading] = useState(false);
 
     const [products, setProducts] = useState([]);
@@ -36,71 +36,44 @@ function HomeScreen({ navigation }) {
 
     // gọi api
     useEffect(() => {
-        // const allProductObserver = getAllProduct();
-
-        //unsubscribe
-        // return () => {
-        //     allProductObserver
-        // }
+        const allProductUnsubscribe = getAllProduct();
+        // unsubscribe
+        return () => {allProductUnsubscribe}
     }, []);
 
-    // const getAllProduct = () => {
-    //     setProductListLoading(true);
+    // API
+    const getAllProduct = async () => {
+        // loading
+        setProductListLoading(true);
 
-    //     const db = getDatabase();
-    //     const instance = onValue(ref(db, 'product'), (snapshot) => {
-    //         const data = snapshot.val();
-    //         if (data !== null) {
-    //             // dữ liệu của firebase lấy về luôn là Object nên phải dùng entries để
-    //             //chuyển sang Array: {id, {value1, value2,...}} --> [id, {value1, value2,...}]
-    //             const dataArr = Object.entries(data);
-    //             const db = getDatabase();
-    //             // đối với mỗi product, lấy percent giảm giá từ id rồi gán lại vào product
-    //             const promises = dataArr.map(async ([id, value]) => {
-    //                 try {
-    //                     const snapshot = await get(child(ref(db), `discount/${value.discountId}`))
-    //                     if (snapshot.exists()) {
-    //                         const discount = snapshot.val();
-    //                         // *Lưu ý: mặc dù ở đây return về một mảng mới nhưng trong hàm async
-    //                         // thì nó sẽ trả về promise, do đó sau khi map() xong thì sẽ 
-    //                         //trả về một mảng các promise
-    //                         return [id, { ...value, discount }];
-    //                     }
-    //                     else {
-    //                         console.log('[Home] Không có dữ liệu discount!');
-    //                         return;
-    //                     }
-    //                 } catch (error) {
-    //                     console.log('[Home] error:', error);
-    //                     return;
-    //                 }
-    //             })
-    //             // Dùng Promise.all để resolve tất cả promise trong mảng promises
-    //             Promise.all(promises).then((productArr) => {
-    //                 setProductListLoading(false);
-    //                 setProducts(productArr)
-    //             })
-    //         }
-    //     })
-
-    //     return instance;
-    // }
+        //lấy dữ liệu
+        const productArr = [];
+        const snapshot = await getDocs(collection(db, 'product'));
+        snapshot.forEach(doc => {
+            // cho id và data của một product vào 1 object rồi push dần vào mảng
+            const productData = doc.data();
+            productArr.push({id: doc.id, ...productData})
+        }) 
+        //cuối cùng set state để hiển thị
+        setProducts(productArr);
+        setProductListLoading(false);
+    }
 
     // logic tự động scroll banner
-    // useEffect(() => {
-    //     const interval = setInterval(() => {
-    //         setBannerCurrentIndex(prev => {
-    //             if (prev < bannerData.length - 1)
-    //                 return prev + 1;
-    //             return 0;
-    //         })
-    //     }, 3000)
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setBannerCurrentIndex(prev => {
+                if (prev < bannerData.length - 1)
+                    return prev + 1;
+                return 0;
+            })
+        }, 3000)
 
-    //     return () => clearInterval(interval);
-    // }, []);
-    // useEffect(() => {
-    //     bannerRef.current.scrollToOffset({ offset: bannerCurrentIndex * (WIDTH - DIMENSION.MARGIN_HORIZONTAL * 2), animated: true })
-    // }, [bannerCurrentIndex])
+        return () => clearInterval(interval);
+    }, []);
+    useEffect(() => {
+        bannerRef.current.scrollToOffset({ offset: bannerCurrentIndex * (WIDTH - DIMENSION.MARGIN_HORIZONTAL * 2), animated: true })
+    }, [bannerCurrentIndex])
 
 
     const renderBanner = ({ item }) => {
@@ -114,17 +87,16 @@ function HomeScreen({ navigation }) {
     const renderBigDiscountProducts = () => {
         return (
             <View style={styles.categoryWrapper}>
-                {products.map(([id, value], index) => {
+                {products.map((product, index) => {
                     // box product nào có index là số chẵn thì marginRight để responsive
                     let even = index % 2 === 0 ? true : false;
                     return (
                         <Product
                             isEven={even}
-                            key={id}
-                            productId={id}
-                            productInfo={value}
+                            key={product.id}
+                            product={product}
                             // tạm thời để id = 1 tránh bị lỗi
-                            onPress={() => navigation.navigate('ProductDetail', { productId: id })}
+                            onPress={() => navigation.navigate('ProductDetail', { productId: 1 })}
                         />
                     )
                 })}
@@ -174,7 +146,6 @@ function HomeScreen({ navigation }) {
                                 outputRange: [0.5, 1, 0.5],
                                 extrapolate: 'clamp'
                             })
-
                             return (
                                 <Animated.View key={item} style={[styles.indicator, { width: dotWidth, opacity }]} />
                             )
@@ -184,14 +155,14 @@ function HomeScreen({ navigation }) {
 
                 {/* 3. Danh sách các sản phẩm */}
                 {/* 3.1 Sale đặc biệt (có mức giảm giá cao) */}
-                {/* <Text style={styles.categoryTitle}>Sale đặc biệt</Text>
+                <Text style={styles.categoryTitle}>Sale đặc biệt</Text>
                 {productListLoading ?
                     <View style={styles.loadingWrapper}>
                         <ActivityIndicator size='large' color={COLOR.MAIN_COLOR} />
                     </View>
                     :
                     renderBigDiscountProducts()
-                } */}
+                }
                 {/* 3.1 Bán chạy (có số lượng bán cao) */}
                 {/* <Text style={styles.categoryTitle}>Bán chạy</Text>
                 {productListLoading ?
