@@ -28,6 +28,8 @@ const bannerData = [
 function HomeScreen({ navigation }) {
     const db = getFirestore();
     const [productListLoading, setProductListLoading] = useState(false);
+    //state để clear interval khi navigate qua màn hình mới
+    const [intervalState, setIntervalState] = useState({ id: '', isRunning: false })
 
     const [products, setProducts] = useState([]);
     const bannerRef = useRef();
@@ -38,7 +40,7 @@ function HomeScreen({ navigation }) {
     useEffect(() => {
         const allProductUnsubscribe = getAllProduct();
         // unsubscribe
-        return () => {allProductUnsubscribe}
+        return () => { allProductUnsubscribe }
     }, []);
 
     // API
@@ -52,25 +54,32 @@ function HomeScreen({ navigation }) {
         snapshot.forEach(doc => {
             // cho id và data của một product vào 1 object rồi push dần vào mảng
             const productData = doc.data();
-            productArr.push({id: doc.id, ...productData})
-        }) 
+            productArr.push({ id: doc.id, ...productData })
+        })
         //cuối cùng set state để hiển thị
         setProducts(productArr);
         setProductListLoading(false);
     }
 
     // logic tự động scroll banner
+    //****************************************************************** KHI NAVIGATION PHẢI NHỚ CLEAR INTERVAL *********
     useEffect(() => {
-        const interval = setInterval(() => {
-            setBannerCurrentIndex(prev => {
-                if (prev < bannerData.length - 1)
-                    return prev + 1;
-                return 0;
-            })
-        }, 3000)
+        // khởi tạo interval
+        if (intervalState.id === '' && intervalState.isRunning === false) {
+            const interval = setInterval(() => {
+                setBannerCurrentIndex(prev => {
+                    if (prev < bannerData.length - 1)
+                        return prev + 1;
+                    return 0;
+                })
+            }, 3000)
+            setIntervalState({ id: interval, isRunning: true })
+        }
+        if (intervalState.isRunning === false)
+            clearInterval(intervalState.id)
+        return () => clearInterval(intervalState.id);
+    }, [intervalState]);
 
-        return () => clearInterval(interval);
-    }, []);
     useEffect(() => {
         bannerRef.current.scrollToOffset({ offset: bannerCurrentIndex * (WIDTH - DIMENSION.MARGIN_HORIZONTAL * 2), animated: true })
     }, [bannerCurrentIndex])
@@ -89,14 +98,17 @@ function HomeScreen({ navigation }) {
             <View style={styles.categoryWrapper}>
                 {products.map((product, index) => {
                     // box product nào có index là số chẵn thì marginRight để responsive
-                    let even = index % 2 === 0 ? true : false;
+                    let isEven = index % 2 === 0 ? true : false;
                     return (
                         <Product
-                            isEven={even}
+                            isEven={isEven}
                             key={product.id}
                             product={product}
-                            // tạm thời để id = 1 tránh bị lỗi
-                            onPress={() => navigation.navigate('ProductDetail', { productId: 1 })}
+                            onPress={() => {
+                                //clear interval
+                                setIntervalState(prev => ({ ...prev, isRunning: false }))
+                                navigation.navigate('ProductDetail', { productId: product.id })
+                            }}
                         />
                     )
                 })}
@@ -109,7 +121,13 @@ function HomeScreen({ navigation }) {
     return (
         <View style={styles.container}>
             {/* Thanh tìm kiếm */}
-            <TouchableOpacity onPress={() => navigation.navigate('Search')} style={styles.searchWrapper}>
+            <TouchableOpacity
+                onPress={() => {
+                    setIntervalState(prev => ({ ...prev, isRunning: false }))
+                    navigation.navigate('Search')
+                }}
+                style={styles.searchWrapper}
+            >
                 <Text style={styles.searchText}>Tìm kiếm</Text>
                 <Icon name='search' size={20} color={COLOR.UNSELECTED}></Icon>
             </TouchableOpacity>

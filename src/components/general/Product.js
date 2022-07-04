@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import {
     View,
     Text,
@@ -11,14 +11,11 @@ import { COLOR, WIDTH, DIMENSION, FONT_SIZE, numberWithCommas, numFormatter } fr
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { Rating } from 'react-native-ratings';
 
-//firebase
-import { getStorage, ref, getDownloadURL } from "firebase/storage";
-
 // chiều rộng của mỗi box sản phẩm
 const cardWidth = (WIDTH - DIMENSION.MARGIN_HORIZONTAL * 3) / 2;
 
 function Product({ product, onPress, style, isEven }) {
-
+    console.log('-----re-render: ', product.id)
     product.discountPrice = Math.round(product.salePrice * (1 - product.discount.percent));
 
     return (
@@ -55,13 +52,14 @@ const styles = StyleSheet.create({
         marginVertical: DIMENSION.MARGIN_HORIZONTAL / 2,
         backgroundColor: COLOR.WHITE,
         borderRadius: 10,
+        
     },
     img: {
         borderTopLeftRadius: 10,
         borderTopRightRadius: 10,
-        width: cardWidth,
+        width: '100%',
         height: cardWidth,
-        resizeMode: 'contain',
+        resizeMode: 'cover',
     },
     productName: {
         fontFamily: 'Montserrat-Bold',

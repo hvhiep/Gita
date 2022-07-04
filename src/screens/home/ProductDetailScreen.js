@@ -9,70 +9,117 @@ import {
     FlatList,
     Animated,
     Modal,
+    ActivityIndicator
 } from 'react-native';
-import { BackBtn, Message } from '../../components';
+import { BackBtn, Product } from '../../components';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Icon2 from 'react-native-vector-icons/FontAwesome5';
 import Icon3 from 'react-native-vector-icons/Feather';
-import { COLOR, DIMENSION, FONT_SIZE, numberWithCommas, numFormatter, specificationsFormat, WIDTH } from '../../res';
-import shopLogo from '../../assets/images/shopLogo.png';
-import productData from './productData';
-
+import { COLOR, DIMENSION, FONT_SIZE, numberWithCommas, numFormatter, WIDTH } from '../../res';
 import { Rating } from 'react-native-ratings';
-import { Product } from '../../components';
 import { Badge } from '@rneui/themed';
+import { showMessage } from 'react-native-flash-message';
 
-//dummy: 
-const shopData = {
-    id: 1,
-    userId: 1,
-    name: 'Ba Đờn',
-    avatarImg: shopLogo,
-    backgroundImg: '',
-    city: 'Tp Hồ Chí Minh',
-    district: 'Thủ Đức',
-    ward: 'Linh Trung',
-    address: '41A đường Trần Hưng Đạo',
-};
-
-const discountData = [
-    {
-        id: 1,
-        name: 'Giảm giá hè',
-        percent: 0.21,
-        startDate: '',
-        endDate: '',
-    },
-    {
-        id: 2,
-        name: 'Giảm giá ngày độc thân 11/11',
-        percent: 0.32,
-        startDate: '',
-        endDate: '',
-    },
-    {
-        id: 3,
-        name: 'Giảm giá giữa tháng',
-        percent: 0.32,
-        startDate: '',
-        endDate: '',
-    },
-];
+//firebase
+import { getFirestore, doc, getDoc, query, collection, where, getDocs } from 'firebase/firestore';
 
 function ProductDetailScreen({ navigation, route }) {
+    const db = getFirestore();
     const productId = route?.params?.productId;
 
+    const [loading, setLoading] = useState(true);
+    const [product, setProduct] = useState(null);
     const [currentImg, setCurrentImg] = useState(1);
     const [isBottomModalShow, setIsBottomModalShow] = useState(false);
     const [orderQuantity, setOrderQuantity] = useState(1);
-    const [isMessageShowed, setIsMessageShowed] = useState(false);
+    const [otherProducts, setOtherProducts] = useState(null);
 
-    // lấy sản phẩm từ id truyền qua navigation
-    const product = productData.find((item) => 1 === item.id);
 
-    //tính giá sau khi đã giảm(giá giảm = giá bán - phần trăm khuyến mãi, tạm thời cứ tính đơn giản thế này đã)
-    const discount = discountData.find((item) => item.id === product.discountId)
-    product.discountPrice = Math.round(product.salePrice * (1 - discount.percent));
+    // ----------------------------------API
+
+    //gọi api
+    useEffect(() => {
+        getProductById();
+    }, [])
+    //lấy danh sách các sản phẩm khác của shop bằng shopId
+    useEffect(() => {
+        if (loading === false && product !== null) {
+            getOtherProductsByShopId(product.shop.shopId, productId);
+        }
+    }, [loading, product])
+
+    const getProductById = async () => {
+        // setLoading(true);
+        //kiểm tra id nhận từ screen khác có hay không
+        if (productId === undefined) {
+            setLoading(false);
+            showMessage({
+                message: `[ProductDetail] Lỗi truyền id từ screen khác!`,
+                type: "danger",
+                icon: 'auto',
+                duration: 2500,
+            });
+            return;
+        }
+        //lấy product snapshot
+        try {
+            const productSnap = await getDoc(doc(db, `product/${productId}`))
+            if (productSnap.exists()) {
+                const data = productSnap.data();
+                // tính giá giảm bởi discount, rồi gán vào productSnap
+                data.discountPrice = Math.round(data.salePrice * (1 - data.discount.percent));
+                setProduct(data);
+                setLoading(false);
+            }
+            else {
+                showMessage({
+                    message: `[ProductDetail] Sản phẩm không tồn tại!`,
+                    type: "danger",
+                    icon: 'auto',
+                    duration: 2500,
+                });
+                setLoading(false);
+            }
+        } catch (error) {
+            setLoading(false);
+            showMessage({
+                message: `[ProductDetail]`,
+                description: `${error}`,
+                type: "danger",
+                icon: 'auto',
+                duration: 2500,
+            });
+        }
+
+    }
+
+    const getOtherProductsByShopId = async (shopId, currentProductId) => {
+        //query: lấy tất cả sp có shop.shopId = shopId
+        try {
+            const products = [];
+            const q = query(collection(db, 'product'), where('shop.shopId', '==', shopId));
+            const querySnap = await getDocs(q);
+            querySnap.forEach((doc) => {
+                const data = doc.data();
+                //Không lấy product hiện tại đang hiển thị
+                if (doc.id !== currentProductId)
+                    //push vào mảng products và phải gắn id vào để sau này navigate thì có id mà truyền
+                    products.push({ id: doc.id, ...data })
+            });
+            setOtherProducts(products);
+
+        } catch (error) {
+            showMessage({
+                message: `[ProductDetail] Sản phẩm khác: `,
+                description: `${error}`,
+                type: "danger",
+                icon: 'auto',
+                duration: 2500,
+            });
+        }
+    }
+
+    // ----------------------------------ANIMATIOn
 
     // animation cho header
     const ScrollViewScrollY = useRef(new Animated.Value(0)).current;
@@ -86,37 +133,47 @@ function ProductDetailScreen({ navigation, route }) {
         outputRange: [0, 0.5],
         extrapolate: 'clamp'
     });
-    
+
+    // ----------------------------------HANDLE
+
     const handleAddToCart = () => {
         // thêm sản phẩm mới vào cart của user
 
         // hiển thị modal thông báo thành công
-        setIsMessageShowed(!isMessageShowed);
+        showMessage({
+            message: 'Thêm vào giỏ hàng thành công!',
+            type: 'success',
+            icon: 'auto',
+            duration: 2500
+        })
+        //đóng bottom modal và reset số lượng thêm
+        setIsBottomModalShow(!isBottomModalShow);
+        setOrderQuantity(1);
+
     }
-    const handleMessageShowed = () => {
-        setTimeout(() => {
-            setIsMessageShowed(!isMessageShowed);
-            setIsBottomModalShow(!isBottomModalShow);
-            setOrderQuantity(1);
-        }, 1000)
+    // ----------------------------------RENDER
+
+    // mỗi dòng thông tin của trường product.specifications
+    const InfoRow = ({ title, value }) => {
+        let val = value;
+        if (title === 'Ty chỉnh cần')
+            val = val ? 'Có' : 'Không';
+        return (
+            <View style={styles.tableRow}>
+                <Text style={styles.tableColumn1}>{title}</Text>
+                <Text style={styles.tableColumn2}>{val}</Text>
+            </View>
+        )
     }
 
-    return (
-        <View style={styles.container}>
-            {/* A. HEADER */}
-            <Animated.View style={[styles.header, { backgroundColor: animatedHeaderBackgroundColor, borderBottomWidth: animatedHeaderBorderWidth }]}>
-                <BackBtn onPress={() => navigation.goBack()} />
-                <TouchableOpacity style={styles.cart}>
-                    <Icon name='shopping-cart' size={20} color={COLOR.MAIN_COLOR} />
-                    <Badge containerStyle={styles.cartBadge} value={25} badgeStyle={{ backgroundColor: COLOR.SECOND_COLOR }}></Badge>
-                </TouchableOpacity>
-            </Animated.View>
+    const renderProductContent = () => {
+        return (
+            //CONTENT
             <Animated.ScrollView
+                showsVerticalScrollIndicator={false}
                 style={styles.scrollView}
                 onScroll={Animated.event([{ nativeEvent: { contentOffset: { y: ScrollViewScrollY } } }], { useNativeDriver: false })}
             >
-
-                {/* B. CONTENT */}
                 {/* 1. Carousel ảnh sản phẩm */}
                 <View style={styles.carousel}>
                     <FlatList
@@ -125,7 +182,7 @@ function ProductDetailScreen({ navigation, route }) {
                         renderItem={({ item }) => {
                             return (
                                 <View key={item}>
-                                    <Image source={item} style={styles.img} />
+                                    <Image source={{ uri: item }} style={styles.img} />
                                 </View>
                             )
                         }}
@@ -148,15 +205,15 @@ function ProductDetailScreen({ navigation, route }) {
                                 type='star'
                                 ratingCount={5}
                                 readonly
-                                startingValue={product.stars}
+                                startingValue={product.rating}
                                 imageSize={12}
                             />
-                            <Text style={styles.rating}>{product.stars}</Text>
+                            <Text style={styles.rating}>{product.rating}</Text>
                         </View>
                     </View>
                     <View style={styles.salePriceWrapper}>
                         <Text style={styles.salePrice}>{numberWithCommas(product.salePrice)} đ</Text>
-                        <Text style={styles.discountPercent}>-{discount.percent * 100}%</Text>
+                        <Text style={styles.discountPercent}>-{product.discount.percent * 100}%</Text>
 
                     </View>
                     <View style={styles.nameWrapper}>
@@ -169,11 +226,11 @@ function ProductDetailScreen({ navigation, route }) {
                     <View style={styles.shopWrapper}>
                         <View style={styles.shopInfoWrapper}>
                             <TouchableOpacity style={styles.shopLogo}>
-                                <Image style={styles.shopLogoImg} source={shopLogo} ></Image>
+                                <Image style={styles.shopLogoImg} source={{ uri: product.shop.avatarImg }} ></Image>
                             </TouchableOpacity>
                             <View style={styles.shopInfo}>
-                                <Text style={styles.shopName}>{shopData.name}</Text>
-                                <Text style={styles.shopLocation}>{shopData.city}</Text>
+                                <Text style={styles.shopName}>{product.shop.name}</Text>
+                                <Text style={styles.shopLocation}>{product.shop.city}</Text>
                             </View>
                         </View>
                         <TouchableOpacity style={styles.shopBtn}>
@@ -198,40 +255,43 @@ function ProductDetailScreen({ navigation, route }) {
                 {/* 4. Carousel các sp khác của shop */}
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Các sản phẩm khác của Shop</Text>
-                    {/* <FlatList
+                    <FlatList
                         style={styles.listShopProduct}
-                        data={productData}
-                        renderItem={({ item }) => {
+                        data={otherProducts}
+                        renderItem={({ item, index }) => {
+                            // box product nào có index là số chẵn thì marginRight để responsive
+                            let isEven = index % 2 === 0 ? true : false;
                             return (
                                 <Product
                                     style={styles.product}
+                                    isEven={isEven}
                                     key={item.id}
-                                    item={item}
-                                // onPress={() => navigation.navigate('ProductDetail', { productId: item.id })}
+                                    product={item}
+                                    onPress={() => navigation.navigate('ProductDetail', { productId: item.id })}
                                 />
                             )
                         }}
                         keyExtractor={(item) => item.id}
                         horizontal
                         showsHorizontalScrollIndicator={false}
-                    /> */}
+                    />
                 </View>
                 {/* 5. Thông số kĩ thuật / specifications */}
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Thông số kỹ thuật</Text>
                     <View style={styles.table}>
-                        {Object.entries(product.specifications).map(([key, value], index) => {
-                            let val = value;
-                            if (key === 'stringAdjustment') {
-                                val = value ? 'Có' : 'Không'
-                            }
-                            return (
-                                <View key={key} style={styles.tableRow}>
-                                    <Text style={styles.tableColumn1}>{specificationsFormat(index)}</Text>
-                                    <Text style={styles.tableColumn2}>{val}</Text>
-                                </View>
-                            )
-                        })}
+                        <InfoRow title='Thương hiệu' value={product.specifications.brand} />
+                        <InfoRow title='Xuất xứ' value={product.specifications.origin} />
+                        <InfoRow title='Kiểu dáng' value={product.specifications.shape} />
+                        <InfoRow title='Kiểu sơn' value={product.specifications.paintStyle} />
+                        <InfoRow title='Mặt đàn' value={product.specifications.top} />
+                        <InfoRow title='Lưng &amp; Hông' value={product.specifications.sideAndBack} />
+                        <InfoRow title='Đầu đàn &amp; Cần đàn' value={product.specifications.headstockAndNeck} />
+                        <InfoRow title='Ngựa đàn' value={product.specifications.saddle} />
+                        <InfoRow title='Dây đàn' value={product.specifications.string} />
+                        <InfoRow title='Ty chỉnh cần' value={product.specifications.stringAdjustment} />
+                        <InfoRow title='EQ' value={product.specifications.eq} />
+                        <InfoRow title='Bảo hành' value={product.specifications.warranty} />
                     </View>
                 </View>
                 {/* 6. Thông tin chi tiết */}
@@ -240,27 +300,11 @@ function ProductDetailScreen({ navigation, route }) {
                     <Text style={styles.information}>{product.information}</Text>
                 </View>
             </Animated.ScrollView>
+        )
+    }
 
-            {/* C. FOOTER */}
-            <View style={styles.footer}>
-                <TouchableOpacity style={styles.footerSmallBtn}>
-                    <Icon2 name='store' size={20} color={COLOR.SECOND_COLOR} />
-                    <Text style={styles.smallBtnText}>Gian hàng</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.footerSmallBtn}>
-                    <Icon name='commenting' size={22} color={COLOR.SECOND_COLOR} />
-                    <Text style={styles.smallBtnText}>Chat</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                    style={styles.footerOrderBtn}
-                    onPress={() => setIsBottomModalShow(!isBottomModalShow)}
-                >
-                    <Icon name='cart-plus' size={30} color={COLOR.WHITE} />
-                    <Text style={styles.orderBtnText}>Thêm vào giỏ hàng</Text>
-                </TouchableOpacity>
-            </View>
-
-            {/* D. BOTTOM MODAL */}
+    const renderBottomModal = () => {
+        return (
             <Modal
                 animationType='fade'
                 visible={isBottomModalShow}
@@ -277,14 +321,14 @@ function ProductDetailScreen({ navigation, route }) {
                         </TouchableOpacity>
                         <View style={styles.sheetHeaderWrapper}>
                             <View style={styles.sheetImgWrapper}>
-                                <Image style={styles.sheetImg} source={product.img[0]} />
+                                <Image style={styles.sheetImg} source={{ uri: product.img[0] }} />
                             </View>
                             <View style={styles.sheetInfoWrapper}>
                                 <View style={styles.sheetHeaderInfoWrapper}>
                                     <Text style={styles.discountPrice}>{numberWithCommas(product.discountPrice)} đ</Text>
                                     <View style={styles.salePriceWrapper}>
                                         <Text style={styles.salePrice}>{numberWithCommas(product.salePrice)} đ</Text>
-                                        <Text style={styles.discountPercent}>-{discount.percent * 100}%</Text>
+                                        <Text style={styles.discountPercent}>-{product.discount.percent * 100}%</Text>
                                     </View>
                                 </View>
                                 <View style={styles.sheetQuantityWrapper}>
@@ -323,13 +367,50 @@ function ProductDetailScreen({ navigation, route }) {
                     </View>
                 </View>
             </Modal>
-            {/* Thông báo thêm vào giỏ hàng thành công */}
-            <Message
-                state='success'
-                content='Thêm vào giỏ hàng thành công'
-                visible={isMessageShowed}
-                onShow={handleMessageShowed}
-            />
+        )
+    }
+
+    // MAIN RETURN
+    return (
+        <View style={styles.container}>
+            {/* A. HEADER */}
+            <Animated.View style={[styles.header, { backgroundColor: animatedHeaderBackgroundColor, borderBottomWidth: animatedHeaderBorderWidth }]}>
+                <BackBtn onPress={() => navigation.goBack()} />
+                <TouchableOpacity style={styles.cart}>
+                    <Icon name='shopping-cart' size={20} color={COLOR.MAIN_COLOR} />
+                    <Badge containerStyle={styles.cartBadge} value={25} badgeStyle={{ backgroundColor: COLOR.SECOND_COLOR }}></Badge>
+                </TouchableOpacity>
+            </Animated.View>
+
+            {/* B. CONTENT */}
+            {loading ?
+                <View style={styles.loading}>
+                    <ActivityIndicator size='large' color={COLOR.MAIN_COLOR} />
+                </View>
+                :
+                renderProductContent()
+            }
+
+            {/* C. FOOTER */}
+            <View style={styles.footer}>
+                <TouchableOpacity style={styles.footerSmallBtn}>
+                    <Icon2 name='store' size={20} color={COLOR.SECOND_COLOR} />
+                    <Text style={styles.smallBtnText}>Gian hàng</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.footerSmallBtn}>
+                    <Icon name='commenting' size={22} color={COLOR.SECOND_COLOR} />
+                    <Text style={styles.smallBtnText}>Chat</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                    style={styles.footerOrderBtn}
+                    onPress={() => setIsBottomModalShow(!isBottomModalShow)}
+                >
+                    <Icon name='cart-plus' size={30} color={COLOR.WHITE} />
+                    <Text style={styles.orderBtnText}>Thêm vào giỏ hàng</Text>
+                </TouchableOpacity>
+            </View>
+            {/* D. BOTTOM MODAL */}
+            {loading ? null : renderBottomModal()}
         </View>
     )
 };
@@ -337,6 +418,12 @@ function ProductDetailScreen({ navigation, route }) {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+    },
+    loading: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: COLOR.BACKGROUND_WHITE,
     },
     scrollView: {
         backgroundColor: COLOR.BACKGROUND_GREY,
@@ -430,10 +517,14 @@ const styles = StyleSheet.create({
         fontSize: FONT_SIZE.NORMAL_TEXT,
     },
     discountPercent: {
-        marginLeft: 10,
+        marginLeft: 5,
+        borderRadius: 5,
+        paddingHorizontal: 2,
         fontFamily: 'Montserrat-Bold',
-        color: COLOR.SECOND_COLOR,
-        fontSize: FONT_SIZE.NORMAL_TEXT,
+        color: COLOR.WHITE,
+        fontSize: FONT_SIZE.SMALL_TEXT,
+        backgroundColor: 'red'
+
     },
     nameWrapper: {
         flexDirection: 'row',
@@ -541,7 +632,6 @@ const styles = StyleSheet.create({
     product: {
         borderWidth: 1,
         borderColor: COLOR.LIGHT_GREY,
-        marginRight: 10,
     },
     // section 4
     table: {
@@ -564,9 +654,9 @@ const styles = StyleSheet.create({
     },
     tableColumn2: {
         width: '70%',
-        marginLeft: 8,
+        marginLeft: 15,
         flexWrap: 'wrap',
-        fontFamily: 'Montserrat-Regular',
+        fontFamily: 'Montserrat-Medium',
         fontSize: FONT_SIZE.NORMAL_TEXT,
         color: COLOR.MAIN_COLOR,
     },
