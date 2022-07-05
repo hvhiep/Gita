@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     View,
     Text,
@@ -6,44 +6,123 @@ import {
     TouchableOpacity,
     TouchableHighlight,
     StatusBar,
-    ScrollView
+    ScrollView,
+    ActivityIndicator
 } from 'react-native';
 import { SearchBar } from '../../components';
-import { COLOR, FONT_SIZE, DIMENSION } from '../../res';
+import { COLOR, FONT_SIZE, DIMENSION, HEIGHT } from '../../res';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import MaterialIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { Product } from '../../components';
+//firebase
+import { getFirestore, collection, getDocs, query, where } from 'firebase/firestore';
 
 //dummy data
 import productData from './productData';
 
+const headerFilter = [
+    {
+        id: 1,
+        title: 'Bán chạy',
+        icon: 'fire'
+    },
+    {
+        id: 2,
+        title: 'Mới nhất',
+        icon: 'new-box'
+    },
+    {
+        id: 3,
+        title: 'Giá',
+        icon: 'arrow-up'
+    },
+    {
+        id: 4,
+        title: 'Giá',
+        icon: 'arrow-down'
+    },
+];
+
 function SearchResultScreen({ navigation, route }) {
+    // Lưu ý: firestore không thể search một chuỗi có nằm trong một chuỗi nào hay không
+    //nên muốn search xịn thì phải dùng thêm phần mềm bên thứ 3 như: https://typesense.org/
+    //còn giải pháp tạm thời là lấy hết tên các product trên db về, cho vào mảng và search thôi (vì số lượng sp không nhiều
+    //nên có thể làm cách này!)
+    const db = getFirestore();
+    const searchResult = route?.params?.searchResult;
 
-    const headerFilter = [
-        {
-            id: 1,
-            title: 'Bán chạy',
-            icon: 'fire'
-        },
-        {
-            id: 2,
-            title: 'Mới nhất',
-            icon: 'new-box'
-        },
-        {
-            id: 3,
-            title: 'Giá',
-            icon: 'arrow-up'
-        },
-        {
-            id: 4,
-            title: 'Giá',
-            icon: 'arrow-down'
-        },
-    ];
-
-    const { searchResult } = route?.params;
+    const [loading, setLoading] = useState(true);
+    // isProductsEmpty === true: không có kết quả phù hợp với từ search, === false thì ngược lại
+    const [isProductsEmpty, setIsProductsEmpty] = useState(true);
     const [headerFilterSelected, setHeaderFilterSelected] = useState(1);
+    const [filterProducts, setFilterProducts] = useState([]);
+
+    //gọi api
+    useEffect(() => {
+        getAllProduct();
+    }, [])
+    //API
+    const getAllProduct = async () => {
+        try {
+            //lấy dữ liệu
+            const productArr = [];
+            const snapshot = await getDocs(collection(db, 'product'));
+            snapshot.forEach(doc => {
+                // cho id và data của một product vào 1 object rồi push dần vào mảng
+                const productData = doc.data();
+                productArr.push({ id: doc.id, ...productData })
+            })
+            //lọc product theo tên
+            if (searchResult !== undefined) {
+                //Dùng hàm filter: trả về một mảng mới với các phần tử đạt điều kiện yêu cầu
+                const newProductArr = productArr.filter((item) => {
+                    const newItem = item.name ? item.name.toUpperCase() : ''.toUpperCase();
+                    const searchText = searchResult.toUpperCase();
+                    return newItem.indexOf(searchText) > -1;
+                })
+                if (newProductArr.length > 0) {
+                    setFilterProducts(newProductArr);
+                    setIsProductsEmpty(false);
+                }
+                setLoading(false);
+
+            }
+            else {
+                setLoading(false);
+            }
+        } catch (error) {
+            console.log('[SearchResult] lỗi lấy product!');
+        }
+    }
+
+    const renderFilterProducts = () => {
+        // nếu không có sp nào thì hiển thị text thông báo
+        if (isProductsEmpty) {
+            return (
+                <View style={styles.messageEmptyWrapper}>
+                    <Text style={styles.messageEmptyText}>Rất tiếc! Không có loại đàn bạn đang tìm kiếm 😭</Text>
+                </View>
+            )
+        }
+        return (
+            <View style={styles.categoryWrapper}>
+                {filterProducts.map((product, index) => {
+                    // box product nào có index là số chẵn thì marginRight để responsive
+                    let isEven = index % 2 === 0 ? true : false;
+                    return (
+                        <Product
+                            isEven={isEven}
+                            key={product.id}
+                            product={product}
+                            onPress={() => {
+                                navigation.navigate('ProductDetail', { productId: product.id })
+                            }}
+                        />
+                    )
+                })}
+            </View>
+        )
+    }
 
     return (
         <View style={styles.container}>
@@ -92,14 +171,14 @@ function SearchResultScreen({ navigation, route }) {
                 </View>
             </View>
             {/* Danh sách sản phẩm */}
-            <ScrollView>
-                <View style={styles.categoryWrapper}>
-                    {productData.map((item) => {
-                        return (
-                            <Product key={item.id} item={item}></Product>
-                        )
-                    })}
-                </View>
+            <ScrollView style={styles.scrollview}>
+                {loading ?
+                    <View style={styles.loading}>
+                        <ActivityIndicator size='large' color={COLOR.MAIN_COLOR} />
+                    </View>
+                    :
+                    renderFilterProducts()
+                }
             </ScrollView>
 
         </View>
@@ -110,6 +189,9 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: COLOR.BACKGROUND_GREY,
+    },
+    loading: {
+        alignSelf: 'center'
     },
     headerWrapper: {
         backgroundColor: COLOR.BACKGROUND_WHITE,
@@ -167,8 +249,26 @@ const styles = StyleSheet.create({
         width: '100%',
         flexDirection: 'row',
         flexWrap: 'wrap',
-        justifyContent: 'space-evenly'
+        marginHorizontal: DIMENSION.MARGIN_HORIZONTAL
 
+    },
+
+    messageEmptyWrapper: {
+        width: '100%',
+        height: HEIGHT * 0.6,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingHorizontal: 25,
+    },
+    messageEmptyText: {
+        fontFamily: 'Montserrat-Bold',
+        fontSize: FONT_SIZE.SMALL_TITLE,
+        color: COLOR.MAIN_COLOR,
+        textAlign: 'center'
+    },
+    scrollview: {
+        flex: 1,
+        backgroundColor: COLOR.BACKGROUND_GREY
     },
 })
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     View,
     Text,
@@ -6,54 +6,58 @@ import {
     TouchableOpacity,
     TextInput,
     StatusBar,
-    FlatList
+    FlatList,
+    ActivityIndicator
 } from 'react-native';
 import { COLOR, FONT_SIZE } from '../../res';
 import Icon from 'react-native-vector-icons/FontAwesome';
-
-
+//firebase
+import { getFirestore, collection, getDocs, query, orderBy, addDoc, Timestamp } from 'firebase/firestore';
+import { useSelector } from 'react-redux';
 
 function SearchScreen({ navigation }) {
+    const db = getFirestore();
+    const user = useSelector(state => state.user);
 
-    const searchHistory = [
-        {
-            id: 1,
-            content: 'dan dien tot nhat'
-        },
-        {
-            id: 2,
-            content: 'dan daaaa'
-        },
-        {
-            id: 3,
-            content: 'đàn bình thường thôi'
-        },
-        {
-            id: 4,
-            content: 'đàn taylor'
-        },
-        {
-            id: 5,
-            content: 'đàn ba đờn'
-        },
-    ];
-
-    const [filterData, setFilterData] = useState(searchHistory);
-    const [initialData, setInitialData] = useState(searchHistory);
+    const [loading, setLoading] = useState(true);
+    const [filterData, setFilterData] = useState([]);
+    const [initialData, setInitialData] = useState([]);
     const [search, setSearch] = useState('');
+
+    //gọi api
+    useEffect(() => {
+        getUserSearchHistory();
+    }, [])
+
+    //API
+    const getUserSearchHistory = async () => {
+        try {
+            const searchArr = [];
+            const ref = collection(db, `user/${user.id}/searchHistory`);
+            const q = query(ref, orderBy('timestamp', 'desc'))
+
+            const snapshot = await getDocs(q)
+            snapshot.forEach((doc) => {
+                searchArr.push(doc.data());
+            })
+            setFilterData(searchArr);
+            setInitialData(searchArr);
+            setLoading(false);
+        } catch (error) {
+            console.log('[Search] lỗi lấy searchHistory: ', error);
+        }
+    }
 
     const renderSearchHistory = ({ item }) => {
         return (
             <TouchableOpacity
-                onPress={() => (
+                onPress={() => {
                     //truyền params qua 2 navigator lồng nhau stack -> drawer -> screen
-                    navigation.navigate(
-                        'FilterDrawer',
-                        { screen: 'SearchResult', params: { searchResult: item.content } }
-                    ))
+                    navigation.navigate('FilterDrawer', { screen: 'SearchResult', params: { searchResult: item.value } })
+                }
                 }
                 style={styles.searchHistoryItem}>
-                <Text style={styles.searchHistoryText}>{item.content}</Text>
+                <Text style={styles.searchHistoryText}>{item.value}</Text>
             </TouchableOpacity>
         )
     }
@@ -64,11 +68,10 @@ function SearchScreen({ navigation }) {
         if (text) {
             //Dùng hàm filter: trả về một mảng mới với các phần tử đạt điều kiện yêu cầu
             const newData = initialData.filter((item) => {
-                const newItem = item.content ? item.content.toUpperCase() : ''.toUpperCase();
+                const newItem = item.value ? item.value.toUpperCase() : ''.toUpperCase();
                 const searchText = text.toUpperCase();
                 return newItem.indexOf(searchText) > -1;
             })
-            console.log('newData: ', newData);
             setFilterData(newData);
             setSearch(text);
         }
@@ -93,7 +96,13 @@ function SearchScreen({ navigation }) {
                     placeholder='Nhập tên cây đàn bạn muốn tìm...'
                     value={search}
                     onChangeText={(text) => handleSearchFilter(text)}
-                    onSubmitEditing={({ nativeEvent }) => {
+                    onSubmitEditing={ async ({ nativeEvent }) => {
+                         //lưu value mới lên db
+                         const newHistory = {
+                            value: nativeEvent.text,
+                            timestamp: Timestamp.now(),
+                        }
+                        await addDoc(collection(db, `user/${user.id}/searchHistory`), newHistory);
                         navigation.navigate(
                             'FilterDrawer',
                             { screen: 'SearchResult', params: { searchResult: nativeEvent.text } }
@@ -104,12 +113,19 @@ function SearchScreen({ navigation }) {
                     <Icon name='search' size={20} color={COLOR.UNSELECTED}></Icon>
                 </TouchableOpacity>
             </View>
-            <FlatList
-                style={styles.listSearchHistory}
-                data={filterData}
-                renderItem={renderSearchHistory}
-                keyExtractor={item => item.id}
-            />
+            {
+                loading ?
+                    <View style={styles.loading}>
+                        <ActivityIndicator size='large' color={COLOR.MAIN_COLOR} />
+                    </View>
+                    :
+                    <FlatList
+                        style={styles.listSearchHistory}
+                        data={filterData}
+                        renderItem={renderSearchHistory}
+                        keyExtractor={item => item.value}
+                    />
+            }
         </View>
     )
 };
@@ -118,6 +134,10 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: COLOR.BACKGROUND_WHITE,
+    },
+    loading: {
+        flex: 1,
+        alignSelf: 'center'
     },
     headerWrapper: {
         flexDirection: 'row',
