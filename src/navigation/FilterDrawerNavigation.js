@@ -30,14 +30,6 @@ const filterSectionData = [
                 id: 2,
                 name: 'Classic'
             },
-            {
-                id: 3,
-                name: 'Bass'
-            },
-            {
-                id: 4,
-                name: 'Electric'
-            },
         ],
     },
     {
@@ -98,7 +90,7 @@ const filterSectionData = [
             },
             {
                 id: 2,
-                name: 'Tp Hồ Chí Minh'
+                name: 'Hồ Chí Minh'
             },
             {
                 id: 3,
@@ -133,7 +125,7 @@ const filterSectionData = [
         ],
     },
 ];
-
+//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Tạm thời chưa làm chức năng này, vì tốn rất nhiều thời gian
 function FilterDrawerNavigation() {
     //Nội dung trong drawer
     const CustomDrawerContent = () => {

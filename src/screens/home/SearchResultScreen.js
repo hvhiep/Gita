@@ -4,50 +4,47 @@ import {
     Text,
     StyleSheet,
     TouchableOpacity,
-    TouchableHighlight,
     StatusBar,
     ScrollView,
     ActivityIndicator
 } from 'react-native';
-import { SearchBar } from '../../components';
 import { COLOR, FONT_SIZE, DIMENSION, HEIGHT } from '../../res';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import MaterialIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { Product } from '../../components';
 //firebase
-import { getFirestore, collection, getDocs, query, where } from 'firebase/firestore';
-
-//dummy data
-import productData from './productData';
+import { getFirestore, collection, getDocs } from 'firebase/firestore';
 
 const headerFilter = [
     {
         id: 1,
-        title: 'Bán chạy',
+        title: 'Bán chạy', // sắp xếp soldQuantity giảm dần
         icon: 'fire'
     },
     {
         id: 2,
-        title: 'Mới nhất',
+        title: 'Đang sale', // sắp xếp discount.percent giảm dần
         icon: 'new-box'
     },
     {
         id: 3,
-        title: 'Giá',
+        title: 'Giá', // giá tăng dần
         icon: 'arrow-up'
     },
     {
         id: 4,
-        title: 'Giá',
+        title: 'Giá', // giá giảm dần
         icon: 'arrow-down'
     },
 ];
 
 function SearchResultScreen({ navigation, route }) {
+
     // Lưu ý: firestore không thể search một chuỗi có nằm trong một chuỗi nào hay không
     //nên muốn search xịn thì phải dùng thêm phần mềm bên thứ 3 như: https://typesense.org/
     //còn giải pháp tạm thời là lấy hết tên các product trên db về, cho vào mảng và search thôi (vì số lượng sp không nhiều
     //nên có thể làm cách này!)
+
     const db = getFirestore();
     const searchResult = route?.params?.searchResult;
 
@@ -55,7 +52,9 @@ function SearchResultScreen({ navigation, route }) {
     // isProductsEmpty === true: không có kết quả phù hợp với từ search, === false thì ngược lại
     const [isProductsEmpty, setIsProductsEmpty] = useState(true);
     const [headerFilterSelected, setHeaderFilterSelected] = useState(1);
-    const [filterProducts, setFilterProducts] = useState([]);
+    const [initialProducts, setInitialProducts] = useState([]); // product lấy từ db về và lọc qua từ search
+    const [filterProducts, setFilterProducts] = useState([]); // product lọc bởi các filter
+
 
     //gọi api
     useEffect(() => {
@@ -81,7 +80,22 @@ function SearchResultScreen({ navigation, route }) {
                     return newItem.indexOf(searchText) > -1;
                 })
                 if (newProductArr.length > 0) {
-                    setFilterProducts(newProductArr);
+
+                    //1. tính discountPrice cho từng product để tí sort
+                    const results_1 = newProductArr.map((item) => {
+                        // thêm trường mới
+                        item.discountPrice = item.salePrice - (1 - item.salePrice * item.discount.percent);
+                        return item;
+                    })
+
+                    //2. lần đầu vào thì sort 'Bán chạy' luôn vì headerFilter ban đầu mặc định là 'Bán chạy'
+                    const results_2 = results_1.sort((productA, productB) => {
+                        return productA.soldQuantity - productB.soldQuantity;
+                    }).reverse()
+
+                    //3. set state
+                    setInitialProducts(results_2);
+                    setFilterProducts(results_2);
                     setIsProductsEmpty(false);
                 }
                 setLoading(false);
@@ -91,7 +105,61 @@ function SearchResultScreen({ navigation, route }) {
                 setLoading(false);
             }
         } catch (error) {
-            console.log('[SearchResult] lỗi lấy product!');
+            console.log('[SearchResult] lỗi lấy product: ', error);
+        }
+    }
+
+    //SORT
+    useEffect(() => {
+        // mỗi khi headerFilter state thay đổi thì sẽ sort lại products trong initialProducts
+        sortByHeaderFilter();
+    }, [headerFilterSelected])
+
+    // ************************************* LƯU Ý *********************************
+    //KHI LÀM VIỆC VỚI MẢNG, OBJECT THÌ PHẢI CLONE RA MỘT BIẾN MỚI RỒI MỚI THAO TÁC
+    //NẾU KHÔNG SẼ KHÔNG CHO RA DỮ LIỆU ĐÚNG VÌ MẢNG/OBJECT LÀ KIỂU DỮ LIỆU THAM CHIẾU
+    const sortByHeaderFilter = () => {
+        //logic sort : https://www.w3schools.com/js/js_array_sort.asp
+        switch (headerFilterSelected) {
+            // soldQuantity desc
+            case 1:
+                setFilterProducts(() => {
+                    const temp = [...initialProducts]; // => clone ra mảng tạm để thao tác
+                    return temp.sort((productA, productB) => {
+                        return productA.soldQuantity - productB.soldQuantity;
+                    }).reverse() //reverse để đảo ngược mảng lại từ asc -> desc
+                })
+                break;
+            // discount percent desc
+            case 2:
+                setFilterProducts(() => {
+                    const temp = [...initialProducts];
+                    return temp.sort((productA, productB) => {
+                        return productA.discount.percent - productB.discount.percent;
+                    }).reverse()
+                })
+                break;
+            // discountPrice asc
+            case 3:
+                setFilterProducts(() => {
+                    const temp = [...initialProducts];
+                    return temp.sort((productA, productB) => {
+                        return productA.discountPrice - productB.discountPrice;
+                    })
+                })
+                break;
+            // discountPrice desc
+            case 4:
+                setFilterProducts(() => {
+                    const temp = [...initialProducts];
+                    const ascArr = temp.sort((productA, productB) => {
+                        return productA.discountPrice - productB.discountPrice;
+                    })
+                    return ascArr.reverse();
+                })
+                break;
+            default:
+                return prev;
         }
     }
 
@@ -103,25 +171,27 @@ function SearchResultScreen({ navigation, route }) {
                     <Text style={styles.messageEmptyText}>Rất tiếc! Không có loại đàn bạn đang tìm kiếm 😭</Text>
                 </View>
             )
+        } else {
+            return (
+                <View style={styles.categoryWrapper}>
+                    {filterProducts.map((product, index) => {
+                        // box product nào có index là số chẵn thì marginRight để responsive
+                        let isEven = index % 2 === 0 ? true : false;
+                        return (
+                            <Product
+                                sort={Math.random()}
+                                isEven={isEven}
+                                key={product.id}
+                                product={product}
+                                onPress={() => {
+                                    navigation.navigate('ProductDetail', { productId: product.id })
+                                }}
+                            />
+                        )
+                    })}
+                </View>
+            )
         }
-        return (
-            <View style={styles.categoryWrapper}>
-                {filterProducts.map((product, index) => {
-                    // box product nào có index là số chẵn thì marginRight để responsive
-                    let isEven = index % 2 === 0 ? true : false;
-                    return (
-                        <Product
-                            isEven={isEven}
-                            key={product.id}
-                            product={product}
-                            onPress={() => {
-                                navigation.navigate('ProductDetail', { productId: product.id })
-                            }}
-                        />
-                    )
-                })}
-            </View>
-        )
     }
 
     return (
@@ -137,12 +207,15 @@ function SearchResultScreen({ navigation, route }) {
                         <Icon name='arrow-left' size={20} color={COLOR.UNSELECTED}></Icon>
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.search} onPress={() => navigation.goBack()}><Text>{searchResult}</Text></TouchableOpacity>
+
+                    {/* >>>>>>>>>>>>>>>>>> phần drawer filter tạm thời chưa làm */}
                     <TouchableOpacity
                         onPress={() => navigation.openDrawer()}
                         style={styles.filter}
                     >
                         <Icon name='filter' size={20} color={COLOR.UNSELECTED}></Icon>
                     </TouchableOpacity>
+
                 </View>
                 {/* header filter */}
                 <View style={styles.headerFilterWrapper}>
