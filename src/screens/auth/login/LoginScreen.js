@@ -28,9 +28,6 @@ function LoginScreen({ navigation }) {
         signInWithEmailAndPassword(auth, values.email, values.password)
             .then((userCredential) => {
                 console.log('[SIGN_IN] user: ', userCredential);
-
-                //- lưu thông tin vào redux để dùng
-
                 //- tự động vào màn hình Home
             })
             .catch((error) => {

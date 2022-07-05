@@ -8,7 +8,6 @@ import {
     StatusBar,
     FlatList
 } from 'react-native';
-import { SearchBar } from '../../components';
 import { COLOR, FONT_SIZE } from '../../res';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
@@ -91,7 +90,7 @@ function SearchScreen({ navigation }) {
                 </TouchableOpacity>
                 <TextInput
                     style={styles.search}
-                    placeholder='Tìm kiếm gì đó'
+                    placeholder='Nhập tên cây đàn bạn muốn tìm...'
                     value={search}
                     onChangeText={(text) => handleSearchFilter(text)}
                     onSubmitEditing={({ nativeEvent }) => {

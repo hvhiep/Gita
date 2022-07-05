@@ -15,4 +15,5 @@ import OrderDeliveryState from "./profile/OrderDeliveryState";
 import GradientText from "./general/GradientText";
 import ChangeSettingBtn from "./button/ChangeSettingBtn";
 import DropDown from "./form/DropDown";
-export { PrimaryBtnBig, SecondaryBtnBig, FormInput, TextBtn, BackBtn, SearchBar, Product, PrimaryBtn, SecondaryBtn, Message, Order, VerifiedOrder, Address, OrderDeliveryState, GradientText, ChangeSettingBtn, DropDown};
+import Banner from "./general/Banner";
+export { PrimaryBtnBig, SecondaryBtnBig, FormInput, TextBtn, BackBtn, SearchBar, Product, PrimaryBtn, SecondaryBtn, Message, Order, VerifiedOrder, Address, OrderDeliveryState, GradientText, ChangeSettingBtn, DropDown, Banner};

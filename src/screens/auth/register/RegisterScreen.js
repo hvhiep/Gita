@@ -21,6 +21,7 @@ import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { useDispatch } from "react-redux";
 import { storeUser } from '../../../features/users/userSlice';
 import { transformErrorCode } from '../../../res';
+import { getFirestore, doc, setDoc } from 'firebase/firestore';
 //db api
 import { createUserAPI } from '../../../api';
 //form handler
@@ -30,6 +31,7 @@ import { SignUpSchema } from '../validation';
 import { showMessage, hideMessage } from "react-native-flash-message";
 
 function RegisterScreen({ navigation }) {
+    const db = getFirestore();
     const dispatch = useDispatch();
 
     const userRoles = [
@@ -63,14 +65,18 @@ function RegisterScreen({ navigation }) {
                 // dữ liệu để lưu lên db
                 const userData = {
                     id: user.uid,
+                    fullName: '',
+                    phoneNumber: '',
+                    avatarImg: '',
+                    sex: null,
+                    birthday: '',
                     type: userRole,
                 };
                 //đẩy lên db
-                createUserAPI(userData);
+                setDoc(doc(db, `user/${user.uid}`), userData);
+                // createUserAPI(userData);
                 //Lưu luôn instance này vào redux
                 dispatch(storeUser(userData));
-                //------------------------đưa ra message đăng ký thành công
-
                 //=> navigation sẽ tự động kiểm tra auth và điều hướng vào Home
             })
             .catch((error) => {
@@ -82,7 +88,7 @@ function RegisterScreen({ navigation }) {
                     type: "danger",
                     icon: 'auto',
                     duration: 2500,
-                  });
+                });
             });
     };
 
@@ -156,10 +162,10 @@ function RegisterScreen({ navigation }) {
                                             />
                                             {/* show validation error */}
                                             {errors.email && touched.email ? (
-                                                    <Text style={styles.errorText}>
-                                                        {errors.email}
-                                                    </Text>
-                                                ) : null}
+                                                <Text style={styles.errorText}>
+                                                    {errors.email}
+                                                </Text>
+                                            ) : null}
                                             <FormInput
                                                 style={styles.formInput}
                                                 title='Mật khẩu'
@@ -203,13 +209,13 @@ function RegisterScreen({ navigation }) {
                                                     scrollXRef.current?.scrollTo({ x: WIDTH, y: 0, animated: true })
                                                 }
                                                 // còn ở page 2 thì submit form
-                                                else  handleSubmit()
+                                                else handleSubmit()
                                             } else {
                                                 showMessage({
                                                     message: "Vui lòng chọn lựa chọn!",
                                                     type: "warning",
                                                     icon: 'auto'
-                                                  })
+                                                })
                                             }
                                         }}
                                     />

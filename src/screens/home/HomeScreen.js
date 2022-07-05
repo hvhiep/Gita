@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { COLOR, DIMENSION, WIDTH, FONT_SIZE } from '../../res/';
 import Icon from 'react-native-vector-icons/FontAwesome5';
-import { Product } from '../../components';
+import { Product, Banner } from '../../components';
 
 // firebase
 import { getFirestore, collection, getDocs } from 'firebase/firestore';
@@ -28,14 +28,8 @@ const bannerData = [
 function HomeScreen({ navigation }) {
     const db = getFirestore();
     const [productListLoading, setProductListLoading] = useState(false);
-    //state để clear interval khi navigate qua màn hình mới
-    const [intervalState, setIntervalState] = useState({ id: '', isRunning: false })
-
     const [products, setProducts] = useState([]);
-    const bannerRef = useRef();
-    const [bannerCurrentIndex, setBannerCurrentIndex] = useState(0);
-    const bannerScrollX = useRef(new Animated.Value(0));
-
+    
     // gọi api
     useEffect(() => {
         const allProductUnsubscribe = getAllProduct();
@@ -61,38 +55,6 @@ function HomeScreen({ navigation }) {
         setProductListLoading(false);
     }
 
-    // logic tự động scroll banner
-    //****************************************************************** KHI NAVIGATION PHẢI NHỚ CLEAR INTERVAL *********
-    useEffect(() => {
-        // khởi tạo interval
-        if (intervalState.id === '' && intervalState.isRunning === false) {
-            const interval = setInterval(() => {
-                setBannerCurrentIndex(prev => {
-                    if (prev < bannerData.length - 1)
-                        return prev + 1;
-                    return 0;
-                })
-            }, 3000)
-            setIntervalState({ id: interval, isRunning: true })
-        }
-        if (intervalState.isRunning === false)
-            clearInterval(intervalState.id)
-        return () => clearInterval(intervalState.id);
-    }, [intervalState]);
-
-    useEffect(() => {
-        bannerRef.current.scrollToOffset({ offset: bannerCurrentIndex * (WIDTH - DIMENSION.MARGIN_HORIZONTAL * 2), animated: true })
-    }, [bannerCurrentIndex])
-
-
-    const renderBanner = ({ item }) => {
-        return (
-            <TouchableOpacity key={item} style={styles.bannerItem}>
-                <Image style={styles.bannerImg} source={{ uri: item }} resizeMode='contain' />
-            </TouchableOpacity>
-        )
-    }
-
     const renderBigDiscountProducts = () => {
         return (
             <View style={styles.categoryWrapper}>
@@ -105,8 +67,6 @@ function HomeScreen({ navigation }) {
                             key={product.id}
                             product={product}
                             onPress={() => {
-                                //clear interval
-                                setIntervalState(prev => ({ ...prev, isRunning: false }))
                                 navigation.navigate('ProductDetail', { productId: product.id })
                             }}
                         />
@@ -123,7 +83,6 @@ function HomeScreen({ navigation }) {
             {/* Thanh tìm kiếm */}
             <TouchableOpacity
                 onPress={() => {
-                    setIntervalState(prev => ({ ...prev, isRunning: false }))
                     navigation.navigate('Search')
                 }}
                 style={styles.searchWrapper}
@@ -135,41 +94,7 @@ function HomeScreen({ navigation }) {
 
                 {/* 1. Banner quảng cáo */}
                 {/* Tạm thời cứ hiển thị ảnh đã, vì nhấn vào mỗi banner sẽ navigate đến trang sự kiện(chưa làm) */}
-                <View>
-                    <FlatList
-                        ref={bannerRef}
-                        style={styles.list}
-                        data={bannerData}
-                        renderItem={renderBanner}
-                        keyExtractor={item => item}
-                        horizontal={true}
-                        showsHorizontalScrollIndicator={false}
-                        pagingEnabled={true}
-                        bounces={false}
-                        onScroll={Animated.event([{ nativeEvent: { contentOffset: { x: bannerScrollX.current } } }], { useNativeDriver: false })}
-                        scrollEventThrottle={32}
-                    />
-                    {/* indicator cho banner */}
-                    <View style={styles.indicatorWrapper}>
-                        {bannerData.map((item, index) => {
-
-                            const inputRange = [(index - 1) * WIDTH, index * WIDTH, (index + 1) * WIDTH];
-                            const dotWidth = bannerScrollX.current.interpolate({
-                                inputRange,
-                                outputRange: [6, 15, 6],
-                                extrapolate: 'clamp'
-                            });
-                            const opacity = bannerScrollX.current.interpolate({
-                                inputRange,
-                                outputRange: [0.5, 1, 0.5],
-                                extrapolate: 'clamp'
-                            })
-                            return (
-                                <Animated.View key={item} style={[styles.indicator, { width: dotWidth, opacity }]} />
-                            )
-                        })}
-                    </View>
-                </View>
+                <Banner  data={bannerData}/>
 
                 {/* 3. Danh sách các sản phẩm */}
                 {/* 3.1 Sale đặc biệt (có mức giảm giá cao) */}
@@ -221,38 +146,6 @@ const styles = StyleSheet.create({
         marginTop: 10,
         backgroundColor: COLOR.BACKGROUND_GREY
     },
-
-    // banner style 
-    list: {
-        marginHorizontal: DIMENSION.MARGIN_HORIZONTAL,
-    },
-    bannerItem: {
-        height: 200,
-        width: WIDTH - DIMENSION.MARGIN_HORIZONTAL * 2,
-        backgroundColor: COLOR.SECOND_COLOR,
-        borderRadius: 10,
-    },
-    bannerImg: {
-        height: 200,
-        width: WIDTH - DIMENSION.MARGIN_HORIZONTAL * 2,
-        borderRadius: 10,
-    },
-    indicatorWrapper: {
-        position: 'absolute',
-        bottom: 10,
-        left: 0,
-        right: 0,
-        flexDirection: 'row',
-        justifyContent: 'center',
-    },
-    indicator: {
-        borderRadius: 50,
-        width: 6,
-        height: 6,
-        backgroundColor: COLOR.MAIN_COLOR,
-        marginRight: 10,
-    },
-
     loadingWrapper: {
         alignItems: 'center',
     },

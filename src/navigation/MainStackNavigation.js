@@ -9,9 +9,10 @@ import MainTabNavigation from './MainTabNavigation';
 import FilterDrawerNavigation from "./FilterDrawerNavigation";
 
 //firebase
-import { auth, db } from '../../firebase';
+import { auth, database } from '../../firebase';
 import { onAuthStateChanged } from "firebase/auth";
-import { ref, onValue } from 'firebase/database';
+import { getFirestore, doc, getDoc } from 'firebase/firestore';
+
 //redux
 import { useDispatch } from 'react-redux';
 import { storeUser } from '../features/users/userSlice';
@@ -20,6 +21,7 @@ import { storeUser } from '../features/users/userSlice';
 const MainStack = createNativeStackNavigator();
 
 function MainStackNavigation() {
+    const db = database;
     const dispatch = useDispatch();
 
     const [isSignIn, setIsSignIn] = useState(false);
@@ -28,21 +30,36 @@ function MainStackNavigation() {
     // kiểm tra xem user đã đăng nhập chưa để thay đổi state
     useEffect(() => {
         const unregisterAuthObserver = onAuthStateChanged(auth, (user) => {
+            // nếu user vừa đăng nhập vào
             if (user) {
-                //lấy UID từ user để lấy data từ bảng user trong realtime db
-                console.log('[navigation] user.uid: ', user.uid);
-                onValue(ref(db, 'user/' + user.uid), snapshot => {
-                    const data = snapshot.val();
-                    console.log('[navigation] user data: ', data);
-                    //lưu user data mới lấy lên redux
-                    dispatch(storeUser(data))
-                })
+                const userId = user.uid;
+                //lấy user bằng userId
+                getDoc(doc(db, `user/${userId}`))
+                    .then((doc) => {
+                        if(doc.exists()){
+                            const data = doc.data();
+                            //phải gán userId để dùng sau này
+                            const userData = {id: userId, ...data};
+                            //lưu user lên redux để dùng 
+                            dispatch(storeUser(userData));
+                        }
+                        else 
+                            console.log('[StackNav] lỗi khi lấy thông tin user!')
+                    })
+                    .catch((error) => console.log('[StackNav] lỗi khi lấy thông tin user: ', error))
+
+                // onValue(ref(db, 'user/' + user.uid), snapshot => {
+                //     const data = snapshot.val();
+                //     console.log('[navigation] user data: ', data);
+                //     //lưu user data mới lấy lên redux
+                //     dispatch(storeUser(data))
+                // })
 
                 //đăng nhập vào Home
                 setIsSignIn(true);
                 setIsLoading(false);
             } else {
-                //quay lại màn hình đăng ký
+                //quay lại màn hình splash
                 setIsSignIn(false);
                 setIsLoading(false);
             }
@@ -76,7 +93,7 @@ function MainStackNavigation() {
             ) : (
                 <MainStack.Group
                     screenOptions={{
-                        headerShown: false
+                    headerShown: false
                     }}
                 >
                     <MainStack.Screen name='MainTab' component={MainTabNavigation} />

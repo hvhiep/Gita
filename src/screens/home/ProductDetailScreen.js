@@ -264,10 +264,10 @@ function ProductDetailScreen({ navigation, route }) {
                             return (
                                 <Product
                                     style={styles.product}
-                                    isEven={isEven}
+                                    // isEven={isEven}
                                     key={item.id}
                                     product={item}
-                                    onPress={() => navigation.navigate('ProductDetail', { productId: item.id })}
+                                    onPress={() => navigation.push('ProductDetail', { productId: item.id })}
                                 />
                             )
                         }}
@@ -632,6 +632,7 @@ const styles = StyleSheet.create({
     product: {
         borderWidth: 1,
         borderColor: COLOR.LIGHT_GREY,
+        marginRight: 15,
     },
     // section 4
     table: {

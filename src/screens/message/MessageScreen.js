@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 
 //firebase
-import { getFirestore, collection, doc, getDoc, addDoc, getDocs } from "firebase/firestore";
+import { getFirestore, collection, doc, getDoc, addDoc, getDocs, query, orderBy, Timestamp } from "firebase/firestore";
 //message
 import { showMessage } from 'react-native-flash-message';
 import products from './products';
@@ -16,26 +16,6 @@ import products from './products';
 const db = getFirestore();
 
 function MessageScreen() {
-
-    //màn hình thêm sản phẩm
-    //1. lấy danh sách discount bằng shopId để hiển thị lên dropbox
-    const discounts = [
-        {
-            id: 'TghBgAqBdYpgXvPE2ojQ',
-            name: "Giảm giá hè(shop0) 1",
-            percent: 0.2
-        },
-        {
-            id: 'Qh2L5LUi1rvTnPxgf8zq',
-            name: "Giảm giá hè(shop0) 2",
-            percent: 0.25
-        },
-        {
-            id: 'SdhevWrbp16h8vBJO5Lh',
-            name: "Giảm giá tháng 7(shop0)",
-            percent: 0.5
-        },
-    ]
 
 
     //2. lấy thông tin của shop, để chuẩn bị gán cho product
@@ -66,21 +46,31 @@ function MessageScreen() {
         }
     };
 
-    const getProduct = () => {
-        
+    const getUser = async () => {
+        try {
+            console.log('dung ham cua firestore luon khoi dung Date: ', Timestamp.now());
+            console.log('-------------------------');
+            const q = query(collection(db, '/user/OlOnxRH71chi07tvZQKdmQOAbNi2/searchHistory'), orderBy('timestamp', 'asc'))
+            const result = await getDocs(q);
+            result.forEach((doc) => {
+                
+                console.log('history: ', doc.id, doc.data())
+            })
+        } catch (error) {
+            console.log(error)
+        }
     }
-
-
 
     return (
         <View style={styles.container}>
             <Text style={styles.text}>Tính năng đang được phát triển! Quay lại sau nhé 😊</Text>
         {/* //shop0: 0 1 2 3 4,  shop1: 5, 6, 7, 8 */}
             {/*      0                             */}
-            <Button title='thêm product' onPress={() => {
-                const shopId0 = 'suUQzTNtQG1iG0B7P4fl';
-                const shopId1 = 'gNPWDkhyC6i3nK2rISqe';
-                addProduct(shopId1);
+            <Button title='get user' onPress={() => {
+                // const shopId0 = 'suUQzTNtQG1iG0B7P4fl';
+                // const shopId1 = 'gNPWDkhyC6i3nK2rISqe';
+                // addProduct(shopId1);
+                getUser();
             }} />
         </View>
     )
