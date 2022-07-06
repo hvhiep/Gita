@@ -9,7 +9,6 @@ import {
 } from 'react-native';
 import { Order } from '../../components';
 import { COLOR, FONT_SIZE, DIMENSION, numberWithCommas } from '../../res';
-import CheckBox from '@react-native-community/checkbox';
 import BouncyCheckbox from "react-native-bouncy-checkbox";
 import { getFirestore, collection, query, where, doc, updateDoc, onSnapshot } from 'firebase/firestore';
 import { useSelector } from 'react-redux';
@@ -25,6 +24,7 @@ function CartScreen({ navigation }) {
     const [toggleCheckBox, setToggleCheckBox] = useState(false);
     const [orderIdsSelected, setOrderIdsSelected] = useState([]);
     const [totalPrice, setTotalPrice] = useState(0);
+
 
     //-----------------------------Lắng nghe thay đổi dữ liệu của những order thuộc user.id hiện tại đang dùng app
     useEffect(() => {
@@ -47,6 +47,14 @@ function CartScreen({ navigation }) {
     //-----------------------------mỗi khi có 1 order được chọn sẽ tính lại tổng cộng tiền cho những order được chọn
     useEffect(() => {
         if (orders.length > 0) {
+            //nếu tất cả checkbox được check thì bật select all checkbox
+
+            setToggleCheckBox(() => {
+                const temp = orders;
+                const isAllCheck = temp.every((item) => item.selected === true); 
+                return isAllCheck;
+            })
+            //dùng để hiển thị số lượng order được chọn
             setOrderIdsSelected(() => {
                 const ordersTemp = orders;
                 const selectedOrders = ordersTemp.filter((item) => item.selected === true);
@@ -83,6 +91,26 @@ function CartScreen({ navigation }) {
             setLoading(false);
         } catch (error) {
             console.log('[Cart] lỗi khi cập nhật quantity của order: ', error)
+        }
+    }
+    //chọn tất cả
+    const selectAllCheckBox = async () => {
+        try {
+            setLoading(true);
+            //update trường selected cho toàn bộ orders
+            const ordersTemp = orders;
+            const promises = ordersTemp.map(async (item) => {
+                return await updateDoc(doc(db, `order/${item.id}`), { selected: !toggleCheckBox });
+            });
+            Promise.all(promises)
+                .then(() => {
+                    setLoading(false);
+                })
+                .catch((error) => {
+                    console.log('[Cart] lỗi cập nhật tất cả order!')
+                })
+        } catch (error) {
+            console.log('[Cart] lỗi cập nhật tất cả order: ', error)
         }
     }
     // MAIN VIEW
@@ -126,7 +154,11 @@ function CartScreen({ navigation }) {
                         unfillColor={COLOR.WHITE}
                         iconStyle={{ borderColor: COLOR.LIGHT_GREY }}
                         isChecked={toggleCheckBox}
-                        onPress={() => setToggleCheckBox(!toggleCheckBox)}
+                        disableBuiltInState
+                        onPress={() => {
+                            setToggleCheckBox(!toggleCheckBox)
+                            selectAllCheckBox()
+                        }}
                     />
                     <Text style={styles.checkBoxText}>Tất cả</Text>
                 </View>

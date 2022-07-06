@@ -19,11 +19,13 @@ import { COLOR, DIMENSION, FONT_SIZE, numberWithCommas, numFormatter, WIDTH } fr
 import { Rating } from 'react-native-ratings';
 import { Badge } from '@rneui/themed';
 import { showMessage } from 'react-native-flash-message';
+import { useSelector } from 'react-redux';
 
 //firebase
-import { getFirestore, doc, getDoc, query, collection, where, getDocs } from 'firebase/firestore';
+import { getFirestore, doc, getDoc, query, collection, where, getDocs, updateDoc, addDoc } from 'firebase/firestore';
 
 function ProductDetailScreen({ navigation, route }) {
+    const user = useSelector(state => state.user);
     const db = getFirestore();
     const productId = route?.params?.productId;
 
@@ -68,6 +70,7 @@ function ProductDetailScreen({ navigation, route }) {
                 const data = productSnap.data();
                 // tính giá giảm bởi discount, rồi gán vào productSnap
                 data.discountPrice = Math.round(data.salePrice * (1 - data.discount.percent));
+                data.id = productId;
                 setProduct(data);
                 setLoading(false);
             }
@@ -136,19 +139,54 @@ function ProductDetailScreen({ navigation, route }) {
 
     // ----------------------------------HANDLE
 
-    const handleAddToCart = () => {
-        // thêm sản phẩm mới vào cart của user
-
-        // hiển thị modal thông báo thành công
-        showMessage({
-            message: 'Thêm vào giỏ hàng thành công!',
-            type: 'success',
-            icon: 'auto',
-            duration: 2500
-        })
-        //đóng bottom modal và reset số lượng thêm
-        setIsBottomModalShow(!isBottomModalShow);
-        setOrderQuantity(1);
+    const handleAddToCart = async () => {
+        if (productId === undefined)
+            return;
+        try {
+            //kiểm tra xem order định thêm vào giỏ đã có trong bảng orders chưa
+            let isExisted = false;
+            let orderId = null;
+            let quantity = null;
+            const q = query(collection(db, 'order'), where('product.id', '==', productId));
+            const snapshot = await getDocs(q);
+            snapshot.forEach((doc) => {
+                if (doc.exists()) {
+                    isExisted = true;
+                    orderId = doc.id;
+                    quantity = doc.data().quantity;
+                }
+            })
+            //nếu có tồn tại rồi thì chỉ update quantity
+            if (isExisted && orderId !== null) {
+                await updateDoc(doc(db, `order/${orderId}`), { quantity: quantity + orderQuantity })
+            } else {
+                //chưa có thì thêm sản phẩm mới vào cart của user
+                const newOrderFormat = {
+                    selected: false, //true: được select trong phần giỏ hàng
+                    userId: user.id,
+                    quantity: orderQuantity,
+                    deliveryAddressId: null, // khi nào chọn địa chỉ mới cập nhật lại
+                    orderDate: null, //vì chưa xác nhận mua nên === null
+                    deliveryDate: null, //vì chưa xác nhận mua nên === null
+                    status: -1, //trong giỏ hàng
+                    orderCancellation: null, //khi nào hủy thì mới cập nhật lại
+                    product: {...product} 
+                }
+                await addDoc(collection(db, `order`), newOrderFormat);
+            }
+            // hiển thị modal thông báo thành công
+            showMessage({
+                message: 'Thêm vào giỏ hàng thành công!',
+                type: 'success',
+                icon: 'auto',
+                duration: 2500
+            })
+            //đóng bottom modal và reset số lượng thêm
+            setIsBottomModalShow(!isBottomModalShow);
+            setOrderQuantity(1);
+        } catch (error) {
+            console.log('[ProductDetail] Có lỗi khi thêm sp vào giỏ: ', error);
+        }
 
     }
     // ----------------------------------RENDER

@@ -6,7 +6,6 @@ import {
     TouchableOpacity,
     Image
 } from 'react-native';
-import CheckBox from '@react-native-community/checkbox';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Icon2 from 'react-native-vector-icons/Feather';
 import Icon3 from 'react-native-vector-icons/FontAwesome5';
@@ -28,6 +27,7 @@ function Order({ navigation, item, onCheckBoxTouch, onProductQuantityChange }) {
                     unfillColor={COLOR.WHITE}
                     iconStyle={{ borderColor: COLOR.LIGHT_GREY }}
                     isChecked={toggleCheckBox}
+                    disableBuiltInState
                     onPress={() => {
                         setToggleCheckBox(!toggleCheckBox)
                         onCheckBoxTouch(!toggleCheckBox, item.id)

@@ -7,8 +7,7 @@ import {
 } from 'react-native';
 import { COLOR, FONT_SIZE, DIMENSION, numberWithCommas } from '../../../res';
 import { BackBtn, PrimaryBtn } from '../../../components';
-import CheckBox from '@react-native-community/checkbox';
-
+import BouncyCheckbox from 'react-native-bouncy-checkbox';
 import orderData from '../../cart/orderData';
 
 const OrderCancellationScreen = ({ navigation, route }) => {
@@ -53,20 +52,20 @@ const OrderCancellationScreen = ({ navigation, route }) => {
             {cancelledReason.map((item, index) => {
                 return (
                     <View key={index} style={styles.reasonWrapper}>
-                        <CheckBox
-                            disabled={false}
-                            value={index === toggleCheckBox ? true : false}
-                            onValueChange={() => setToggleCheckBox(index)}
-                            tintColors={{
-                                true: COLOR.SECOND_COLOR,
-                                false: COLOR.GREY
-                            }}
+                        <BouncyCheckbox
+                            size={25}
+                            fillColor={COLOR.SECOND_COLOR}
+                            unfillColor={COLOR.WHITE}
+                            disableBuiltInState
+                            iconStyle={{ borderColor: COLOR.LIGHT_GREY }}
+                            isChecked={index === toggleCheckBox ? true : false}
+                            onPress={() => setToggleCheckBox(!toggleCheckBox)}
                         />
                         <Text style={styles.reasonText}>{item}</Text>
                     </View>
                 )
             })}
-            <PrimaryBtn style={styles.btn} title='Gửi yêu cầu' type='long'/>
+            <PrimaryBtn style={styles.btn} title='Gửi yêu cầu' type='long' />
         </View >
     )
 };
