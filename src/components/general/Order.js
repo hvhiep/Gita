@@ -11,46 +11,28 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import Icon2 from 'react-native-vector-icons/Feather';
 import Icon3 from 'react-native-vector-icons/FontAwesome5';
 import { COLOR, FONT_SIZE, numberWithCommas } from '../../res';
+import BouncyCheckbox from 'react-native-bouncy-checkbox';
+//?????????????????????/ ĐỔI LẠI CÁI CHECKBOX KHÁC, CHECKBOX NÀY NGU VÃI LỒN
+function Order({ navigation, item, onCheckBoxTouch, onProductQuantityChange }) {
 
-function Order({ navigation, item, isCheckedBySelectAll, onCheckBoxTouch, onProductQuantityChange }) {
-
-    const [toggleCheckBox, setToggleCheckBox] = useState(false);
-    const [productQuantity, setProductQuantity] = useState(1);
-
-    // xử lý trong mỗi order khi người dùng bấm chọn tất cả
-    useEffect(() => {
-        if (isCheckedBySelectAll) {
-            setToggleCheckBox(true)
-            onCheckBoxTouch(true, {id: item.id, quantity: productQuantity})
-        } else {
-            setToggleCheckBox(false);
-            onCheckBoxTouch(false, {id: item.id, quantity: productQuantity})
-
-        }
-    }, [isCheckedBySelectAll])
-
-    // xử lý thêm bớt số lượng
-    useEffect(() => {
-        if (toggleCheckBox)
-            onProductQuantityChange(item.id, productQuantity)
-    }, [productQuantity])
+    const [toggleCheckBox, setToggleCheckBox] = useState(item.selected);
 
     return (
         <View style={styles.container}>
             {/* 1. selector */}
             <View style={styles.selectorWrapper}>
-                <CheckBox
-                    disabled={false}
-                    value={toggleCheckBox}
-                    onValueChange={(newValue) => {
-                        setToggleCheckBox(newValue)
-                        onCheckBoxTouch(newValue, {id: item.id, quantity: productQuantity})
+                <BouncyCheckbox
+                    style={styles.checkbox}
+                    size={25}
+                    fillColor={COLOR.SECOND_COLOR}
+                    unfillColor={COLOR.WHITE}
+                    iconStyle={{ borderColor: COLOR.LIGHT_GREY }}
+                    isChecked={toggleCheckBox}
+                    onPress={() => {
+                        setToggleCheckBox(!toggleCheckBox)
+                        onCheckBoxTouch(!toggleCheckBox, item.id)
                     }}
-                    tintColors={{
-                        true: COLOR.SECOND_COLOR,
-                        false: COLOR.GREY
-                    }}
-                ></CheckBox>
+                />
             </View>
             {/* 2. content */}
             <View style={styles.contentWrapper}>
@@ -58,7 +40,7 @@ function Order({ navigation, item, isCheckedBySelectAll, onCheckBoxTouch, onProd
                 <TouchableOpacity style={styles.shopBtn}>
                     <View style={styles.shopBtnWrapper}>
                         <Icon3 name='store' size={18} color={COLOR.MAIN_COLOR} />
-                        <Text style={styles.shopName}>{item.shop.name}</Text>
+                        <Text style={styles.shopName}>{item.product.shop.name}</Text>
                         <Icon name='angle-right' size={20} color={COLOR.MAIN_COLOR} />
                     </View>
                 </TouchableOpacity>
@@ -69,7 +51,7 @@ function Order({ navigation, item, isCheckedBySelectAll, onCheckBoxTouch, onProd
                         style={styles.imgWrapper}
                         onPress={() => navigation.navigate('ProductDetail', { productId: item.id })}
                     >
-                        <Image style={styles.img} source={item.product.img[0]}></Image>
+                        <Image style={styles.img} source={{ uri: item.product.img[0] }}></Image>
                     </TouchableOpacity>
                     {/* info sp */}
                     <View style={styles.orderInfoWrapper}>
@@ -85,21 +67,22 @@ function Order({ navigation, item, isCheckedBySelectAll, onCheckBoxTouch, onProd
                                 {/* bớt sản phẩm */}
                                 <TouchableOpacity
                                     style={styles.quantityBtn}
+                                    disabled={item.quantity === 1 ? true : false}
                                     onPress={() => {
-                                        setProductQuantity(prev => {
-                                            if (prev <= 1)
-                                                return prev
-                                            return prev - 1
-                                        })
+                                        //nếu sl sp > 1 thì mới cho bớt đi
+                                        if (item.quantity > 1)
+                                            onProductQuantityChange(item.id, item.quantity - 1)
                                     }}
                                 >
-                                    <Icon2 name='minus' size={20} color={COLOR.BLACK} />
+                                    <Icon2 name='minus' size={20} color={item.quantity === 1 ? COLOR.LIGHT_GREY : COLOR.BLACK} />
                                 </TouchableOpacity>
-                                <Text style={styles.quantityText}>{productQuantity}</Text>
+                                <Text style={styles.quantityText}>{item.quantity}</Text>
                                 {/* thêm sản phẩm */}
                                 <TouchableOpacity
                                     style={styles.quantityBtn}
-                                    onPress={() => setProductQuantity(prev => prev + 1)}
+                                    onPress={() => {
+                                        onProductQuantityChange(item.id, item.quantity + 1)
+                                    }}
                                 >
                                     <Icon2 name='plus' size={20} color={COLOR.BLACK} />
                                 </TouchableOpacity>
@@ -133,6 +116,10 @@ const styles = StyleSheet.create({
         alignItems: 'center',
 
     },
+    checkbox: {
+        marginRight: -10,
+        marginLeft: 5,
+    },
     contentWrapper: {
         flex: 1,
     },
@@ -163,8 +150,9 @@ const styles = StyleSheet.create({
         alignItems: 'center'
     },
     img: {
-        width: '90%',
-        height: '90%',
+        borderRadius: 10,
+        width: '100%',
+        height: '100%',
         resizeMode: 'contain'
     },
     orderInfoWrapper: {
@@ -214,7 +202,8 @@ const styles = StyleSheet.create({
         paddingHorizontal: 5,
         borderTopRightRadius: 10,
         borderBottomRightRadius: 10,
-        borderLeftWidth: 0.4,
+        borderLeftWidth: 0.3,
+        borderColor: COLOR.LIGHT_GREY
     },
 });
 

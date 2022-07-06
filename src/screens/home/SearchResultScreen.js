@@ -84,7 +84,7 @@ function SearchResultScreen({ navigation, route }) {
                     //1. tính discountPrice cho từng product để tí sort
                     const results_1 = newProductArr.map((item) => {
                         // thêm trường mới
-                        item.discountPrice = item.salePrice - (1 - item.salePrice * item.discount.percent);
+                        item.discountPrice = item.salePrice * (1 - item.discount.percent);
                         return item;
                     })
 

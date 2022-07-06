@@ -4,128 +4,143 @@ import {
     Text,
     StyleSheet,
     FlatList,
-    TouchableOpacity
+    TouchableOpacity,
+    ActivityIndicator
 } from 'react-native';
 import { Order } from '../../components';
 import { COLOR, FONT_SIZE, DIMENSION, numberWithCommas } from '../../res';
 import CheckBox from '@react-native-community/checkbox';
-
-// dump import
-import orderData from './orderData';
+import BouncyCheckbox from "react-native-bouncy-checkbox";
+import { getFirestore, collection, query, where, doc, updateDoc, onSnapshot } from 'firebase/firestore';
+import { useSelector } from 'react-redux';
 
 function CartScreen({ navigation }) {
+    console.log('re-render')
+    const db = getFirestore();
+    const user = useSelector(state => state.user);
 
+    const [loading, setLoading] = useState(true);
+    const [orders, setOrders] = useState([]);
+    //state cho  selectAllCheckbox
     const [toggleCheckBox, setToggleCheckBox] = useState(false);
-    const [orderCheckBoxState, setOrderCheckBoxState] = useState(false);
-    const [orderSelected, setOrderSelected] = useState([]);
+    const [orderIdsSelected, setOrderIdsSelected] = useState([]);
+    const [totalPrice, setTotalPrice] = useState(0);
 
-    // logic cho nút chọn tất cả order ở footer
+    //-----------------------------Lắng nghe thay đổi dữ liệu của những order thuộc user.id hiện tại đang dùng app
     useEffect(() => {
-        if (toggleCheckBox) {
-            setOrderCheckBoxState(true);
-        } else {
-            setOrderCheckBoxState(false)
-        }
-    }, [toggleCheckBox])
+        const q = query(collection(db, 'order'), where('userId', '==', user.id))
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+            setLoading(true);
+            const orderArr = [];
+            snapshot.forEach((doc) => {
+                const data = doc.data();
+                //tính discountPrice
+                data.product.discountPrice = data.product.salePrice * (1 - data.product.discount.percent);
+                orderArr.push({ id: doc.id, ...data });
+            })
+            setOrders(orderArr);
+            setLoading(false);
+        });
+        return () => unsubscribe();
+    }, [])
 
-    // logic cho việc chọn hay bỏ chọn một order
-    const handleCheckBoxTouch = (checkBoxValue, order) => {
-        if (checkBoxValue) {
-            setOrderSelected(prev => {
-                // kiểm tra order định thêm vào có tồn tại trong mảng orderSelected hay không
-                let isExisted = orderSelected.some((item) => {
-                    return item.id === order.id;
-                });
-                if (isExisted)
-                    return prev;
-                else
-                    return [...prev, { id: order.id, quantity: order.quantity }];
+    //-----------------------------mỗi khi có 1 order được chọn sẽ tính lại tổng cộng tiền cho những order được chọn
+    useEffect(() => {
+        if (orders.length > 0) {
+            setOrderIdsSelected(() => {
+                const ordersTemp = orders;
+                const selectedOrders = ordersTemp.filter((item) => item.selected === true);
+                const selectedOrderIds = selectedOrders.map((item) => item.id);
+                return selectedOrderIds;
             })
-        } else {
-            setOrderSelected(prev => {
-                return prev.filter((item) => {
-                    return item.id !== order.id;
-                })
+            setTotalPrice(() => {
+                const ordersTemp = orders;
+                const total = ordersTemp.reduce((total, item) => {
+                    //order nào có trường selected === true thì mới tính tổng tiền
+                    if (item.selected) {
+                        return total + (item.product.discountPrice * item.quantity);
+                    }
+                    return total;
+                }, 0)
+                return numberWithCommas(total);
             })
         }
-    };
+    }, [orders])
 
-    // xử lý việc thêm bớt sl sp trong danh sách đã chọn
-    const handleProductQuantityChange = (orderId, productQuantity) => {
-        // cập nhật state
-        setOrderSelected(prev => {
-            return prev.map((item) => {
-                if (item.id === orderId)
-                    return { id: orderId, quantity: productQuantity };
-                else
-                    return item;
-            })
-        })
-        // update data trên server
-        
+    //----------------------------- logic cho việc chọn hay bỏ chọn một order
+    const handleCheckBoxTouch = async (checkBoxValue, orderId) => {
+        //cập nhật lại trường selected với giá trị mới cho order có orderId 
+        setLoading(true);
+        await updateDoc(doc(db, `order/${orderId}`), { selected: checkBoxValue });
+        setLoading(false);
     }
 
-    // tính tổng tiền phải trả
-    const handleTotalPrice = () => {
-        const total = orderSelected.reduce((total, item) => {
-            const order = orderData.find((orderItem) => {
-                return orderItem.id === item.id;
-            })
-            return total + Math.round(order.product.discountPrice * item.quantity);
-        }, 0);
-
-        return numberWithCommas(total);
+    //----------------------------- xử lý việc thêm bớt trường quantity của mỗi order
+    const handleProductQuantityChange = async (orderId, quantity) => {
+        try {
+            setLoading(true);
+            const result = await updateDoc(doc(db, `order/${orderId}`), { quantity })
+            setLoading(false);
+        } catch (error) {
+            console.log('[Cart] lỗi khi cập nhật quantity của order: ', error)
+        }
     }
-
+    // MAIN VIEW
     return (
         <View style={styles.container}>
             {/* A. HEADER */}
             <View style={styles.header}>
-                <Text style={styles.headerText}>Giỏ hàng của tôi ({orderData.length})</Text>
+                <Text style={styles.headerText}>Giỏ hàng của tôi ({orders.length})</Text>
             </View>
             {/* B. CONTENT - FLATLIST */}
-            <FlatList
-                style={styles.listOrder}
-                data={orderData}
-                renderItem={({ item }) => {
-                    return (
-                        <Order
-                            key={item.id}
-                            item={item}
-                            navigation={navigation}
-                            isCheckedBySelectAll={orderCheckBoxState}
-                            onCheckBoxTouch={handleCheckBoxTouch}
-                            onProductQuantityChange={handleProductQuantityChange}
-                        />
-                    )
-                }}
-                keyExtractor={(item) => item.id}
-            />
+            {loading ?
+                <View style={styles.loading}>
+                    <ActivityIndicator size='large' color={COLOR.MAIN_COLOR} />
+                </View>
+                :
+                <View style={{ flex: 1 }}>
+                    <FlatList
+                        style={styles.listOrder}
+                        data={orders}
+                        renderItem={({ item }) => {
+                            return (
+                                <Order
+                                    key={item.id}
+                                    item={item}
+                                    navigation={navigation}
+                                    onCheckBoxTouch={handleCheckBoxTouch}
+                                    onProductQuantityChange={handleProductQuantityChange}
+                                />
+                            )
+                        }}
+                        keyExtractor={(item) => item.id}
+                    />
+                </View>
+            }
             {/* C. FOOTER */}
             <View style={styles.footer}>
                 <View style={styles.checkBoxWrapper}>
-                    <CheckBox
-                        disabled={false}
-                        value={toggleCheckBox}
-                        onValueChange={(newValue) => {
-                            setToggleCheckBox(newValue);
-                        }}
-                        tintColors={{
-                            true: COLOR.SECOND_COLOR,
-                            false: COLOR.GREY
-                        }}
+                    <BouncyCheckbox
+                        size={25}
+                        fillColor={COLOR.SECOND_COLOR}
+                        unfillColor={COLOR.WHITE}
+                        iconStyle={{ borderColor: COLOR.LIGHT_GREY }}
+                        isChecked={toggleCheckBox}
+                        onPress={() => setToggleCheckBox(!toggleCheckBox)}
                     />
                     <Text style={styles.checkBoxText}>Tất cả</Text>
                 </View>
                 <View style={styles.totalPriceWrapper}>
                     <Text style={styles.totalPriceText}>Tổng cộng</Text>
-                    <Text style={styles.totalPrice}>{handleTotalPrice()} đ</Text>
+                    <Text style={styles.totalPrice}>{totalPrice} đ</Text>
                 </View>
                 <TouchableOpacity
                     style={styles.orderBtn}
-                    onPress={() => navigation.navigate('OrderVerification', { listOrderSelected: orderSelected })}
+                    onPress={() => {
+                        navigation.navigate('OrderVerification', { listOrderSelected: orderIdsSelected })
+                    }}
                 >
-                    <Text style={styles.orderBtnText}>Thanh toán {orderSelected.length !== 0 ? `(${orderSelected.length})` : ''}</Text>
+                    <Text style={styles.orderBtnText}>Thanh toán {orderIdsSelected.length !== 0 ? `(${orderIdsSelected.length})` : ''}</Text>
 
                 </TouchableOpacity>
             </View>
@@ -137,6 +152,11 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: COLOR.BACKGROUND_GREY
+    },
+    loading: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     header: {
         backgroundColor: COLOR.WHITE,
