@@ -31,6 +31,7 @@ function ProductDetailScreen({ navigation, route }) {
 
     const [loading, setLoading] = useState(true);
     const [product, setProduct] = useState(null);
+    const [orders, setOrders] = useState(0);
     const [currentImg, setCurrentImg] = useState(1);
     const [isBottomModalShow, setIsBottomModalShow] = useState(false);
     const [orderQuantity, setOrderQuantity] = useState(1);
@@ -42,6 +43,8 @@ function ProductDetailScreen({ navigation, route }) {
     //gọi api
     useEffect(() => {
         getProductById();
+        // lấy orders để tính số lượng order -> hiển thị cho nút giỏ hàng 
+        getAllOrderByUserId();
     }, [])
     //lấy danh sách các sản phẩm khác của shop bằng shopId
     useEffect(() => {
@@ -119,6 +122,19 @@ function ProductDetailScreen({ navigation, route }) {
                 icon: 'auto',
                 duration: 2500,
             });
+        }
+    }
+
+    const getAllOrderByUserId = async () => {
+        try {
+            const arr = [];
+            const snapshot = await getDocs(query(collection(db, 'order'), where('userId', '==', user.id)));
+            snapshot.forEach((doc) => {
+                arr.push(doc.data());
+            })
+            setOrders(arr);
+        } catch (error) {
+            console.log('[ProductDetail] Lỗi khi lấy tất cả orders: ', error)
         }
     }
 
@@ -414,9 +430,13 @@ function ProductDetailScreen({ navigation, route }) {
             {/* A. HEADER */}
             <Animated.View style={[styles.header, { backgroundColor: animatedHeaderBackgroundColor, borderBottomWidth: animatedHeaderBorderWidth }]}>
                 <BackBtn onPress={() => navigation.goBack()} />
-                <TouchableOpacity style={styles.cart}>
+                <TouchableOpacity style={styles.cart} onPress={() => navigation.navigate('Cart')}>
                     <Icon name='shopping-cart' size={20} color={COLOR.MAIN_COLOR} />
-                    <Badge containerStyle={styles.cartBadge} value={25} badgeStyle={{ backgroundColor: COLOR.SECOND_COLOR }}></Badge>
+                    <Badge
+                        containerStyle={styles.cartBadge} 
+                        value={orders.length} 
+                        badgeStyle={{ backgroundColor: COLOR.SECOND_COLOR }}
+                    />
                 </TouchableOpacity>
             </Animated.View>
 

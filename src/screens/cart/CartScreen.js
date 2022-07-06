@@ -14,7 +14,6 @@ import { getFirestore, collection, query, where, doc, updateDoc, onSnapshot } fr
 import { useSelector } from 'react-redux';
 
 function CartScreen({ navigation }) {
-    console.log('re-render')
     const db = getFirestore();
     const user = useSelector(state => state.user);
 
