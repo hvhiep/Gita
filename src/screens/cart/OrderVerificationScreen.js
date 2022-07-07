@@ -10,8 +10,9 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import Icon2 from 'react-native-vector-icons/FontAwesome5';
 import { BackBtn, VerifiedOrder } from '../../components';
 import { COLOR, FONT_SIZE, DIMENSION, numberWithCommas } from '../../res';
-import { getFirestore, getDoc, doc } from 'firebase/firestore';
+import { getFirestore, getDoc, doc, updateDoc } from 'firebase/firestore';
 import { useSelector } from 'react-redux';
+import { showMessage } from 'react-native-flash-message';
 
 const OrderVerificationScreen = ({ navigation, route }) => {
     const user = useSelector(state => state.user);
@@ -20,8 +21,7 @@ const OrderVerificationScreen = ({ navigation, route }) => {
     const selectedOrderIds = route?.params?.selectedOrderIds;
     // lấy addressId trả về từ AddressScreen
     const addressId = route?.params?.addressId;
-
-    const [orders, setOrders] = useState([]);
+    const [orders, setOrders] = useState([]); // format: [..., {id: '', data: {...}}]
     const [totalPrice, setTotalPrice] = useState(0);
     const [address, setAddress] = useState(null);
     //lấy order
@@ -133,10 +133,24 @@ const OrderVerificationScreen = ({ navigation, route }) => {
                 </View>
                 <TouchableOpacity
                     style={styles.orderBtn}
-                    onPress={() => {
-                        // navigation.navigate('SuccessfulOrder', {
-                        //     orderIdsSelected: orderIdsSelected
-                        // })
+                    onPress={async () => {
+                        // chưa chọn địa chỉ thì k cho qua screen mới
+                        if (addressId === undefined)
+                            showMessage({
+                                message: 'Vui lòng chọn địa chỉ giao hàng!',
+                                type: "warning",
+                                icon: 'auto',
+                                duration: 1000,
+                            })
+                        else{
+                            const temp = orders;
+                            const idArr = temp.map((item) => item.id);
+                            navigation.navigate('SuccessfulOrder', {
+                                selectedOrderIds: idArr,
+                                addressId: addressId,
+                                totalPrice: totalPrice,
+                            })
+                        }
                     }}
                 >
                     <Text style={styles.orderBtnText}>Đặt hàng</Text>

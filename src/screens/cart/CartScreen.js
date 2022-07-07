@@ -26,9 +26,10 @@ function CartScreen({ navigation }) {
     const [totalPrice, setTotalPrice] = useState(0);
 
 
-    //-----------------------------Lắng nghe thay đổi dữ liệu của những order thuộc user.id hiện tại đang dùng app
+    //-----------------------------Lắng nghe thay đổi dữ liệu của những order của user hiện tại và status = -1 (nghĩa là
+    // vẫn còn nằm trong giỏ hàng)
     useEffect(() => {
-        const q = query(collection(db, 'order'), where('userId', '==', user.id))
+        const q = query(collection(db, 'order'), where('userId', '==', user.id), where('status', '==', -1))
         const unsubscribe = onSnapshot(q, (snapshot) => {
             setLoading(true);
             const orderArr = [];
@@ -48,7 +49,6 @@ function CartScreen({ navigation }) {
     useEffect(() => {
         if (orders.length > 0) {
             //nếu tất cả checkbox được check thì bật select all checkbox
-
             setToggleCheckBox(() => {
                 const temp = orders;
                 const isAllCheck = temp.every((item) => item.selected === true);

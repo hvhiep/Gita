@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import {
     View,
@@ -7,33 +7,94 @@ import {
     TouchableOpacity,
     ScrollView,
     Image,
-    BackHandler
+    BackHandler,
+    ActivityIndicator
 } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Icon2 from 'react-native-vector-icons/FontAwesome5';
 
 import { COLOR, FONT_SIZE, DIMENSION, numberWithCommas } from '../../res';
 import { PrimaryBtn } from '../../components';
-//dump:
-import orderData from './orderData';
+import { getFirestore, getDoc, doc, updateDoc, Timestamp } from 'firebase/firestore';
+import { useSelector } from 'react-redux';
+
 
 function SuccessfulOrderScreen({ navigation, route }) {
 
-    //dump data
-    const listOrderSelected = route?.params?.listOrderSelected.map((item) => item.id);
-    const selectedOrderData = orderData.filter((item) => {
-        return listOrderSelected.includes(item.id);
-    })
-    const address = {
-        id: 1,
-        userId: 1,
-        fullName: 'Hoàng Văn Hiệp',
-        phoneNumber: '0356562378',
-        address: '999A, đường Tô Vĩnh Diện',
-        ward: 'Linh Trung',
-        district: 'Thủ Đức',
-        city: 'Tp Hồ Chí Minh'
-    };
+    const user = useSelector(state => state.user);
+    const db = getFirestore();
+    const { selectedOrderIds, addressId, totalPrice } = route?.params;
+
+    const [loading, setLoading] = useState(true);
+    const [addressLoading, setAddressLoading] = useState(true);
+    const [orders, setOrders] = useState([]);
+    const [address, setAddress] = useState(null);
+    //lấy order
+    useEffect(() => {
+        if (selectedOrderIds !== undefined && addressId !== undefined && totalPrice !== undefined)
+            handleUpdateOder();
+    }, []);
+
+    const handleUpdateOder = async () => {
+        try {
+            setLoading(true);
+            //1. update lại thông tin đặt hàng tại trạng thái chờ xử lý:
+            // status 0 -> 0 (chờ xử lý)
+            // deliveryAddressId: gắn id vào
+            // orderDate: lấy thời gian hiện tại now
+            // deliveryDate: vẫn để null vì phải chờ xác nhận bên shop!
+            // orderCancellation: vẫn để null, khi nào hủy đơn thì mới gắn vào!
+            const newUpdateData = {
+                selected: false,
+                status: 0,
+                deliveryAddressId: addressId,
+                orderDate: Timestamp.now(),
+            }
+
+            const promises1 = selectedOrderIds.map(async (id) => {
+                return await updateDoc(doc(db, `order/${id}`), newUpdateData)
+            })
+            await Promise.all(promises1);
+            //2. lấy dữ liệu mới về để hiển thị lên
+            const promises2 = selectedOrderIds.map(async (id) => {
+                const result = await getDoc(doc(db, `order/${id}`))
+                if (result.exists()) {
+                    const data = result.data();
+                    data.product.discountPrice = data.product.salePrice * (1 - data.product.discount.percent);
+                    data.id = result.id;
+                    return { ...data };
+                }
+                else
+                    return null;
+            })
+            const ordersArr = await Promise.all(promises2);
+            setOrders(ordersArr);
+            setLoading(false);
+        } catch (error) {
+            console.log('[SuccessfulOrder] lỗi lấy order: ', error);
+        }
+    }
+
+    //lấy thông tin address người dùng đã chọn
+    useEffect(() => {
+        if (addressId !== undefined)
+            getAddressById();
+    }, [addressId])
+    const getAddressById = async () => {
+        try {
+            setAddressLoading(true);
+            const snapshot = await getDoc(doc(db, `user/${user.id}/address/${addressId}`));
+            if (snapshot.exists()) {
+                const data = snapshot.data();
+                data.id = snapshot.id;
+                setAddress(data);
+                setAddressLoading(false);
+            }
+            else console.log('[SuccessfulOrder] không có address!')
+        } catch (error) {
+            console.log('[SuccessfulOrder]: ', error);
+        }
+    }
 
     //Ngăn không cho user back về màn hình trước (vì đã đặt hàng thành công rồi thì k back về đc nữa)
     useFocusEffect(
@@ -45,61 +106,74 @@ function SuccessfulOrderScreen({ navigation, route }) {
                 BackHandler.removeEventListener('hardwareBackPress', onBackPress);
         }, [])
     );
-    
+
+    const renderOrders = () => {
+        return orders.map((item) => {
+            const date = new Timestamp(item.orderDate.seconds, item.orderDate.nanoseconds);
+            return (
+                <View key={item.id} style={styles.order}>
+                    <Text style={styles.orderId}>Mã đơn hàng: {item.id}</Text>
+                    <Text style={styles.orderDeliveryDate}>Ngày đặt hàng: {date.toDate().toISOString()}</Text>
+                    <View style={styles.orderContentWrapper}>
+                        <View style={styles.imgWrapper}>
+                            <Image style={styles.img} source={{ uri: item.product.img[0] }}></Image>
+                        </View>
+                        <View style={styles.orderInfoWrapper}>
+                            <Text style={styles.productName}>{item.product.name}</Text>
+                            <View style={styles.priceWrapper}>
+                                <Text style={styles.discountPrice}>{numberWithCommas(item.product.discountPrice)} đ</Text>
+                                <Text style={styles.quantity}>Số lượng: {item.quantity}</Text>
+                            </View>
+                        </View>
+                    </View>
+                </View>
+            )
+        })
+    }
+
     return (
         <View style={styles.container}>
-            {/* 1.HEADER */}
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => navigation.navigate('Home')}>
                     <Icon name='close' size={20} color={COLOR.MAIN_COLOR} />
                 </TouchableOpacity>
                 <Text style={styles.headerText}>Đơn hàng đã đặt</Text>
             </View>
-            {/* 2.SCROLL CONTENT */}
             <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
                 <View style={styles.messageWrapper}>
                     <Icon name='check-circle' size={40} color={COLOR.WHITE} />
                     <Text style={styles.messageText}>Đặt hàng thành công !</Text>
                 </View>
-                <Text style={styles.priceText}>Vui lòng chuẩn bị số tiền tương ứng vào ngày giao hàng!</Text>
-                <Text style={styles.price}>{numberWithCommas(5240000)} đ</Text>
+                <Text style={styles.priceText}>Vui lòng chờ người bán hàng xác nhận đơn hàng của bạn!</Text>
+                <Text style={styles.price}>{totalPrice} đ</Text>
                 <Text style={styles.sectionTitle}>Thông tin người nhận</Text>
-                <View style={styles.addressWrapper}>
-                    <Icon2 name='map-marked-alt' size={20} color={COLOR.MAIN_COLOR} />
-                    <View style={styles.addressInfoWrapper}>
-                        <View style={styles.nameWrapper}>
-                            <Text style={styles.fullName}>{address.fullName}</Text>
-                            <Text style={styles.phoneNumber}>{address.phoneNumber}</Text>
+                {
+                    addressLoading ?
+                        <View>
+                            <ActivityIndicator size='large' color={COLOR.MAIN_COLOR} />
                         </View>
-                        <Text style={styles.infoAddress}>{address.address}, {address.ward}, {address.district}, {address.city}</Text>
-                    </View>
-                </View>
-                <Text style={styles.sectionTitle}>Đơn hàng</Text>
-                {selectedOrderData.map((item) => {
-                    return (
-                        <View key={item.id} style={styles.order}>
-                            <Text style={styles.orderId}>Mã đơn hàng: {item.id}</Text>
-                            <Text style={styles.orderDeliveryDate}>Thời gian giao hàng dự kiến: {item.deliveryDate}</Text>
-                            <View style={styles.orderContentWrapper}>
-                                {/* ảnh sp */}
-                                <View style={styles.imgWrapper}>
-                                    <Image style={styles.img} source={item.product.img[0]}></Image>
+                        :
+                        <View style={styles.addressWrapper}>
+                            <Icon2 name='map-marked-alt' size={20} color={COLOR.MAIN_COLOR} />
+                            <View style={styles.addressInfoWrapper}>
+                                <View style={styles.nameWrapper}>
+                                    <Text style={styles.fullName}>{address.fullName}</Text>
+                                    <Text style={styles.phoneNumber}>{address.phoneNumber}</Text>
                                 </View>
-                                {/* info sp */}
-                                <View style={styles.orderInfoWrapper}>
-                                    <Text style={styles.productName}>{item.product.name}</Text>
-                                    <View style={styles.priceWrapper}>
-                                        <Text style={styles.discountPrice}>{numberWithCommas(item.product.discountPrice)} đ</Text>
-                                        {/* số lượng  */}
-                                        <Text style={styles.quantity}>Số lượng: {item.quantity}</Text>
-                                    </View>
-                                </View>
+                                <Text style={styles.infoAddress}>{address.address}, {address.ward}, {address.district}, {address.city}</Text>
                             </View>
                         </View>
-                    )
-                })}
+                }
+                <Text style={styles.sectionTitle}>Đơn hàng</Text>
+                {
+                    loading ?
+                        <View>
+                            <ActivityIndicator size='large' color={COLOR.MAIN_COLOR} />
+                        </View>
+                        :
+                        renderOrders()
+                }
             </ScrollView>
-            {/* 3.HOME BUTTON */}
             <PrimaryBtn
                 style={styles.homeBtn}
                 title='Về trang chủ' type='long'
@@ -245,8 +319,9 @@ const styles = StyleSheet.create({
         alignItems: 'center'
     },
     img: {
-        width: '90%',
-        height: '90%',
+        width: '100%',
+        borderRadius: 10,
+        height: '100%',
         resizeMode: 'contain'
     },
     orderInfoWrapper: {

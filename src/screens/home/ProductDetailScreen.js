@@ -128,7 +128,7 @@ function ProductDetailScreen({ navigation, route }) {
     const getAllOrderByUserId = async () => {
         try {
             const arr = [];
-            const snapshot = await getDocs(query(collection(db, 'order'), where('userId', '==', user.id)));
+            const snapshot = await getDocs(query(collection(db, 'order'), where('userId', '==', user.id), where('selected', '==', true)));
             snapshot.forEach((doc) => {
                 arr.push(doc.data());
             })

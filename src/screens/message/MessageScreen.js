@@ -99,15 +99,6 @@ function MessageScreen() {
             <Button title='create address' onPress={() => {
                 createAddress();
             }} />
-            <BouncyCheckbox
-                size={25}
-                fillColor={COLOR.SECOND_COLOR}
-                unfillColor="#FFFFFF"
-                iconStyle={{ borderColor: COLOR.LIGHT_GREY }}
-                textStyle={{ textDecorationLine: 'none' }}
-                isChecked={toggleCheckbox}
-                onPress={() => { setToggleCheckBox(!toggleCheckbox) }}
-            />
         </View>
     )
 }
