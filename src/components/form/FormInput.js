@@ -7,7 +7,7 @@ import {
 } from 'react-native';
 import { COLOR, FONT_SIZE, DIMENSION } from '../../res/constant'
 
-function FormInput({ style, title, type, inputState, onInputStateChange, onBlur, multiline, secure  }) {
+function FormInput({ style, title, type, inputState, onInputStateChange, onBlur, multiline, secure, keyboardType  }) {
 
     const [isFocus, setIsFocus] = useState(false);
     const [isError, setIsError] = useState(false);
@@ -47,6 +47,7 @@ function FormInput({ style, title, type, inputState, onInputStateChange, onBlur,
                 underlineColorAndroid='transparent'
                 multiline={multiline}
                 secureTextEntry={secure}
+                keyboardType={keyboardType}
             ></TextInput>
             {isError && <Text style={styles.errorMessage}>Nhập trùng rồi condi !</Text>}
         </View>

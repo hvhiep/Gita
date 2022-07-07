@@ -5,28 +5,27 @@ import {
     StyleSheet,
     TouchableOpacity
 } from 'react-native';
-import Icon from 'react-native-vector-icons/FontAwesome';
 import Icon2 from 'react-native-vector-icons/FontAwesome5';
-import { COLOR, FONT_SIZE, numberWithCommas, DIMENSION } from '../../res';
+import { COLOR, FONT_SIZE, DIMENSION } from '../../res';
 
-function Address({ navigation, address }) {
+function Address({ navigation, item }) {
     return (
         <TouchableOpacity
             style={styles.container}
-            
+            onPress={() => navigation.navigate('OrderVerification', {addressId: item.id})}
         >
             <View style={styles.contentWrapper}>
                 <Icon2 name='map-marked-alt' size={20} color={COLOR.MAIN_COLOR} />
                 <View style={styles.infoWrapper}>
                     <View style={styles.nameWrapper}>
-                        <Text style={styles.fullName}>{address.fullName}</Text>
-                        <Text style={styles.phoneNumber}>{address.phoneNumber}</Text>
+                        <Text style={styles.fullName}>{item.fullName}</Text>
+                        <Text style={styles.phoneNumber}>{item.phoneNumber}</Text>
                     </View>
-                    <Text style={styles.infoAddress}>{address.address}, {address.ward}, {address.district}, {address.city}</Text>
+                    <Text style={styles.infoAddress}>{item.address}, {item.ward}, {item.district}, {item.city}</Text>
                 </View>
                 <TouchableOpacity
                     style={styles.editBtn}
-                    onPress={() => navigation.navigate('AddressForm', {addressId: address.id})}
+                    onPress={() => navigation.navigate('AddressForm', {addressId: item.id})}
                 >
                     <Text style={styles.editBtnText}>Chỉnh sửa</Text>
                 </TouchableOpacity>

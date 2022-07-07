@@ -16,8 +16,8 @@ import products from './products';
 import orderTestData from './orderTestData';
 import BouncyCheckbox from 'react-native-bouncy-checkbox';
 
-const db = getFirestore();
 function MessageScreen() {
+    const db = getFirestore();
     const [toggleCheckbox, setToggleCheckBox] = useState(false)
 
     //2. lấy thông tin của shop, để chuẩn bị gán cho product
@@ -70,6 +70,20 @@ function MessageScreen() {
         await addDoc(collection(db, 'order'), orderTestData[2]);
     }
 
+
+    const createAddress = () => {
+        const userId = 'jb5n1dhF7geNMX8TVHnjCFwOvdo2';
+        const addressData = {
+            fullName: 'Hoàng Văn Hiệp',
+            phoneNumber: '0356562378',
+            address: '81B, Lê Văn Lương',
+            ward: 'Sa Thầy',
+            district: 'Sa Thầy',
+            city: 'Kon Tum'
+        }
+        addDoc(collection(db, `user/${userId}/address`), addressData);
+    }
+
     return (
         <View style={styles.container}>
             <Text style={styles.text}>Tính năng đang được phát triển! Quay lại sau nhé 😊</Text>
@@ -82,8 +96,8 @@ function MessageScreen() {
                 getUser();
             }} />
 
-            <Button title='create order' onPress={() => {
-                createOrder();
+            <Button title='create address' onPress={() => {
+                createAddress();
             }} />
             <BouncyCheckbox
                 size={25}

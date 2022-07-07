@@ -5,20 +5,10 @@ import {
     StyleSheet,
     Image
 } from 'react-native';
-import Icon from 'react-native-vector-icons/FontAwesome';
 import Icon2 from 'react-native-vector-icons/FontAwesome5';
 import { COLOR, FONT_SIZE, numberWithCommas, DIMENSION } from '../../res';
 
-//dump:
-import orderData from '../../screens/cart/orderData';
-
-function VerifiedOrder({ order }) {
-
-    // dump:
-    const data = orderData.find((item) => {
-        return item.id === order.id;
-    });
-
+function VerifiedOrder({ item }) {
 
     return (
         <View style={styles.container}>
@@ -27,21 +17,21 @@ function VerifiedOrder({ order }) {
                 {/* shop btn */}
                     <View style={styles.shop}>
                         <Icon2 name='store' size={18} color={COLOR.MAIN_COLOR} />
-                        <Text style={styles.shopName}>{data.shop.name}</Text>
+                        <Text style={styles.shopName}>{item.product.shop.name}</Text>
                     </View>
                 {/* order content */}
                 <View style={styles.orderContentWrapper}>
                     {/* ảnh sp */}
                     <View style={styles.imgWrapper}>
-                        <Image style={styles.img} source={data.product.img[0]}></Image>
+                        <Image style={styles.img} source={{uri: item.product.img[0]}}></Image>
                     </View>
                     {/* info sp */}
                     <View style={styles.orderInfoWrapper}>
-                            <Text style={styles.productName}>{data.product.name}</Text>
+                            <Text style={styles.productName}>{item.product.name}</Text>
                         <View style={styles.priceWrapper}>
-                            <Text style={styles.discountPrice}>{numberWithCommas(data.product.discountPrice)} đ</Text>
+                            <Text style={styles.discountPrice}>{numberWithCommas(item.product.discountPrice)} đ</Text>
                             {/* số lượng  */}
-                            <Text style={styles.quantity}>Số lượng: {order.quantity}</Text>
+                            <Text style={styles.quantity}>Số lượng: {item.quantity}</Text>
                         </View>
                     </View>
                 </View>
@@ -87,8 +77,9 @@ const styles = StyleSheet.create({
         alignItems: 'center'
     },
     img: {
-        width: '90%',
-        height: '90%',
+        width: '100%',
+        height: '100%',
+        borderRadius: 10,
         resizeMode: 'contain'
     },
     orderInfoWrapper: {

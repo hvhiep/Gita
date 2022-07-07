@@ -12,7 +12,7 @@ import Icon3 from 'react-native-vector-icons/FontAwesome5';
 import { COLOR, FONT_SIZE, numberWithCommas } from '../../res';
 import BouncyCheckbox from 'react-native-bouncy-checkbox';
 //?????????????????????/ ĐỔI LẠI CÁI CHECKBOX KHÁC, CHECKBOX NÀY NGU VÃI LỒN
-function Order({ navigation, item, onCheckBoxTouch, onProductQuantityChange }) {
+function Order({ navigation, item, onCheckBoxTouch, onDeleteTouch, onProductQuantityChange }) {
 
     const [toggleCheckBox, setToggleCheckBox] = useState(item.selected);
 
@@ -92,7 +92,7 @@ function Order({ navigation, item, onCheckBoxTouch, onProductQuantityChange }) {
                 </View>
             </View>
             {/* 3. remove order */}
-            <TouchableOpacity style={styles.removeWrapper}>
+            <TouchableOpacity style={styles.removeWrapper} onPress={() => onDeleteTouch(item.id)}>
                 <Icon name='trash' size={25} color={COLOR.GREY} />
             </TouchableOpacity>
             <View>

@@ -10,8 +10,9 @@ import {
 import { Order } from '../../components';
 import { COLOR, FONT_SIZE, DIMENSION, numberWithCommas } from '../../res';
 import BouncyCheckbox from "react-native-bouncy-checkbox";
-import { getFirestore, collection, query, where, doc, updateDoc, onSnapshot } from 'firebase/firestore';
+import { getFirestore, collection, query, where, doc, updateDoc, onSnapshot, deleteDoc } from 'firebase/firestore';
 import { useSelector } from 'react-redux';
+import { showMessage } from 'react-native-flash-message';
 
 function CartScreen({ navigation }) {
     const db = getFirestore();
@@ -50,7 +51,7 @@ function CartScreen({ navigation }) {
 
             setToggleCheckBox(() => {
                 const temp = orders;
-                const isAllCheck = temp.every((item) => item.selected === true); 
+                const isAllCheck = temp.every((item) => item.selected === true);
                 return isAllCheck;
             })
             //dùng để hiển thị số lượng order được chọn
@@ -92,6 +93,11 @@ function CartScreen({ navigation }) {
             console.log('[Cart] lỗi khi cập nhật quantity của order: ', error)
         }
     }
+    //xóa 1 order
+    const handleDeleteTouch = async (orderId) => {
+        await deleteDoc(doc(db, `order/${orderId}`))
+    }
+
     //chọn tất cả
     const selectAllCheckBox = async () => {
         try {
@@ -136,6 +142,7 @@ function CartScreen({ navigation }) {
                                     item={item}
                                     navigation={navigation}
                                     onCheckBoxTouch={handleCheckBoxTouch}
+                                    onDeleteTouch={handleDeleteTouch}
                                     onProductQuantityChange={handleProductQuantityChange}
                                 />
                             )
@@ -168,7 +175,15 @@ function CartScreen({ navigation }) {
                 <TouchableOpacity
                     style={styles.orderBtn}
                     onPress={() => {
-                        navigation.navigate('OrderVerification', { listOrderSelected: orderIdsSelected })
+                        if (orderIdsSelected.length > 0)
+                            navigation.navigate('OrderVerification', { selectedOrderIds: orderIdsSelected })
+                        else
+                        showMessage({
+                            message: 'Vui lòng chọn sản phẩm muốn đặt hàng!',
+                            type: 'warning',
+                            icon: 'auto',
+                            duration: 1000,
+                        });
                     }}
                 >
                     <Text style={styles.orderBtnText}>Thanh toán {orderIdsSelected.length !== 0 ? `(${orderIdsSelected.length})` : ''}</Text>

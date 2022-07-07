@@ -1,19 +1,43 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     View,
     Text,
     StyleSheet,
     FlatList,
-    TouchableOpacity
+    TouchableOpacity,
+    ActivityIndicator
 } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { BackBtn, VerifiedOrder } from '../../components';
 import { COLOR, FONT_SIZE, DIMENSION } from '../../res';
 import { Address } from '../../components';
-//dump: 
-import addressData from './addressData';
+import { useSelector } from 'react-redux';
+import { getFirestore, collection, onSnapshot } from 'firebase/firestore';
 
-function AddressScreen ({ navigation }) {
+function AddressScreen({ navigation }) {
+    const user = useSelector(state => state.user);
+    const db = getFirestore();
+
+    const [address, setAddress] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        //lắng nghe dữ liệu thay đổi realtime
+        setLoading(true);
+        const unsubscribe = onSnapshot(collection(db, `user/${user.id}/address`), (snapshot) => {
+            const arr = [];
+            snapshot.forEach((doc) => {
+                const data = doc.data();
+                data.id = doc.id;
+                arr.push({ ...data })
+            })
+            setAddress(arr);
+            setLoading(false);
+        })
+
+        return () => unsubscribe();
+    }, []);
+
     return (
         <View style={styles.container}>
             {/* 1.HEADER */}
@@ -31,12 +55,19 @@ function AddressScreen ({ navigation }) {
                 <Text style={styles.addressBtnText}>Thêm địa chỉ mới</Text>
             </TouchableOpacity>
             {/* orders list */}
-            <FlatList
-                style={styles.listOrder}
-                data={addressData}
-                renderItem={({ item }) => <Address key={item.id} navigation={navigation} address={item} />}
-                keyExtractor={(item) => item.id}
-            />
+            <View style={{ flex: 1 }}>
+                {
+                    loading ?
+                        <ActivityIndicator size='large' color={COLOR.MAIN_COLOR} />
+                        :
+                        <FlatList
+                            style={styles.listOrder}
+                            data={address}
+                            renderItem={({ item, index }) => <Address key={index} navigation={navigation} item={item} />}
+                            keyExtractor={(item, index) => index}
+                        />
+                }
+            </View>
         </View>
     )
 };
@@ -68,7 +99,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center'
-        
+
     },
     addressBtnText: {
         marginLeft: 10,

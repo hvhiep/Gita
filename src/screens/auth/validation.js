@@ -19,5 +19,13 @@ const SignInSchema = Yup.object().shape({
     email: Yup.string().required('Bắt Buộc Nhập!'),
     password: Yup.string().required('Bắt Buộc Nhập!'),
 });
+const AddressSchema = Yup.object().shape({
+    fullName: Yup.string().required('Bắt Buộc Nhập!'),
+    phoneNumber: Yup.string().required('Bắt Buộc Nhập!'),
+    address: Yup.string().required('Bắt Buộc Nhập!'),
+    ward: Yup.string().required('Bắt Buộc Nhập!'),
+    district: Yup.string().required('Bắt Buộc Nhập!'),
+    city: Yup.string().required('Bắt Buộc Nhập!'),
+});
 
-export { SignUpSchema, SignInSchema };
+export { SignUpSchema, SignInSchema, AddressSchema };
