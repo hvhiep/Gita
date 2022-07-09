@@ -10,9 +10,6 @@ import Salesman from './Salesman/Salesman';
 //redux
 import { useSelector } from 'react-redux';
 
-//dump:
-import userData from './userData';
-
 function ProfileScreen({ navigation }) {
 
     const [isLoading, setIsLoading] = useState(true);
@@ -27,7 +24,7 @@ function ProfileScreen({ navigation }) {
                 user.type === 0 ?
                     <Salesman navigation={navigation} user={user} />
                     :
-                    <Customer navigation={navigation} user={user} />
+                    <Customer navigation={navigation}/>
             }
         </View >
     )

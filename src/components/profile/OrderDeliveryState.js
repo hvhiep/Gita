@@ -10,7 +10,7 @@ import Icon4 from 'react-native-vector-icons/FontAwesome';
 import { COLOR, FONT_SIZE, DIMENSION } from '../../res';
 import { Badge } from '@rneui/themed';
 
-const OrderDeliveryState = ({ title, orderState, navigation }) => {
+const OrderDeliveryState = ({ title, orderState, navigation, route }) => {
     return (
         <>
             <View style={styles.orderTitleWrapper}>
@@ -26,9 +26,9 @@ const OrderDeliveryState = ({ title, orderState, navigation }) => {
                         <TouchableOpacity style={styles.orderState} key={item.id}>
                             {/* 1,2,3 thì dùng Icon; 4,5 dùng Icon2 vì các icon cần phải solid mà một vài bộ icon k có solid */}
                             <View style={styles.orderStateItem}>
-                                {(item.id === 1 || item.id === 2 || item.id === 3) && <Icon name={item.icon} size={30} color={COLOR.MAIN_COLOR} />}
-                                {(item.id === 4 || item.id === 5) && <Icon4 name={item.icon} size={30} color={COLOR.MAIN_COLOR} />}
-                                <Badge containerStyle={styles.orderBadge} value={25} badgeStyle={{ backgroundColor: COLOR.SECOND_COLOR }}></Badge>
+                                {(item.id === 0 || item.id === 1 || item.id === 2) && <Icon name={item.icon} size={30} color={COLOR.MAIN_COLOR} />}
+                                {(item.id === 3 || item.id === 4) && <Icon4 name={item.icon} size={30} color={COLOR.MAIN_COLOR} />}
+                                <Badge containerStyle={styles.orderBadge} value={item.quantity} badgeStyle={{ backgroundColor: COLOR.SECOND_COLOR }}></Badge>
                             </View>
 
                             <Text style={styles.orderStateText}>{item.title}</Text>

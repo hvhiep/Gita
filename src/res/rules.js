@@ -16,35 +16,35 @@ const productDetail = [
 
 const orderStatusLookup = [
     {
-        id: 1,
+        id: 0,
         title: 'Chờ xác nhận',
         title2: 'Đơn hàng đang chờ xác nhận !',
         icon: 'clipboard-check',
         color: 'orange'
     },
     {
-        id: 2,
+        id: 1,
         title: 'Chờ vận chuyển',
         title2: 'Đơn hàng đang chờ vận chuyển !',
         icon: 'truck',
         color: '#1F4690'
     },
     {
-        id: 3,
+        id: 2,
         title: 'Chờ giao hàng',
         title2: 'Đơn hàng đang chờ giao hàng !',
         icon: 'truck-loading',
         color: '#5FD068'
     },
     {
-        id: 4,
+        id: 3,
         title: 'Đã giao hàng',
         title2: 'Đơn hàng đã được giao thành công !',
         icon: 'check-square',
         color: 'green'
     },
     {
-        id: 5,
+        id: 4,
         title: 'Đơn đã hủy',
         title2: 'Đơn hàng đã bị hủy !',
         icon: 'window-close',

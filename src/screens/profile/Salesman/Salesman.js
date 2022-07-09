@@ -1,11 +1,13 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     View,
     Text,
     StyleSheet,
     TouchableOpacity,
     Image,
-    ImageBackground
+    ImageBackground,
+    ScrollView,
+    ActivityIndicator
 } from 'react-native';
 import Icon2 from 'react-native-vector-icons/Ionicons';
 import { COLOR, FONT_SIZE, DIMENSION, numberWithCommas } from '../../../res';
@@ -14,42 +16,126 @@ import { OrderDeliveryState, ChangeSettingBtn, GradientText } from '../../../com
 //firebase
 import { auth } from '../../../../firebase';
 import { signOut } from 'firebase/auth';
-
-//dummy:
-import shopData from '../../home/shopData';
+import { getFirestore, collection, getDocs, query, where, doc, getDoc } from 'firebase/firestore';
+import { useSelector } from 'react-redux';
+const orderState = [
+    {
+        id: 0,
+        title: 'Đang xác nhận',
+        icon: 'clipboard-check',
+        quantity: 0,
+    },
+    {
+        id: 1,
+        title: 'Đang vận chuyển',
+        icon: 'truck',
+        quantity: 0,
+    },
+    {
+        id: 2,
+        title: 'Đang giao hàng',
+        icon: 'truck-loading',
+        quantity: 0,
+    },
+    {
+        id: 3,
+        title: 'Đã giao hàng',
+        icon: 'check-square',
+        quantity: 0,
+    },
+    {
+        id: 4,
+        title: 'Đơn đã hủy',
+        icon: 'window-close',
+        quantity: 0,
+    },
+];
 
 const Salesman = ({ navigation }) => {
+    const db = getFirestore();
+    const user = useSelector(state => state.user);
 
-    const orderState = [
-        {
-            id: 1,
-            title: 'Đang xử lý',
-            icon: 'clipboard-check',
-        },
-        {
-            id: 2,
-            title: 'Đang vận chuyển',
-            icon: 'truck',
-        },
-        {
-            id: 3,
-            title: 'Đang giao hàng',
-            icon: 'truck-loading',
-        },
-        {
-            id: 4,
-            title: 'Đã giao hàng',
-            icon: 'check-square',
-        },
-        {
-            id: 5,
-            title: 'Đơn đã hủy',
-            icon: 'window-close',
-        },
-    ];
-
-    const data = shopData.find((item) => item.id === 2);
-
+    const [loading, setLoading] = useState(true);
+    const [shop, setShop] = useState({
+        id: '',
+        userId: '',
+        name: '',
+        avatarImg: 'https://firebasestorage.googleapis.com/v0/b/gita-backend.appspot.com/o/server%2Fwhite.png?alt=media&token=59f74a5f-d779-414d-8c86-2684366f0590',
+        backgroundImg: 'https://firebasestorage.googleapis.com/v0/b/gita-backend.appspot.com/o/server%2Fwhite.png?alt=media&token=59f74a5f-d779-414d-8c86-2684366f0590',
+        address: '',
+        ward: '',
+        district: '',
+        city: '',
+    });
+    const [orderDeliveryState, setOrderDeliveryState] = useState(orderState);
+    // lấy thông tin shop bằng userId
+    useEffect(() => {
+        getShopByUserId();
+    }, []);
+    const getShopByUserId = async () => {
+        try {
+            const arr = [];
+            const snapshot = await getDocs(query(collection(db, 'shop'), where('userId', '==', user.id)));
+            snapshot.forEach((doc) => {
+                const data = doc.data();
+                data.id = doc.id;
+                arr.push({ ...data });
+            })
+            setShop(arr[0]);
+        } catch (error) {
+            console.log('[Salesman]: ', error);
+        }
+    };
+    // từ thông tin shop -> shopId -> lấy thông tin các đơn hàng thuộc shop này 
+    useEffect(() => {
+        if (shop.id !== '') {
+            setLoading(true);
+            getAllOrderByShopId();
+        }
+    }, [shop]);
+    const getAllOrderByShopId = async () => {
+        try {
+            let status0 = 0;
+            let status1 = 0;
+            let status2 = 0;
+            let status3 = 0;
+            let status4 = 0;
+            const arr = [];
+            const snapshot = await getDocs(query(collection(db, 'order'), where('product.shop.shopId', '==', shop.id)));
+            snapshot.forEach((doc) => {
+                const data = doc.data();
+                if (data.status === 0)
+                    status0 += 1;
+                else if (data.status === 1)
+                    status1 += 1;
+                else if (data.status === 2)
+                    status2 += 1;
+                else if (data.status === 3)
+                    status3 += 1;
+                else if (data.status === 4)
+                    status4 += 1;
+            });
+            setOrderDeliveryState(prev => {
+                const newData = prev.map((item) => {
+                    if (item.id === 0)
+                        item.quantity = status0;
+                    else if (item.id === 1)
+                        item.quantity = status1;
+                    else if (item.id === 2)
+                        item.quantity = status2;
+                    else if (item.id === 3)
+                        item.quantity = status3;
+                    else if (item.id === 4)
+                        item.quantity = status4;
+                    return item;
+                })
+                return newData;
+            });
+            setLoading(false);
+        } catch (error) {
+            console.log('[Salesman]: ', error);
+        }
+    }
     const handleSignOut = () => {
         if (auth) {
             signOut(auth)
@@ -64,17 +150,17 @@ const Salesman = ({ navigation }) => {
     }
 
     return (
-        <View style={styles.container}>
+        <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
             {/* 1. HEADER */}
-            <ImageBackground source={data.backgroundImg} style={styles.headerWrapper} resizeMode='cover'>
+            <ImageBackground source={{ uri: shop.backgroundImg }} style={styles.headerWrapper} resizeMode='cover'>
                 <View style={styles.infoWrapper}>
                     <View style={styles.infoLeft}>
-                        <Image source={data.avatarImg} style={styles.avatar} resizeMode='contain' />
+                        <Image source={{ uri: shop.avatarImg }} style={styles.avatar} resizeMode='contain' />
                         <View style={styles.nameWrapper}>
-                            <Text style={styles.shopName}>{data.name}</Text>
+                            <Text style={styles.shopName}>{shop.name}</Text>
                             <View style={styles.locationWrapper}>
                                 <Icon2 name='location-sharp' size={15} color={COLOR.WHITE} />
-                                <Text style={styles.locationText}>{data.city}</Text>
+                                <Text style={styles.locationText}>{shop.city}</Text>
                             </View>
                         </View>
                     </View>
@@ -115,17 +201,21 @@ const Salesman = ({ navigation }) => {
                     <GradientText style={styles.statisticText}>{numberWithCommas(123455000)} đ</GradientText>
                 </View>
             </View>
-            <OrderDeliveryState
-                title='Quản lý đơn hàng'
-                orderState={orderState}
-                navigation={navigation}
-            />
+            {
+                loading ? null
+                    :
+                    <OrderDeliveryState
+                        title='Quản lý đơn hàng'
+                        orderState={orderDeliveryState}
+                        navigation={navigation}
+                    />
+            }
             {/* BUTTON LIST */}
-            <ChangeSettingBtn title='Quản lý sản phẩm' onPress={() => navigation.navigate('TotalProduct', { shopId: data.id })} />
-            <ChangeSettingBtn title='Báo cáo doanh số' onPress={() => navigation.navigate('Turnover', { shopId: data.id })} />
+            <ChangeSettingBtn title='Quản lý sản phẩm' onPress={() => navigation.navigate('TotalProduct', { shopId: shop.id })} />
+            <ChangeSettingBtn title='Báo cáo doanh số' onPress={() => navigation.navigate('Turnover', { shopId: shop.id })} />
             <ChangeSettingBtn title='Trung tâm trợ giúp' />
             <ChangeSettingBtn title='Đăng xuất' onPress={handleSignOut} />
-        </View>
+        </ScrollView>
     )
 };
 

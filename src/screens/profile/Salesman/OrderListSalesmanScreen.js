@@ -5,34 +5,80 @@ import {
     StyleSheet,
     FlatList,
     TouchableOpacity,
-    Image
+    Image,
+    ActivityIndicator
 } from 'react-native';
 import { COLOR, FONT_SIZE, DIMENSION, numberWithCommas, orderStatusLookup } from '../../../res';
 import { BackBtn } from '../../../components';
-//dummy:
-import orderData from '../../cart/orderData';
+import { getFirestore, getDocs, collection, where, query, onSnapshot, Timestamp } from 'firebase/firestore';
+import { useSelector } from 'react-redux';
 
-const OrderListScreen = ({ navigation }) => {
+const OrderListSalesmanScreen = ({ navigation }) => {
+    const user = useSelector(state => state.user);
+    const db = getFirestore();
 
     const sectionTitleList = [
         'Tất cả',
-        'Chờ xác nhận',
-        'Chờ vận chuyển',
-        'Chờ giao hàng',
+        'Đang xác nhận',
+        'Đang vận chuyển',
+        'Đang giao hàng',
         'Đã giao hàng',
         'Đơn đã hủy',
     ];
-
+    const [loading, setLoading] = useState(true);
+    const [shop, setShop] = useState(null);
     const [sectionTitle, setSectionTitle] = useState(0);
-    const [filterOrderData, setFilterOrderData] = useState(orderData);
-    const [initialOrderData, setInitialOrderData ] = useState(orderData);
+    const [filterOrderData, setFilterOrderData] = useState([]);
+    const [initialOrderData, setInitialOrderData] = useState([]);
+
+    // lấy thông tin shop -> lấy shopId
+    useEffect(() => {
+        getShopByUserId();
+    }, []);
+    const getShopByUserId = async () => {
+        try {
+            const arr = [];
+            const snapshot = await getDocs(query(collection(db, 'shop'), where('userId', '==', user.id)));
+            snapshot.forEach((doc) => {
+                const data = doc.data();
+                data.id = doc.id;
+                arr.push({ ...data });
+            })
+            setShop(arr[0]);
+        } catch (error) {
+            console.log('[OrderListSalesman]: ', error);
+        }
+    };
+
+    useEffect(() => {
+        setLoading(true);
+        if (shop !== null) {
+            //lấy những orders không nằm trong giỏ hàng
+            const unsubscribe = onSnapshot(query(collection(db, 'order'), where('product.shop.shopId', '==', shop.id)), (snapshot) => {
+                let arr = [];
+                snapshot.forEach((doc) => {
+                    const data = doc.data();
+                    data.id = doc.id;
+                    data.product.discountPrice = data.product.salePrice * (1 - data.product.discount.percent);
+                    arr.push({ ...data })
+                })
+                arr = arr.filter(item => item.status !== -1);
+                setInitialOrderData(arr);
+                setFilterOrderData(arr);
+                setLoading(false);
+            });
+            return () => unsubscribe();
+        }
+    }, [shop])
 
     // logic hiển thị danh sách item trong flatlist có status đúng với section đã chọn phía trên
     useEffect(() => {
         setFilterOrderData(prev => {
-            if(sectionTitle === 0)
+            if (sectionTitle === 0)
                 return initialOrderData;
-            return initialOrderData.filter((item) => item.status === sectionTitle);
+            return initialOrderData.filter((item) => item.status === sectionTitle - 1);
+            // phải trừ 1 vì sectionTile có status là 'Tất cả', cái mà không thực sự tồn tại trong database,
+            // nên index so sánh sẽ lệch 1 đơn vị
         })
     }, [sectionTitle])
 
@@ -48,23 +94,23 @@ const OrderListScreen = ({ navigation }) => {
         )
     };
 
-    const renderOrderList = ({ item, index }) => {
+    const renderOrderList = ({ item }) => {
 
         const orderItemStatus = orderStatusLookup.find((value) => value.id === item.status);
-
+        const date = new Timestamp(item.orderDate.seconds, item.orderDate.nanoseconds);
         return (
             <View key={item.id} style={styles.orderItem}>
                 <View style={styles.orderItemHeader}>
-                    <TouchableOpacity onPress={() => navigation.navigate('OrderDetail', {orderId: item.id})}>
+                    <TouchableOpacity style={styles.orderItemHeaderTextLeft} onPress={() => navigation.navigate('OrderDetail', { orderId: item.id })}>
                         <Text style={styles.orderId}>Mã đơn hàng: {item.id}</Text>
-                        <Text style={styles.orderDate}>Thời gian đặt hàng: {item.orderDate}</Text>
+                        <Text style={styles.orderDate}>Ngày đặt hàng: {date.toDate().toISOString()}</Text>
                     </TouchableOpacity>
-                    <Text style={[styles.orderItemStatus, orderItemStatus && {backgroundColor: orderItemStatus.color}]}>{orderItemStatus.title}</Text>
+                    <Text style={[styles.orderItemStatus, orderItemStatus && { backgroundColor: orderItemStatus.color }]}>{orderItemStatus.title}</Text>
                 </View>
                 <View style={styles.orderContentWrapper}>
                     {/* ảnh sp */}
                     <View style={styles.imgWrapper}>
-                        <Image style={styles.img} source={item.product.img[0]}></Image>
+                        <Image style={styles.img} source={{ uri: item.product.img[0] }}></Image>
                     </View>
                     {/* info sp */}
                     <View style={styles.orderInfoWrapper}>
@@ -73,7 +119,7 @@ const OrderListScreen = ({ navigation }) => {
                         <Text style={styles.quantityText}>Số lượng: {item.quantity}</Text>
                         <View style={styles.priceWrapper}>
                             <Text style={styles.quantityText}>Tổng cộng: </Text>
-                            <Text style={styles.discountPrice}>{numberWithCommas(item.product.discountPrice)} đ</Text>
+                            <Text style={styles.discountPrice}>{numberWithCommas(item.product.discountPrice * item.quantity)} đ</Text>
                         </View>
                     </View>
                 </View>
@@ -85,7 +131,7 @@ const OrderListScreen = ({ navigation }) => {
         <View style={styles.container}>
             <View style={styles.header}>
                 <BackBtn onPress={() => navigation.goBack()} />
-                <Text style={styles.headerText}>Đơn hàng của tôi</Text>
+                <Text style={styles.headerText}>Quản lý đơn hàng</Text>
             </View>
             <FlatList
                 style={styles.sectionTitleList}
@@ -95,13 +141,20 @@ const OrderListScreen = ({ navigation }) => {
                 keyExtractor={item => item}
                 showsHorizontalScrollIndicator={false}
             />
-            <FlatList
-                style={styles.orderList}
-                data={filterOrderData}
-                renderItem={renderOrderList}
-                keyExtractor={item => item.id}
-                showsVerticalScrollIndicator={false}
-            />
+            {
+                loading ?
+                    <View>
+                        <ActivityIndicator size='large' color={COLOR.MAIN_COLOR} />
+                    </View>
+                    :
+                    <FlatList
+                        style={styles.orderList}
+                        data={filterOrderData}
+                        renderItem={renderOrderList}
+                        keyExtractor={item => item.id}
+                        showsVerticalScrollIndicator={false}
+                    />
+            }
         </View>
     )
 };
@@ -140,7 +193,9 @@ const styles = StyleSheet.create({
 
     orderList: {
         flex: 1,
-        width: '100%'
+        width: '100%',
+        backgroundColor: COLOR.BACKGROUND_GREY,
+        paddingTop: 10,
     },
     orderItem: {
         marginHorizontal: DIMENSION.MARGIN_HORIZONTAL,
@@ -151,12 +206,14 @@ const styles = StyleSheet.create({
     },
     orderItemHeader: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
         marginBottom: 10,
+    },
+    orderItemHeaderTextLeft: {
+        maxWidth: '72%',
     },
     orderId: {
         fontFamily: 'Montserrat-Bold',
-        fontSize: FONT_SIZE.BIG_TEXT,
+        fontSize: FONT_SIZE.SMALL_TEXT,
         color: COLOR.MAIN_COLOR,
         marginBottom: 5,
         marginLeft: DIMENSION.MARGIN_HORIZONTAL,
@@ -167,9 +224,13 @@ const styles = StyleSheet.create({
         fontSize: FONT_SIZE.SMALL_TEXT,
         color: COLOR.MAIN_COLOR,
         marginBottom: 5,
-        marginLeft: DIMENSION.MARGIN_HORIZONTAL
+        marginLeft: DIMENSION.MARGIN_HORIZONTAL,
+
     },
     orderItemStatus: {
+        position: 'absolute',
+        right: 0,
+        top: 0,
         backgroundColor: 'green',
         fontFamily: 'Montserrat-Bold',
         fontSize: FONT_SIZE.SMALL_TEXT,
@@ -179,7 +240,8 @@ const styles = StyleSheet.create({
         borderTopRightRadius: 10,
         borderBottomLeftRadius: 10,
         paddingHorizontal: 5,
-        width: '32%',
+        width: '28%',
+        height: 40,
     },
     orderContentWrapper: {
         flexDirection: 'row',
@@ -227,4 +289,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default OrderListScreen;
+export default OrderListSalesmanScreen;

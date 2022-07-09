@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     View,
     Text,
     StyleSheet,
     TouchableOpacity,
-    Image
+    Image,
+    ActivityIndicator
 } from 'react-native';
 import Icon2 from 'react-native-vector-icons/Ionicons';
 import Icon3 from 'react-native-vector-icons/Feather';
@@ -13,39 +14,51 @@ import { OrderDeliveryState, ChangeSettingBtn } from '../../../components';
 //firebase
 import { auth } from '../../../../firebase';
 import { signOut } from 'firebase/auth';
+import { getFirestore, collection, getDocs, query, where } from 'firebase/firestore';
+import { useSelector } from 'react-redux';
+const orderState = [
+    {
+        id: 0,
+        title: 'Chờ xác nhận',
+        icon: 'clipboard-check',
+        quantity: 0,
+    },
+    {
+        id: 1,
+        title: 'Chờ vận chuyển',
+        icon: 'truck',
+        quantity: 0,
+    },
+    {
+        id: 2,
+        title: 'Chờ giao hàng',
+        icon: 'truck-loading',
+        quantity: 0,
+    },
+    {
+        id: 3,
+        title: 'Đã giao hàng',
+        icon: 'check-square',
+        quantity: 0,
+    },
+    {
+        id: 4,
+        title: 'Đơn đã hủy',
+        icon: 'window-close',
+        quantity: 0,
+    },
+];
 
-function Customer({ navigation, user }) {
+function Customer({ navigation }) {
+    const db = getFirestore();
+    const user = useSelector(state => state.user);
 
-    const orderState = [
-        {
-            id: 1,
-            title: 'Chờ xác nhận',
-            icon: 'clipboard-check',
-        },
-        {
-            id: 2,
-            title: 'Chờ vận chuyển',
-            icon: 'truck',
-        },
-        {
-            id: 3,
-            title: 'Chờ giao hàng',
-            icon: 'truck-loading',
-        },
-        {
-            id: 4,
-            title: 'Đã giao hàng',
-            icon: 'check-square',
-        },
-        {
-            id: 5,
-            title: 'Đơn đã hủy',
-            icon: 'window-close',
-        },
-    ];
+    const [loading, setLoading] = useState(true);
+    const [orderDeliveryState, setOrderDeliveryState] = useState(orderState);
 
+    //ĐĂNG XUẤT
     const handleSignOut = () => {
-        if(auth){
+        if (auth) {
             signOut(auth)
                 .then(() => {
                     //đăng xuất thành công, thông báo trước khi đăng xuất
@@ -56,6 +69,54 @@ function Customer({ navigation, user }) {
                 })
         }
     }
+    //THÔNG TIN ORDER
+    useEffect(() => {
+        getAllOrdersByUserId();
+    }, [])
+    const getAllOrdersByUserId = async () => {
+        try {
+            setLoading(true);
+            let status0 = 0;
+            let status1 = 0;
+            let status2 = 0;
+            let status3 = 0;
+            let status4 = 0;
+            //tính số lượng order theo status
+            const snapshot = await getDocs(query(collection(db, 'order'), where('userId', '==', user.id)));
+            snapshot.forEach((doc) => {
+                const data = doc.data();
+                if (data.status === 0)
+                    status0 += 1;
+                else if (data.status === 1)
+                    status1 += 1;
+                else if (data.status === 2)
+                    status2 += 1;
+                else if (data.status === 3)
+                    status3 += 1;
+                else if (data.status === 4)
+                    status4 += 1;
+            })
+            setOrderDeliveryState(prev => {
+                const newData = prev.map((item) => {
+                    if (item.id === 0)
+                        item.quantity = status0;
+                    else if (item.id === 1)
+                        item.quantity = status1;
+                    else if (item.id === 2)
+                        item.quantity = status2;
+                    else if (item.id === 3)
+                        item.quantity = status3;
+                    else if (item.id === 4)
+                        item.quantity = status4;
+                    return item;
+                })
+                return newData;
+            });
+            setLoading(false);
+        } catch (error) {
+            console.log('[Customer] lỗi lấy orders: ', error);
+        }
+    }
 
     return (
         <>
@@ -63,10 +124,10 @@ function Customer({ navigation, user }) {
             <View style={styles.header}>
                 <View style={styles.headerLeft}>
                     <View style={styles.avatar}>
-                        <Image style={styles.avatarImg} source={user.img} />
+                        <Image style={styles.avatarImg} source={{ uri: user.avatarImg }} />
                     </View>
                     <View style={styles.headerInfo}>
-                        <Text style={styles.name}>{user.phoneNumber}</Text>
+                        <Text style={styles.name}>{auth.currentUser.email}</Text>
                         <TouchableOpacity style={styles.changeInfoBtn}>
                             <Text style={styles.changeInfoBtnText}>Hoàn tất thông tin tài khoản</Text>
                             <Icon3 name='chevron-right' size={20} color={COLOR.GREY} />
@@ -78,16 +139,20 @@ function Customer({ navigation, user }) {
                 </TouchableOpacity>
             </View>
             {/* 2.ORDER DELIVERY STATE */}
-            <OrderDeliveryState
-                title='Đơn hàng của tôi'
-                orderState={orderState}
-                navigation={navigation}
-            />
+            {
+                loading ? null
+                    :
+                    <OrderDeliveryState
+                        title='Đơn hàng của tôi'
+                        orderState={orderDeliveryState}
+                        navigation={navigation}
+                    />
+            }
             {/* BUTTON LIST */}
             <ChangeSettingBtn title='Đổi mật khẩu' />
             <ChangeSettingBtn title='Liên hệ &amp; Góp ý' />
             <ChangeSettingBtn title='Trung tâm trợ giúp' />
-            <ChangeSettingBtn title='Đăng xuất' onPress={handleSignOut}/>
+            <ChangeSettingBtn title='Đăng xuất' onPress={handleSignOut} />
         </>
     )
 };

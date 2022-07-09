@@ -44,7 +44,7 @@ function ProductDetailScreen({ navigation, route }) {
     useEffect(() => {
         getProductById();
         // lấy orders để tính số lượng order -> hiển thị cho nút giỏ hàng 
-        getAllOrderByUserId();
+
     }, [])
     //lấy danh sách các sản phẩm khác của shop bằng shopId
     useEffect(() => {
@@ -125,10 +125,13 @@ function ProductDetailScreen({ navigation, route }) {
         }
     }
 
+    useEffect(() => {
+        getAllOrderByUserId();
+    }, [])
     const getAllOrderByUserId = async () => {
         try {
             const arr = [];
-            const snapshot = await getDocs(query(collection(db, 'order'), where('userId', '==', user.id), where('selected', '==', true)));
+            const snapshot = await getDocs(query(collection(db, 'order'), where('userId', '==', user.id), where('status', '==', -1)));
             snapshot.forEach((doc) => {
                 arr.push(doc.data());
             })
@@ -156,6 +159,7 @@ function ProductDetailScreen({ navigation, route }) {
     // ----------------------------------HANDLE
 
     const handleAddToCart = async () => {
+        console.log('productId: ', productId);
         if (productId === undefined)
             return;
         try {
@@ -186,7 +190,7 @@ function ProductDetailScreen({ navigation, route }) {
                     deliveryDate: null, //vì chưa xác nhận mua nên === null
                     status: -1, //trong giỏ hàng
                     orderCancellation: null, //khi nào hủy thì mới cập nhật lại
-                    product: {...product} 
+                    product: { ...product }
                 }
                 await addDoc(collection(db, `order`), newOrderFormat);
             }
@@ -197,6 +201,8 @@ function ProductDetailScreen({ navigation, route }) {
                 icon: 'auto',
                 duration: 2500
             })
+            //Cập nhật lại số lượng hàng trong giỏ
+            getAllOrderByUserId();
             //đóng bottom modal và reset số lượng thêm
             setIsBottomModalShow(!isBottomModalShow);
             setOrderQuantity(1);
@@ -433,8 +439,8 @@ function ProductDetailScreen({ navigation, route }) {
                 <TouchableOpacity style={styles.cart} onPress={() => navigation.navigate('Cart')}>
                     <Icon name='shopping-cart' size={20} color={COLOR.MAIN_COLOR} />
                     <Badge
-                        containerStyle={styles.cartBadge} 
-                        value={orders.length} 
+                        containerStyle={styles.cartBadge}
+                        value={orders.length}
                         badgeStyle={{ backgroundColor: COLOR.SECOND_COLOR }}
                     />
                 </TouchableOpacity>
