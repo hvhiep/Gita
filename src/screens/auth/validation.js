@@ -11,7 +11,7 @@ const SignUpSchema = Yup.object().shape({
         .max(30, 'Tối Đa 30 Ký Tự!')
         .required('Bắt Buộc Nhập!'),
     passwordVerification: Yup.string()
-        .oneOf([Yup.ref('password')],'Xác Nhận Mật Khẩu Không Đúng!')
+        .oneOf([Yup.ref('password')], 'Xác Nhận Mật Khẩu Không Đúng!')
         .required('Bắt Buộc Nhập!'),
 });
 
@@ -27,5 +27,22 @@ const AddressSchema = Yup.object().shape({
     district: Yup.string().required('Bắt Buộc Nhập!'),
     city: Yup.string().required('Bắt Buộc Nhập!'),
 });
-
-export { SignUpSchema, SignInSchema, AddressSchema };
+const ProductSchema = Yup.object().shape({
+    name: Yup.string().required('Bắt Buộc Nhập!'),
+    quantity: Yup.string().required('Bắt Buộc Nhập!'),
+    standardCost: Yup.string().required('Bắt Buộc Nhập!'),
+    salePrice: Yup.string().required('Bắt Buộc Nhập!'),
+    brand: Yup.string().required('Bắt Buộc Nhập!'),
+    origin: Yup.string().required('Bắt Buộc Nhập!'),
+    shape: Yup.string().required('Bắt Buộc Nhập!'),
+    paintStyle: Yup.string().required('Bắt Buộc Nhập!'),
+    top: Yup.string().required('Bắt Buộc Nhập!'),
+    sideAndBack: Yup.string().required('Bắt Buộc Nhập!'),
+    headstockAndNeck: Yup.string().required('Bắt Buộc Nhập!'),
+    saddle: Yup.string().required('Bắt Buộc Nhập!'),
+    string: Yup.string().required('Bắt Buộc Nhập!'),
+    warranty: Yup.string().required('Bắt Buộc Nhập!'),
+    eq: Yup.string().required('Bắt Buộc Nhập!'),
+    information: Yup.string().required('Bắt Buộc Nhập!'),
+});
+export { SignUpSchema, SignInSchema, AddressSchema, ProductSchema };

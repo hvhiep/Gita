@@ -2,15 +2,19 @@ import React from "react";
 import {
     Text,
     StyleSheet,
-    TouchableOpacity
+    TouchableOpacity,
+    ActivityIndicator
+
 } from 'react-native';
 import { COLOR, FONT_SIZE } from '../../res/constant';
 
 function PrimaryBtn(props) {
-
+    let loading = false;
+    if (props.isLoading !== undefined)
+        loading = props.isLoading;
     let styleBtn = null;
     let styleText = null;
-    switch(props.type){
+    switch (props.type) {
         case 'big':
             styleBtn = 'btnBig';
             styleText = 'textBig';
@@ -23,14 +27,20 @@ function PrimaryBtn(props) {
             styleBtn = 'btnLong';
             styleText = 'textSmall';
             break;
-    }  
+    }
 
     return (
-        <TouchableOpacity 
+        <TouchableOpacity
             style={[styles.btn, styleBtn && styles[styleBtn], props.style && props.style]}
             onPress={props.onPress}
         >
-            <Text style={[styles.text, styleText && styles[styleText]]}>{props.title}</Text>
+            {
+                loading ?
+                    <ActivityIndicator size='small' color={COLOR.WHITE} />
+                    :
+                    <Text style={[styles.text, styleText && styles[styleText]]}>{props.title}</Text>
+            }
+
         </TouchableOpacity>
     )
 }
@@ -52,7 +62,7 @@ const styles = StyleSheet.create({
     },
     btnLong: {
         paddingVertical: 10,
-        
+
     },
     text: {
         color: COLOR.WHITE,

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     View,
     Text,
@@ -6,31 +6,54 @@ import {
     TextInput,
     Image,
     TouchableOpacity,
-    FlatList
+    FlatList,
+    ActivityIndicator
 } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import { COLOR, FONT_SIZE, DIMENSION, numberWithCommas } from '../../../res';
 import { BackBtn } from '../../../components';
+import { getFirestore, collection, getDocs, query, where } from 'firebase/firestore';
 
 //dummy data
 import productData from '../../home/productData';
 
 const TotalProductScreen = ({ navigation, route }) => {
-
-    //lọc các product từ productData mà thuộc shopId hiện tại
+    const db = getFirestore();
     const shopId = route?.params?.shopId;
-    const data = productData.filter((item) => item.shopId === shopId);
 
-    const [filterData, setFilterData] = useState(data);
-    const [initialData, setInitialData] = useState(data);
+    const [loading, setLoading] = useState(true);
+    const [filterData, setFilterData] = useState(null);
+    const [initialData, setInitialData] = useState(null);
     const [search, setSearch] = useState('');
+
+    useEffect(() => {
+        getAllProductByShopId();
+    }, []);
+    const getAllProductByShopId = async () => {
+        try {
+            setLoading(true);
+            const arr = [];
+            const snapshot = await getDocs(query(collection(db, 'product'), where('shop.shopId', '==', shopId)));
+            snapshot.forEach((doc) => {
+                const data = doc.data();
+                data.id = doc.id;
+                data.discountPrice = data.salePrice * (1 - data.discount.percent);
+                arr.push(data);
+            })
+            setInitialData(arr);
+            setFilterData(arr);
+            setLoading(false);
+        } catch (error) {
+            console.log(error);
+        }
+    };
 
     const renderProductItem = ({item}) => {
         return (
             <TouchableOpacity key={item.id} style={styles.productContentWrapper}>
                 {/* ảnh sp */}
                 <View style={styles.imgWrapper}>
-                    <Image style={styles.img} source={item.img[0]}></Image>
+                    <Image style={styles.img} source={{uri: item.img[0]}}></Image>
                 </View>
                 {/* info sp */}
                 <View style={styles.productInfoWrapper}>
@@ -85,14 +108,21 @@ const TotalProductScreen = ({ navigation, route }) => {
                 </View>
             </View>
             {/* 3. PRODUCT LIST */}
-            <FlatList 
+            {
+                loading ? 
+                <View>
+                    <ActivityIndicator size='large' color={COLOR.MAIN_COLOR} />
+                </View>
+                :
+                <FlatList 
                 style={styles.productList}
                 data={filterData}
                 renderItem={renderProductItem}
                 keyExtractor={item => item.id}
             />
+            }
             {/* 4. ADD BTN */}
-            <TouchableOpacity style={styles.btnAdd} onPress={() => navigation.navigate('AddProduct')}>
+            <TouchableOpacity style={styles.btnAdd} onPress={() => navigation.navigate('AddProduct', {shopId: shopId})}>
                 <Icon name='plus' size={30} color={COLOR.WHITE} />
             </TouchableOpacity>
         </View>
@@ -159,8 +189,9 @@ const styles = StyleSheet.create({
         alignItems: 'center'
     },
     img: {
-        width: '90%',
-        height: '90%',
+        width: '100%',
+        height: '100%',
+        borderRadius: 10,
         resizeMode: 'contain'
     },
     productInfoWrapper: {

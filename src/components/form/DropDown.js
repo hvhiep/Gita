@@ -11,7 +11,6 @@ import { COLOR, FONT_SIZE } from '../../res/constant';
 const DropDown = ({ data, open, selectedValue, containerStyle, title, placeholder, onSelectItem, onOpen }) => {
 
     //phải biến đổi dữ liệu của selectedValue về dạng {label: ,value: } trước khi cho vào DropDown (vì label để hiển thị cho người dùng khác với value để lưu trong database)
-
     return (
         <View style={[styles.container, containerStyle && containerStyle]}>
             <Text style={styles.title}>{title}</Text>
