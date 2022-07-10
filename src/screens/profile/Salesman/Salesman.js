@@ -21,19 +21,19 @@ import { useSelector } from 'react-redux';
 const orderState = [
     {
         id: 0,
-        title: 'Đang xác nhận',
+        title: 'Chờ xác nhận',
         icon: 'clipboard-check',
         quantity: 0,
     },
     {
         id: 1,
-        title: 'Đang vận chuyển',
+        title: 'Chờ vận chuyển',
         icon: 'truck',
         quantity: 0,
     },
     {
         id: 2,
-        title: 'Đang giao hàng',
+        title: 'Chờ giao hàng',
         icon: 'truck-loading',
         quantity: 0,
     },

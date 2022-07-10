@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 
 //firebase
-import { getFirestore, collection, doc, getDoc, addDoc, getDocs, query, orderBy, Timestamp, setDoc } from "firebase/firestore";
+import { getFirestore, collection, doc, getDoc, addDoc, getDocs, query, orderBy, Timestamp, setDocn, runTransaction, where } from "firebase/firestore";
 //message
 import { COLOR } from '../../res';
 import { showMessage } from 'react-native-flash-message';
@@ -84,6 +84,40 @@ function MessageScreen() {
         addDoc(collection(db, `user/${userId}/address`), addressData);
     }
 
+    const updateMultipleDocUseTransaction = async () => {
+        //có: productId -> update quantity
+        const productId = 'p1';
+        // lấy mảng id của các order
+        let orderIdArr = [];
+        const snapshot = await getDocs(query(collection(db, 'test'), where('product.id', '==', productId)));
+        snapshot.forEach((doc) => {
+            orderIdArr.push(doc.id);
+        });
+        try {
+            const quantityTrans = await runTransaction(db, async (transaction) => {
+                //read: lấy quantity của product muốn update
+                const product = await transaction.get(doc(db, `productTest/${productId}`));
+                if (!product.exists())
+                    throw 'không có product!';
+                //change data: 
+                const newQuantity = product.data().quantity - 1;
+                //write
+                if (newQuantity >= 0) {
+                    //write product
+                    transaction.update(doc(db, `productTest/${productId}`), {quantity: newQuantity});
+                    //write order
+                    orderIdArr.forEach((id) => {
+                        transaction.update(doc(db, `test/${id}`), {'product.quantity': newQuantity});
+                    })
+                } else {
+                    throw 'không còn hàng!';
+                }
+            })
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
     return (
         <View style={styles.container}>
             <Text style={styles.text}>Tính năng đang được phát triển! Quay lại sau nhé 😊</Text>
@@ -98,6 +132,9 @@ function MessageScreen() {
 
             <Button title='create address' onPress={() => {
                 createAddress();
+            }} />
+            <Button title='update quantity' onPress={() => {
+                updateMultipleDocUseTransaction();
             }} />
         </View>
     )

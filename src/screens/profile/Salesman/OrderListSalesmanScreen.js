@@ -19,9 +19,9 @@ const OrderListSalesmanScreen = ({ navigation }) => {
 
     const sectionTitleList = [
         'Tất cả',
-        'Đang xác nhận',
-        'Đang vận chuyển',
-        'Đang giao hàng',
+        'Chờ xác nhận',
+        'Chờ vận chuyển',
+        'Chờ giao hàng',
         'Đã giao hàng',
         'Đơn đã hủy',
     ];
@@ -101,7 +101,7 @@ const OrderListSalesmanScreen = ({ navigation }) => {
         return (
             <View key={item.id} style={styles.orderItem}>
                 <View style={styles.orderItemHeader}>
-                    <TouchableOpacity style={styles.orderItemHeaderTextLeft} onPress={() => navigation.navigate('OrderDetail', { orderId: item.id })}>
+                    <TouchableOpacity style={styles.orderItemHeaderTextLeft} onPress={() => navigation.navigate('OrderDetailSalesman', { orderId: item.id })}>
                         <Text style={styles.orderId}>Mã đơn hàng: {item.id}</Text>
                         <Text style={styles.orderDate}>Ngày đặt hàng: {date.toDate().toISOString()}</Text>
                     </TouchableOpacity>

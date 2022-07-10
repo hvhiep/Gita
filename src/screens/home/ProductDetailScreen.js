@@ -182,6 +182,7 @@ function ProductDetailScreen({ navigation, route }) {
             } else {
                 //chưa có thì thêm sản phẩm mới vào cart của user
                 const newOrderFormat = {
+                    received: false, //true: người mua xác nhận đã nhận hàng
                     selected: false, //true: được select trong phần giỏ hàng
                     userId: user.id,
                     quantity: orderQuantity,
