@@ -7,10 +7,17 @@ import {
     ActivityIndicator
 } from 'react-native';
 import { COLOR, FONT_SIZE, DIMENSION, numberWithCommas, orderStatusLookup } from '../../../res';
-import { BackBtn, SecondaryBtn } from '../../../components';
+import { BackBtn, PrimaryBtn, SecondaryBtn } from '../../../components';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Icon2 from 'react-native-vector-icons/FontAwesome5';
-import { getFirestore, getDoc, doc, Timestamp } from 'firebase/firestore';
+import { getFirestore, getDoc, doc, Timestamp, onSnapshot, runTransaction, getDocs, where, query, collection, updateDoc } from 'firebase/firestore';
+// const status = [
+//     'Chờ xác nhận', 0
+//     'Chờ vận chuyển',1
+//     'Chờ giao hàng',2
+//     'Đã giao hàng',3
+//     'Đơn đã hủy',4
+// ];
 
 //dummy:
 import orderData from '../../cart/orderData';
@@ -30,26 +37,24 @@ const OrderDetailCustomerScreen = ({ navigation, route }) => {
     });
     const [address, setAddress] = useState({});
 
-    // lấy order theo id
+    // lắng nghe realtime
     useEffect(() => {
-        if (orderId !== undefined)
-            getOrderById();
-    }, []);
-    const getOrderById = async () => {
-        try {
+
+        const unsub = onSnapshot(doc(db, `order/${orderId}`), (doc) => {
             setLoading(true);
-            const snapshot = await getDoc(doc(db, `order/${orderId}`));
-            if (!snapshot.exists())
-                throw '[OrderDetail] order không tồn tại!';
-            const data = snapshot.data();
-            data.product.discountPrice = data.product.salePrice * (1 - data.product.discount.percent);
-            data.id = snapshot.id;
-            setOrder(data);
-            setLoading(false);
-        } catch (error) {
-            console.log('[OrderDetail]: ', error);
-        }
-    };
+            if (!doc.exists())
+                console.log('[OrderDetail] order không tồn tại!');
+            else {
+                const data = doc.data();
+                data.product.discountPrice = data.product.salePrice * (1 - data.product.discount.percent);
+                data.id = doc.id;
+                setOrder(data);
+                setLoading(false);
+            }
+        })
+
+        return () => unsub();
+    }, []);
 
 
     //lấy địa chỉ giao hàng của người mua để hiển thị
@@ -83,7 +88,59 @@ const OrderDetailCustomerScreen = ({ navigation, route }) => {
             console.log('[OrderDetail]: ', error);
         }
     };
+    //RENDER CÁC BTN XỬ LÝ
+    const renderBtn = () => {
+        try {
+            // hủy đơn hàng chi có ở 'Chờ xác nhận'0, 'Chờ vận chuyển'1, 'Chờ giao hàng'2
+            if (order.status === 0 || order.status === 1) {
+                return (
+                    <>
+                        <SecondaryBtn
+                            style={styles.btn}
+                            title='Hủy đơn hàng'
+                            type='small'
+                            onPress={handleCancelOrder}
+                        />
+                    </>
+                )
 
+            }
+            // chờ giao hàng
+            else if (order.status === 2) {
+                return (
+                    <>
+                        <PrimaryBtn
+                            style={styles.btn}
+                            title='Xác nhận nhận hàng'
+                            type='small'
+                            onPress={handleReceiveOrder}
+                        />
+                        <SecondaryBtn
+                            style={styles.btn}
+                            title='Hủy đơn hàng'
+                            type='small'
+                            onPress={handleCancelOrder}
+                        />
+                    </>
+                )
+            } else return null;
+        } catch (error) {
+            console.log('[OrderDetailSalesman]: ', error);
+        }
+
+    }
+    //-------------------------------------HANDLE
+    //XỬ LÝ HỦY ĐƠN HÀNG
+    const handleCancelOrder = () => {
+        navigation.navigate('OrderCancellation', { orderId: order.id });
+    };
+    //XỬ LÝ NHẬN ĐƠN HÀNG
+    const handleReceiveOrder = async () => {
+        if (order.status === 2 && order.received === false)
+            await updateDoc(doc(db, `order/${order.id}`), { received: true, status: 3 });
+    };
+
+    //MAIN RETURN
     return (
         <View style={styles.container}>
             <View style={styles.header}>
@@ -93,16 +150,20 @@ const OrderDetailCustomerScreen = ({ navigation, route }) => {
             {
                 addressLoading ?
                     <View>
-                        <ActivityIndicator size='large' color={COLOR.MAIN_COLOR} />
+                        <ActivityIndicator style={{ height: 300, justifyContent: 'center', alignItems: 'center' }} size='large' color={COLOR.MAIN_COLOR} />
                     </View>
                     :
                     <>
-                        <View style={[styles.messageWrapper, displayInfo.orderStatus && { backgroundColor: displayInfo.orderStatus.color }]}>
-                            {(order.status === 0 || order.status === 1 || order.status === 2) && <Icon2 name={displayInfo.orderStatus.icon} size={30} color={COLOR.WHITE} />}
-
-                            {(order.status === 3 || order.status === 4) && <Icon name={displayInfo.orderStatus.icon} size={30} color={COLOR.WHITE} />}
-                            <Text style={styles.messageText}>{displayInfo.orderStatus.title2}</Text>
-                        </View>
+                        {
+                            loading ?
+                                null
+                                :
+                                <View style={[styles.messageWrapper, displayInfo.orderStatus && { backgroundColor: displayInfo.orderStatus.color }]}>
+                                    {order.status <= 2 ? <Icon2 name={displayInfo.orderStatus.icon} size={30} color={COLOR.WHITE} /> : null}
+                                    {order.status > 2 ? <Icon name={displayInfo.orderStatus.icon} size={30} color={COLOR.WHITE} /> : null}
+                                    <Text style={styles.messageText}>{displayInfo.orderStatus.title2}</Text>
+                                </View>
+                        }
                         <Text style={styles.sectionTitle}>Thông tin người nhận</Text>
                         <View style={styles.addressWrapper}>
                             <Icon2 name='map-marked-alt' size={20} color={COLOR.MAIN_COLOR} />
@@ -157,15 +218,9 @@ const OrderDetailCustomerScreen = ({ navigation, route }) => {
                                 </View>
 
                         }
+                        {renderBtn()}
                     </>
             }
-            <SecondaryBtn style={[styles.btn, { marginTop: 20 }]} title='Liên hệ shop' type='small' />
-            <SecondaryBtn
-                style={styles.btn}
-                title='Hủy đơn hàng'
-                type='small'
-                onPress={() => navigation.navigate('OrderCancellation', { orderId: order.id })}
-            />
         </View>
     )
 };

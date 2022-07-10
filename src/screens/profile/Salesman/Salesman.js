@@ -16,7 +16,7 @@ import { OrderDeliveryState, ChangeSettingBtn, GradientText } from '../../../com
 //firebase
 import { auth } from '../../../../firebase';
 import { signOut } from 'firebase/auth';
-import { getFirestore, collection, getDocs, query, where, doc, getDoc } from 'firebase/firestore';
+import { getFirestore, collection, getDocs, query, where, doc, getDoc, onSnapshot } from 'firebase/firestore';
 import { useSelector } from 'react-redux';
 const orderState = [
     {
@@ -88,54 +88,49 @@ const Salesman = ({ navigation }) => {
     };
     // từ thông tin shop -> shopId -> lấy thông tin các đơn hàng thuộc shop này 
     useEffect(() => {
+        let unsub = () => { };
         if (shop.id !== '') {
-            setLoading(true);
-            getAllOrderByShopId();
+            unsub = onSnapshot(query(collection(db, 'order'), where('product.shop.shopId', '==', shop.id)), (snapshot) => {
+                setLoading(true);
+                let status0 = 0;
+                let status1 = 0;
+                let status2 = 0;
+                let status3 = 0;
+                let status4 = 0;
+                snapshot.forEach((doc) => {
+                    const data = doc.data();
+                    if (data.status === 0)
+                        status0 += 1;
+                    else if (data.status === 1)
+                        status1 += 1;
+                    else if (data.status === 2)
+                        status2 += 1;
+                    else if (data.status === 3)
+                        status3 += 1;
+                    else if (data.status === 4)
+                        status4 += 1;
+                });
+                setOrderDeliveryState(prev => {
+                    const newData = prev.map((item) => {
+                        if (item.id === 0)
+                            item.quantity = status0;
+                        else if (item.id === 1)
+                            item.quantity = status1;
+                        else if (item.id === 2)
+                            item.quantity = status2;
+                        else if (item.id === 3)
+                            item.quantity = status3;
+                        else if (item.id === 4)
+                            item.quantity = status4;
+                        return item;
+                    })
+                    return newData;
+                });
+                setLoading(false);
+            })
         }
+        return () => unsub();
     }, [shop]);
-    const getAllOrderByShopId = async () => {
-        try {
-            let status0 = 0;
-            let status1 = 0;
-            let status2 = 0;
-            let status3 = 0;
-            let status4 = 0;
-            const arr = [];
-            const snapshot = await getDocs(query(collection(db, 'order'), where('product.shop.shopId', '==', shop.id)));
-            snapshot.forEach((doc) => {
-                const data = doc.data();
-                if (data.status === 0)
-                    status0 += 1;
-                else if (data.status === 1)
-                    status1 += 1;
-                else if (data.status === 2)
-                    status2 += 1;
-                else if (data.status === 3)
-                    status3 += 1;
-                else if (data.status === 4)
-                    status4 += 1;
-            });
-            setOrderDeliveryState(prev => {
-                const newData = prev.map((item) => {
-                    if (item.id === 0)
-                        item.quantity = status0;
-                    else if (item.id === 1)
-                        item.quantity = status1;
-                    else if (item.id === 2)
-                        item.quantity = status2;
-                    else if (item.id === 3)
-                        item.quantity = status3;
-                    else if (item.id === 4)
-                        item.quantity = status4;
-                    return item;
-                })
-                return newData;
-            });
-            setLoading(false);
-        } catch (error) {
-            console.log('[Salesman]: ', error);
-        }
-    }
     const handleSignOut = () => {
         if (auth) {
             signOut(auth)

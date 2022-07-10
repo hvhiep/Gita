@@ -49,6 +49,7 @@ function ProductDetailScreen({ navigation, route }) {
     //lấy danh sách các sản phẩm khác của shop bằng shopId
     useEffect(() => {
         if (loading === false && product !== null) {
+            console.log(product.shop.shopId)
             getOtherProductsByShopId(product.shop.shopId, productId);
         }
     }, [loading, product])
@@ -102,6 +103,7 @@ function ProductDetailScreen({ navigation, route }) {
     const getOtherProductsByShopId = async (shopId, currentProductId) => {
         //query: lấy tất cả sp có shop.shopId = shopId
         try {
+            console.log(shopId)
             const products = [];
             const q = query(collection(db, 'product'), where('shop.shopId', '==', shopId));
             const querySnap = await getDocs(q);
@@ -115,13 +117,7 @@ function ProductDetailScreen({ navigation, route }) {
             setOtherProducts(products);
 
         } catch (error) {
-            showMessage({
-                message: `[ProductDetail] Sản phẩm khác: `,
-                description: `${error}`,
-                type: "danger",
-                icon: 'auto',
-                duration: 2500,
-            });
+            console.log('[OrderDetail]: ', error);
         }
     }
 
@@ -163,11 +159,11 @@ function ProductDetailScreen({ navigation, route }) {
         if (productId === undefined)
             return;
         try {
-            //kiểm tra xem order định thêm vào giỏ đã có trong bảng orders chưa
+            //kiểm tra xem order định thêm vào giỏ đã có trong giỏ chưa
             let isExisted = false;
             let orderId = null;
             let quantity = null;
-            const q = query(collection(db, 'order'), where('product.id', '==', productId));
+            const q = query(collection(db, 'order'), where('product.id', '==', productId), where('received', '==', false), where('orderCancellation', '==', null), where('status', '==', -1));
             const snapshot = await getDocs(q);
             snapshot.forEach((doc) => {
                 if (doc.exists()) {

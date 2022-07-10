@@ -10,8 +10,14 @@ import { COLOR, FONT_SIZE, DIMENSION, numberWithCommas, orderStatusLookup } from
 import { BackBtn, PrimaryBtn } from '../../../components';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Icon2 from 'react-native-vector-icons/FontAwesome5';
-import { getFirestore, getDoc, doc, Timestamp, onSnapshot, runTransaction, getDocs, where, query, collection } from 'firebase/firestore';
-import { showMessage } from 'react-native-flash-message';
+import { getFirestore, getDoc, doc, Timestamp, onSnapshot, runTransaction, getDocs, where, query, collection, updateDoc } from 'firebase/firestore';
+// const status = [
+//     'Chờ xác nhận', 0
+//     'Chờ vận chuyển',1
+//     'Chờ giao hàng',2
+//     'Đã giao hàng',3
+//     'Đơn đã hủy',4
+// ];
 
 const OrderDetailSalesmanScreen = ({ navigation, route }) => {
     const db = getFirestore();
@@ -30,8 +36,8 @@ const OrderDetailSalesmanScreen = ({ navigation, route }) => {
 
     // lắng nghe realtime
     useEffect(() => {
-        setLoading(true);
         const unsub = onSnapshot(doc(db, `order/${orderId}`), (doc) => {
+            setLoading(true);
             if (!doc.exists())
                 console.log('[OrderDetail] order không tồn tại!');
             else {
@@ -146,7 +152,7 @@ const OrderDetailSalesmanScreen = ({ navigation, route }) => {
                     })
                     //cập nhật deliveryDate của order hiện tại là cách 3 ngày so với orderDate và tăng status == 1
                     const newDeliveryDate = new Timestamp(order.orderDate.seconds + 259200, order.orderDate.nanoseconds);
-                    transaction.update(doc(db, `order/${order.id}`), {deliveryDate: newDeliveryDate, status: 1})
+                    transaction.update(doc(db, `order/${order.id}`), { deliveryDate: newDeliveryDate, status: 1 })
                 } else {
                     throw 'không còn hàng!';
                 }
@@ -156,9 +162,13 @@ const OrderDetailSalesmanScreen = ({ navigation, route }) => {
         }
     }
 
-    const handleConfirmOrderDelivery = () => {
-        //chuyển trạng thái từ 'Chờ vận chuyển' -> 'Chờ giao hàng'
+    //XỬ LÝ VIỆC CHUYỂN TRẠNG THÁI ĐƠN HÀNG TỪ 'CHỜ VẬN CHUYỂN' -> 'CHỜ GIAO HÀNG'
+    const handleConfirmOrderDelivery = async () => {
+        if (order.status === 1)
+            await updateDoc(doc(db, `order/${order.id}`), { status: 2 });
     }
+
+    //MAIN RETURN
     return (
         <View style={styles.container}>
             <View style={styles.header}>
@@ -167,17 +177,21 @@ const OrderDetailSalesmanScreen = ({ navigation, route }) => {
             </View>
             {
                 addressLoading ?
-                    <View>
+                    <View style={{ height: 300, justifyContent: 'center', alignItems: 'center' }}>
                         <ActivityIndicator size='large' color={COLOR.MAIN_COLOR} />
                     </View>
                     :
                     <>
-                        <View style={[styles.messageWrapper, displayInfo.orderStatus && { backgroundColor: displayInfo.orderStatus.color }]}>
-                            {(order.status === 0 || order.status === 1 || order.status === 2) && <Icon2 name={displayInfo.orderStatus.icon} size={30} color={COLOR.WHITE} />}
-
-                            {(order.status === 3 || order.status === 4) && <Icon name={displayInfo.orderStatus.icon} size={30} color={COLOR.WHITE} />}
-                            <Text style={styles.messageText}>{displayInfo.orderStatus.title2}</Text>
-                        </View>
+                        {
+                            loading ?
+                                null
+                                :
+                                <View style={[styles.messageWrapper, displayInfo.orderStatus && { backgroundColor: displayInfo.orderStatus.color }]}>
+                                    {order.status <= 2 ? <Icon2 name={displayInfo.orderStatus.icon} size={30} color={COLOR.WHITE} /> : null}
+                                    {order.status > 2 ? <Icon name={displayInfo.orderStatus.icon} size={30} color={COLOR.WHITE} /> : null}
+                                    <Text style={styles.messageText}>{displayInfo.orderStatus.title2}</Text>
+                                </View>
+                        }
                         <Text style={styles.sectionTitle}>Thông tin người nhận</Text>
                         <View style={styles.addressWrapper}>
                             <Icon2 name='map-marked-alt' size={20} color={COLOR.MAIN_COLOR} />
@@ -236,7 +250,6 @@ const OrderDetailSalesmanScreen = ({ navigation, route }) => {
 
                     </>
             }
-
         </View>
     )
 };

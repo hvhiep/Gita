@@ -14,7 +14,7 @@ import { OrderDeliveryState, ChangeSettingBtn } from '../../../components';
 //firebase
 import { auth } from '../../../../firebase';
 import { signOut } from 'firebase/auth';
-import { getFirestore, collection, getDocs, query, where } from 'firebase/firestore';
+import { getFirestore, collection, getDocs, query, where, onSnapshot } from 'firebase/firestore';
 import { useSelector } from 'react-redux';
 const orderState = [
     {
@@ -69,20 +69,16 @@ function Customer({ navigation }) {
                 })
         }
     }
+
     //THÔNG TIN ORDER
     useEffect(() => {
-        getAllOrdersByUserId();
-    }, [])
-    const getAllOrdersByUserId = async () => {
-        try {
+        const unsub = onSnapshot(query(collection(db, 'order'), where('userId', '==', user.id)), (snapshot) => {
             setLoading(true);
             let status0 = 0;
             let status1 = 0;
             let status2 = 0;
             let status3 = 0;
             let status4 = 0;
-            //tính số lượng order theo status
-            const snapshot = await getDocs(query(collection(db, 'order'), where('userId', '==', user.id)));
             snapshot.forEach((doc) => {
                 const data = doc.data();
                 if (data.status === 0)
@@ -95,7 +91,7 @@ function Customer({ navigation }) {
                     status3 += 1;
                 else if (data.status === 4)
                     status4 += 1;
-            })
+            });
             setOrderDeliveryState(prev => {
                 const newData = prev.map((item) => {
                     if (item.id === 0)
@@ -113,10 +109,9 @@ function Customer({ navigation }) {
                 return newData;
             });
             setLoading(false);
-        } catch (error) {
-            console.log('[Customer] lỗi lấy orders: ', error);
-        }
-    }
+        })
+        return () => unsub();
+    }, [])
 
     return (
         <>
