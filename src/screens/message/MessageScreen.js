@@ -120,23 +120,15 @@ function MessageScreen() {
 
     return (
         <View style={styles.container}>
-            <Image source={{uri: 'https://firebasestorage.googleapis.com/v0/b/gita-backend.appspot.com/o/client%2FIMG_20220710_193004.jpg?alt=media&token=6e8d7a1d-b4dc-44c4-bd8d-e899f3260e58'}} style={{width: 200, height: 200, resizeMode:'contain', borderWidth: 1}} />
+            {/* <Image source={{uri: 'https://firebasestorage.googleapis.com/v0/b/gita-backend.appspot.com/o/client%2FIMG_20220710_193004.jpg?alt=media&token=6e8d7a1d-b4dc-44c4-bd8d-e899f3260e58'}} style={{width: 200, height: 200, resizeMode:'contain', borderWidth: 1}} /> */}
             <Text style={styles.text}>Tính năng đang được phát triển! Quay lại sau nhé 😊</Text>
-            {/* //shop0: 0 1 2 3 4,  shop1: 5, 6, 7, 8 */}
-            {/*      0                             */}
-            <Button title='get user' onPress={() => {
-                // const shopId0 = 'suUQzTNtQG1iG0B7P4fl';
-                // const shopId1 = 'gNPWDkhyC6i3nK2rISqe';
-                // addProduct(shopId1);
-                getUser();
-            }} />
 
-            <Button title='create address' onPress={() => {
+            {/* <Button title='create address' onPress={() => {
                 createAddress();
             }} />
             <Button title='update quantity' onPress={() => {
                 updateMultipleDocUseTransaction();
-            }} />
+            }} /> */}
         </View>
     )
 }

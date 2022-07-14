@@ -12,10 +12,7 @@ import {
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import { COLOR, FONT_SIZE, DIMENSION, numberWithCommas } from '../../../res';
 import { BackBtn } from '../../../components';
-import { getFirestore, collection, getDocs, query, where } from 'firebase/firestore';
-
-//dummy data
-import productData from '../../home/productData';
+import { getFirestore, collection, getDocs, query, where, onSnapshot } from 'firebase/firestore';
 
 const TotalProductScreen = ({ navigation, route }) => {
     const db = getFirestore();
@@ -26,34 +23,30 @@ const TotalProductScreen = ({ navigation, route }) => {
     const [initialData, setInitialData] = useState(null);
     const [search, setSearch] = useState('');
 
+    //realtime
     useEffect(() => {
-        getAllProductByShopId();
-    }, []);
-    const getAllProductByShopId = async () => {
-        try {
+        const unsubscribe = onSnapshot(query(collection(db, 'product'), where('shop.shopId', '==', shopId)), (snapshot) => {
             setLoading(true);
             const arr = [];
-            const snapshot = await getDocs(query(collection(db, 'product'), where('shop.shopId', '==', shopId)));
             snapshot.forEach((doc) => {
                 const data = doc.data();
                 data.id = doc.id;
                 data.discountPrice = data.salePrice * (1 - data.discount.percent);
                 arr.push(data);
-            })
+            });
             setInitialData(arr);
             setFilterData(arr);
             setLoading(false);
-        } catch (error) {
-            console.log(error);
-        }
-    };
+        })
+        return () => unsubscribe();
+    }, []);
 
-    const renderProductItem = ({item}) => {
+    const renderProductItem = ({ item }) => {
         return (
             <TouchableOpacity key={item.id} style={styles.productContentWrapper}>
                 {/* ảnh sp */}
                 <View style={styles.imgWrapper}>
-                    <Image style={styles.img} source={{uri: item.img[0]}}></Image>
+                    <Image style={styles.img} source={{ uri: item.img[0] }}></Image>
                 </View>
                 {/* info sp */}
                 <View style={styles.productInfoWrapper}>
@@ -103,26 +96,26 @@ const TotalProductScreen = ({ navigation, route }) => {
                         style={styles.searchInput}
                         placeholder='Tìm kiếm sản phẩm'
                         value={search}
-                    onChangeText={(text) => handleSearchFilter(text)}
+                        onChangeText={(text) => handleSearchFilter(text)}
                     />
                 </View>
             </View>
             {/* 3. PRODUCT LIST */}
             {
-                loading ? 
-                <View>
-                    <ActivityIndicator size='large' color={COLOR.MAIN_COLOR} />
-                </View>
-                :
-                <FlatList 
-                style={styles.productList}
-                data={filterData}
-                renderItem={renderProductItem}
-                keyExtractor={item => item.id}
-            />
+                loading ?
+                    <View>
+                        <ActivityIndicator size='large' color={COLOR.MAIN_COLOR} />
+                    </View>
+                    :
+                    <FlatList
+                        style={styles.productList}
+                        data={filterData}
+                        renderItem={renderProductItem}
+                        keyExtractor={item => item.id}
+                    />
             }
             {/* 4. ADD BTN */}
-            <TouchableOpacity style={styles.btnAdd} onPress={() => navigation.navigate('AddProduct', {shopId: shopId})}>
+            <TouchableOpacity style={styles.btnAdd} onPress={() => navigation.navigate('AddProduct', { shopId: shopId })}>
                 <Icon name='plus' size={30} color={COLOR.WHITE} />
             </TouchableOpacity>
         </View>
@@ -169,7 +162,7 @@ const styles = StyleSheet.create({
     productList: {
         marginTop: 10,
     },
-    
+
     // product item
     productContentWrapper: {
         flexDirection: 'row',
@@ -220,7 +213,7 @@ const styles = StyleSheet.create({
         fontSize: FONT_SIZE.BIG_TEXT,
         color: COLOR.SECOND_COLOR,
     },
-    
+
     btnAdd: {
         position: 'absolute',
         bottom: 20,

@@ -17,7 +17,7 @@ function MainTabNavigation() {
 
             })}>
             <Tab.Screen
-                name='Home'
+                name='Trang chủ'
                 component={HomeScreen}
                 options={{
                     tabBarIcon: ({ color }) => <Icon name='home' size={20} color={color} />,
@@ -51,7 +51,7 @@ function MainTabNavigation() {
                 }}
             />
             <Tab.Screen
-                name='Message'
+                name='Tin nhắn'
                 component={MessageScreen}
                 options={{
                     tabBarIcon: ({ color }) => <Icon name='commenting' size={20} color={color} />,
@@ -59,7 +59,7 @@ function MainTabNavigation() {
                 }}
             />
             <Tab.Screen
-                name='Cart'
+                name='Giỏ hàng'
                 component={CartScreen}
                 options={{
                     tabBarIcon: ({ color }) => <Icon name='shopping-cart' size={20} color={color} />,
@@ -67,7 +67,7 @@ function MainTabNavigation() {
                 }}
             />
             <Tab.Screen
-                name='Profile'
+                name='Cá nhân'
                 component={ProfileScreen}
                 options={{
                     tabBarIcon: ({ color }) => <Icon name='user' size={20} color={color} />,

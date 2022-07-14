@@ -13,6 +13,7 @@ function App() {
     'ViewPropTypes will be removed from React Native. Migrate to ViewPropTypes exported from \'deprecated-react-native-prop-types\'.',
     'NativeBase: The contrast ratio of',
     "[react-native-gesture-handler] Seems like you\'re using an old API with gesture components, check out new Gestures system!",
+    'AsyncStorage has been extracted from react-native core and will be removed in a future release. It can now be installed and imported from \'@react-native-async-storage/async-storage\' instead of \'react-native\'. See https://github.com/react-native-async-storage/async-storage',
   ])
   return (
     <Provider store={store}>

@@ -15,7 +15,7 @@ import Icon from 'react-native-vector-icons/FontAwesome5';
 import { Product, Banner } from '../../components';
 
 // firebase
-import { getFirestore, collection, getDocs } from 'firebase/firestore';
+import { getFirestore, collection, getDocs, onSnapshot } from 'firebase/firestore';
 //dummy data
 // dummy banner: 
 const bannerData = [
@@ -29,31 +29,26 @@ function HomeScreen({ navigation }) {
     const db = getFirestore();
     const [productListLoading, setProductListLoading] = useState(false);
     const [products, setProducts] = useState([]);
-    
-    // gọi api
+
+    // gọi api realtime
     useEffect(() => {
-        const allProductUnsubscribe = getAllProduct();
+        const unsubscribe = onSnapshot(collection(db, 'product'), (snapshot) => {
+            // loading
+            setProductListLoading(true);
+            //lấy dữ liệu
+            const productArr = [];
+            snapshot.forEach(doc => {
+                // cho id và data của một product vào 1 object rồi push dần vào mảng
+                const productData = doc.data();
+                productArr.push({ id: doc.id, ...productData })
+            })
+            //cuối cùng set state để hiển thị
+            setProducts(productArr);
+            setProductListLoading(false);
+        });
         // unsubscribe
-        return () => { allProductUnsubscribe }
+        return () => unsubscribe();
     }, []);
-
-    // API
-    const getAllProduct = async () => {
-        // loading
-        setProductListLoading(true);
-
-        //lấy dữ liệu
-        const productArr = [];
-        const snapshot = await getDocs(collection(db, 'product'));
-        snapshot.forEach(doc => {
-            // cho id và data của một product vào 1 object rồi push dần vào mảng
-            const productData = doc.data();
-            productArr.push({ id: doc.id, ...productData })
-        })
-        //cuối cùng set state để hiển thị
-        setProducts(productArr);
-        setProductListLoading(false);
-    }
 
     const renderBigDiscountProducts = () => {
         return (
@@ -94,7 +89,7 @@ function HomeScreen({ navigation }) {
 
                 {/* 1. Banner quảng cáo */}
                 {/* Tạm thời cứ hiển thị ảnh đã, vì nhấn vào mỗi banner sẽ navigate đến trang sự kiện(chưa làm) */}
-                <Banner  data={bannerData}/>
+                <Banner data={bannerData} />
 
                 {/* 3. Danh sách các sản phẩm */}
                 {/* 3.1 Sale đặc biệt (có mức giảm giá cao) */}
@@ -107,7 +102,7 @@ function HomeScreen({ navigation }) {
                     renderBigDiscountProducts()
                 }
                 {/* 3.1 Bán chạy (có số lượng bán cao) */}
-                {/* <Text style={styles.categoryTitle}>Bán chạy</Text>
+                <Text style={styles.categoryTitle}>Bán chạy</Text>
                 {productListLoading ?
                     //loading 
                     <View style={styles.loadingWrapper}>
@@ -115,7 +110,7 @@ function HomeScreen({ navigation }) {
                     </View>
                     :
                     renderBigDiscountProducts()
-                } */}
+                }
             </ScrollView>
         </View>
     )
