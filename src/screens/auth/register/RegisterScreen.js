@@ -67,7 +67,7 @@ function RegisterScreen({ navigation }) {
                     id: user.uid,
                     fullName: '',
                     phoneNumber: '',
-                    avatarImg: '',
+                    avatarImg: 'https://firebasestorage.googleapis.com/v0/b/gita-backend.appspot.com/o/server%2Fcustomer0.jpg?alt=media&token=a1097e7d-7a26-44aa-a5e4-9e22da374f5b',
                     sex: null,
                     birthday: '',
                     type: userRole,
@@ -94,7 +94,7 @@ function RegisterScreen({ navigation }) {
 
     return (
         <KeyboardAvoidingView style={styles.container}>
-            <ScrollView>
+            <ScrollView showsVerticalScrollIndicator={false}>
                 <TouchableWithoutFeedback
                     onPress={() => Keyboard.dismiss()}>
                     <View style={styles.wrapper}>
@@ -263,11 +263,11 @@ const styles = StyleSheet.create({
     wrapperForm: {
         justifyContent: 'center',
         width: WIDTH,
-        marginBottom: 10,
+        // marginBottom: 10,
         height: 400,
     },
     wrapperBottom: {
-        marginTop: 20,
+        marginTop: 10,
         flexDirection: 'row',
         alignItems: 'center',
     },

@@ -17,9 +17,10 @@ function MainTabNavigation() {
 
             })}>
             <Tab.Screen
-                name='Trang chủ'
+                name='Home'
                 component={HomeScreen}
                 options={{
+                    tabBarLabel: 'Trang chủ',
                     tabBarIcon: ({ color }) => <Icon name='home' size={20} color={color} />,
                     headerTitle: 'Gita',
                     headerTitleStyle: {
@@ -51,25 +52,28 @@ function MainTabNavigation() {
                 }}
             />
             <Tab.Screen
-                name='Tin nhắn'
+                name='Message'
                 component={MessageScreen}
                 options={{
+                    tabBarLabel: 'Tin nhắn',
                     tabBarIcon: ({ color }) => <Icon name='commenting' size={20} color={color} />,
                     headerShown: false
                 }}
             />
             <Tab.Screen
-                name='Giỏ hàng'
+                name='Cart'
                 component={CartScreen}
                 options={{
+                    tabBarLabel: 'Giỏ hàng',
                     tabBarIcon: ({ color }) => <Icon name='shopping-cart' size={20} color={color} />,
                     headerShown: false
                 }}
             />
             <Tab.Screen
-                name='Cá nhân'
+                name='Profile'
                 component={ProfileScreen}
                 options={{
+                    tabBarLabel: 'Cá nhân',
                     tabBarIcon: ({ color }) => <Icon name='user' size={20} color={color} />,
                     headerShown: false
                 }}

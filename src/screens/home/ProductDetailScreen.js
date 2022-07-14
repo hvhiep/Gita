@@ -22,7 +22,7 @@ import { showMessage } from 'react-native-flash-message';
 import { useSelector } from 'react-redux';
 
 //firebase
-import { getFirestore, doc, getDoc, query, collection, where, getDocs, updateDoc, addDoc } from 'firebase/firestore';
+import { getFirestore, doc, getDoc, query, collection, where, getDocs, updateDoc, addDoc, onSnapshot } from 'firebase/firestore';
 
 function ProductDetailScreen({ navigation, route }) {
     const user = useSelector(state => state.user);
@@ -43,8 +43,18 @@ function ProductDetailScreen({ navigation, route }) {
     //gọi api
     useEffect(() => {
         getProductById();
-        // lấy orders để tính số lượng order -> hiển thị cho nút giỏ hàng 
+        //lấy danh sách order để hiển thị số lượng order có trong giỏ
+        const unsub = onSnapshot(query(collection(db, 'order'), where('userId', '==', user.id), where('status', '==', -1)), (snapshot) => {
+            const arr = [];
+            snapshot.forEach((doc) => {
+                const data = doc.data();
+                data.id = doc.id;
+                arr.push(data);
+            })
+            setOrders(arr);
+        });
 
+        return () => unsub();
     }, [])
     //lấy danh sách các sản phẩm khác của shop bằng shopId
     useEffect(() => {
@@ -119,23 +129,7 @@ function ProductDetailScreen({ navigation, route }) {
         } catch (error) {
             console.log('[OrderDetail]: ', error);
         }
-    }
-
-    useEffect(() => {
-        getAllOrderByUserId();
-    }, [])
-    const getAllOrderByUserId = async () => {
-        try {
-            const arr = [];
-            const snapshot = await getDocs(query(collection(db, 'order'), where('userId', '==', user.id), where('status', '==', -1)));
-            snapshot.forEach((doc) => {
-                arr.push(doc.data());
-            })
-            setOrders(arr);
-        } catch (error) {
-            console.log('[ProductDetail] Lỗi khi lấy tất cả orders: ', error)
-        }
-    }
+    };
 
     // ----------------------------------ANIMATIOn
 
@@ -196,10 +190,8 @@ function ProductDetailScreen({ navigation, route }) {
                 message: 'Thêm vào giỏ hàng thành công!',
                 type: 'success',
                 icon: 'auto',
-                duration: 2500
+                duration: 1500
             })
-            //Cập nhật lại số lượng hàng trong giỏ
-            getAllOrderByUserId();
             //đóng bottom modal và reset số lượng thêm
             setIsBottomModalShow(!isBottomModalShow);
             setOrderQuantity(1);

@@ -12,7 +12,7 @@ import {
 import { COLOR, FONT_SIZE } from '../../res';
 import Icon from 'react-native-vector-icons/FontAwesome';
 //firebase
-import { getFirestore, collection, getDocs, query, orderBy, addDoc, Timestamp } from 'firebase/firestore';
+import { getFirestore, collection, getDocs, query, orderBy, addDoc, Timestamp, onSnapshot } from 'firebase/firestore';
 import { useSelector } from 'react-redux';
 
 function SearchScreen({ navigation }) {
@@ -24,29 +24,19 @@ function SearchScreen({ navigation }) {
     const [initialData, setInitialData] = useState([]);
     const [search, setSearch] = useState('');
 
-    //gọi api
+    //gọi api realtime
     useEffect(() => {
-        getUserSearchHistory();
-    }, [])
-
-    //API
-    const getUserSearchHistory = async () => {
-        try {
+        const unsub = onSnapshot(query(collection(db, `user/${user.id}/searchHistory`), orderBy('timestamp', 'desc')), (snapshot) => {
             const searchArr = [];
-            const ref = collection(db, `user/${user.id}/searchHistory`);
-            const q = query(ref, orderBy('timestamp', 'desc'))
-
-            const snapshot = await getDocs(q)
             snapshot.forEach((doc) => {
                 searchArr.push(doc.data());
             })
             setFilterData(searchArr);
             setInitialData(searchArr);
             setLoading(false);
-        } catch (error) {
-            console.log('[Search] lỗi lấy searchHistory: ', error);
-        }
-    }
+        });
+        return () => unsub();
+    }, []);
 
     const renderSearchHistory = ({ item }) => {
         return (
@@ -96,9 +86,9 @@ function SearchScreen({ navigation }) {
                     placeholder='Nhập tên cây đàn bạn muốn tìm...'
                     value={search}
                     onChangeText={(text) => handleSearchFilter(text)}
-                    onSubmitEditing={ async ({ nativeEvent }) => {
-                         //lưu value mới lên db
-                         const newHistory = {
+                    onSubmitEditing={async ({ nativeEvent }) => {
+                        //lưu value mới lên db
+                        const newHistory = {
                             value: nativeEvent.text,
                             timestamp: Timestamp.now(),
                         }
